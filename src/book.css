@@ -18,6 +18,22 @@ code{font-family:"Cascadia Mono",Consolas,"Segoe UI","Sylfaen",monospace;font-si
 .cover .foot{line-height:1.6}
 .cover .author{font-size:14pt;font-weight:700;letter-spacing:.02em}
 .cover .place{font-size:11pt;color:#444;margin-top:1mm}
+/* technical cover: graphite-blue, map linework */
+.cover.technical{background:#0e1b27;color:#eaf1f6;padding:0;position:relative}
+.cover.technical .art{position:absolute;left:0;top:0;width:100%;height:100%}
+.cover.technical .g-grid line{stroke:#5f8aa8;stroke-opacity:.16;stroke-width:.25}
+.cover.technical .g-cont polyline{fill:none;stroke:#7fb3d1;stroke-opacity:.26;stroke-width:.35}
+.cover.technical .g-poly{fill:#c9822b;fill-opacity:.10;stroke:#c9822b;stroke-opacity:.9;stroke-width:.5;stroke-dasharray:2 1.4}
+.cover.technical .g-dots circle{fill:#e3a553}
+.cover.technical .tech{position:absolute;inset:0;padding:22mm 20mm 20mm;display:flex;flex-direction:column;justify-content:space-between}
+.cover.technical .tags{font:600 9.5pt "Segoe UI","Sylfaen",sans-serif;letter-spacing:.22em;color:#e3a553;text-transform:uppercase}
+.cover.technical .mid{margin-top:46mm}
+.cover.technical h1{font:700 29pt/1.22 "Sylfaen","Georgia",serif;color:#fff;margin:0;text-align:left;max-width:12.5cm}
+.cover.technical .rule{width:24mm;height:.9mm;background:#c9822b;margin:8mm 0 6mm}
+.cover.technical .sub{font:400 15pt "Sylfaen","Georgia",serif;color:#bcd3e2}
+.cover.technical .foot{line-height:1.6}
+.cover.technical .author{font:700 14pt "Sylfaen","Georgia",serif;color:#fff}
+.cover.technical .place{font:400 11pt "Sylfaen","Georgia",serif;color:#9db8c9}
 @page :first{margin:0}
 /* toc */
 .toc{page-break-after:always;page-break-before:always}

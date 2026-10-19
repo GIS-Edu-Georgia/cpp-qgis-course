@@ -11,7 +11,43 @@ import { chromium } from 'playwright-core';
 const ROOT = path.dirname(new URL(import.meta.url).pathname.replace(/^\/(\w:)/, '$1'));
 const CHROME = 'C:/Program Files/Google/Chrome/Application/chrome.exe';
 const BOOK_TITLE = 'შესავალი QGIS-ის პროგრამირებაში';
-const BOOK_SUBTITLE = 'C++ PyQGIS-იდან QGIS Core-მდე';
+const BOOK_SUBTITLE = 'PyQGIS-იდან QGIS Core-მდე';
+const COVER_TAGS = 'პროგრამირება · GIS · C++';
+const COVER_STYLE = process.env.COVER || 'technical'; // 'technical' | 'academic'
+
+// decorative cover art: coordinate grid, contour lines and a vector polygon (units: mm)
+function coverArt() {
+  const W = 170, H = 240;
+  const grid = [];
+  for (let x = 17; x < W; x += 17) grid.push(`<line x1="${x}" y1="0" x2="${x}" y2="${H}"/>`);
+  for (let y = 16; y < H; y += 16) grid.push(`<line x1="0" y1="${y}" x2="${W}" y2="${y}"/>`);
+  const contours = [];
+  for (let k = 0; k < 9; k++) {
+    const base = 128 + k * 13, amp = 5 + k * 0.7, ph = k * 0.55;
+    const pts = [];
+    for (let x = 0; x <= W; x += 5) {
+      const y = base + amp * Math.sin(x / 19 + ph) + 3.2 * Math.sin(x / 7.5 + ph * 1.7);
+      pts.push(`${x},${y.toFixed(2)}`);
+    }
+    contours.push(`<polyline points="${pts.join(' ')}"/>`);
+  }
+  const poly = [[112, 22], [145, 30], [152, 55], [133, 76], [104, 66], [96, 42]];
+  const polyPts = poly.map(p => p.join(',')).join(' ');
+  const dots = poly.map(p => `<circle cx="${p[0]}" cy="${p[1]}" r="1.6"/>`).join('');
+  return `<svg class="art" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+  <g class="g-grid">${grid.join('')}</g>
+  <g class="g-cont">${contours.join('')}</g>
+  <polygon class="g-poly" points="${polyPts}"/>
+  <g class="g-dots">${dots}</g>
+</svg>`;
+}
+
+function coverInner() {
+  if (COVER_STYLE === 'academic') {
+    return `<div class="frame"><div></div><div class="mid"><div class="orn"></div><h1>${BOOK_TITLE}</h1><div class="sub">${BOOK_SUBTITLE}</div><div class="orn"></div></div><div class="foot"><div class="author">${AUTHOR}</div><div class="place">${PLACE_YEAR}</div></div></div>`;
+  }
+  return `${coverArt()}<div class="tech"><div class="tags">${COVER_TAGS}</div><div class="mid"><h1>${BOOK_TITLE}</h1><div class="rule"></div><div class="sub">${BOOK_SUBTITLE}</div></div><div class="foot"><div class="author">${AUTHOR}</div><div class="place">${PLACE_YEAR}</div></div></div>`;
+}
 const AUTHOR = 'გიორგი კაპანაძე';
 const PLACE_YEAR = 'თბილისი · 2026';
 
@@ -145,7 +181,7 @@ function bookHtml(pages, cover = false) {
   </section>`).join('\n');
   return `<!doctype html><html lang="ka"><head><meta charset="utf-8"><title>${BOOK_TITLE}</title>
 <style>${css('book.css')}</style></head><body>
-<section class="cover${cover ? '' : ' blank'}">${cover ? `<div class="frame"><div></div><div class="mid"><div class="orn"></div><h1>${BOOK_TITLE}</h1><div class="sub">${BOOK_SUBTITLE}</div><div class="orn"></div></div><div class="foot"><div class="author">${AUTHOR}</div><div class="place">${PLACE_YEAR}</div></div></div>` : ''}</section>
+<section class="cover${cover ? '' : ' blank'}${cover && COVER_STYLE !== 'academic' ? ' technical' : ''}">${cover ? coverInner() : ''}</section>
 <section class="toc"><h1>სარჩევი</h1><ol>${toc}</ol></section>
 ${chs}
 </body></html>`;
