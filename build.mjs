@@ -12,7 +12,6 @@ const ROOT = path.dirname(new URL(import.meta.url).pathname.replace(/^\/(\w:)/, 
 const CHROME = 'C:/Program Files/Google/Chrome/Application/chrome.exe';
 const BOOK_TITLE = 'შესავალი QGIS-ის პროგრამირებაში';
 const BOOK_SUBTITLE = 'C++ PyQGIS-იდან QGIS Core-მდე';
-const BOOK_SUB = 'ლექციების კონსპექტი და სამუშაო რვეული გეოინფორმატიკოსებისთვის';
 const AUTHOR = 'გიორგი კაპანაძე';
 const PLACE_YEAR = 'თბილისი · 2026';
 
@@ -116,7 +115,7 @@ function indexHtml() {
   const items = chapters.map(c => `<a class="card" href="lectures/L${c.meta.n}.html"><b>${c.meta.n}</b><span>${esc(c.meta.title)}<small>${esc(c.meta.topics || '')}</small></span></a>`).join('\n');
   return `<!doctype html><html lang="ka"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${BOOK_TITLE}</title><link rel="stylesheet" href="assets/slides.css"></head>
-<body class="index"><main><div class="eyebrow">კურსი</div><h1>${BOOK_TITLE}</h1><p class="en">${BOOK_SUBTITLE}</p><p class="topics">${BOOK_SUB}</p><p class="topics">${AUTHOR} · ${PLACE_YEAR}</p>
+<body class="index"><main><div class="eyebrow">კურსი</div><h1>${BOOK_TITLE}</h1><p class="en">${BOOK_SUBTITLE}</p><p class="topics">${AUTHOR} · ${PLACE_YEAR}</p>
 <div class="cards">${items}</div><p class="hint"><a href="book.pdf">PDF წიგნის გადმოწერა</a></p></main></body></html>`;
 }
 
@@ -146,7 +145,7 @@ function bookHtml(pages, cover = false) {
   </section>`).join('\n');
   return `<!doctype html><html lang="ka"><head><meta charset="utf-8"><title>${BOOK_TITLE}</title>
 <style>${css('book.css')}</style></head><body>
-<section class="cover${cover ? '' : ' blank'}">${cover ? `<div class="frame"><div class="kind">${BOOK_SUB}</div><div class="mid"><div class="orn"></div><h1>${BOOK_TITLE}</h1><div class="sub">${BOOK_SUBTITLE}</div><div class="orn"></div></div><div class="foot"><div class="author">${AUTHOR}</div><div class="place">${PLACE_YEAR}</div></div></div>` : ''}</section>
+<section class="cover${cover ? '' : ' blank'}">${cover ? `<div class="frame"><div></div><div class="mid"><div class="orn"></div><h1>${BOOK_TITLE}</h1><div class="sub">${BOOK_SUBTITLE}</div><div class="orn"></div></div><div class="foot"><div class="author">${AUTHOR}</div><div class="place">${PLACE_YEAR}</div></div></div>` : ''}</section>
 <section class="toc"><h1>სარჩევი</h1><ol>${toc}</ol></section>
 ${chs}
 </body></html>`;
