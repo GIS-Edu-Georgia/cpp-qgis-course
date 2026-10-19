@@ -7,12 +7,17 @@ p{margin:.55em 0;text-align:justify;hyphens:auto;orphans:3;widows:3}
 li{margin:.2em 0}
 code{font-family:"Cascadia Mono",Consolas,"Segoe UI","Sylfaen",monospace;font-size:.85em;background:#eef2f0;padding:0 .25em;border-radius:2px}
 /* cover */
-.cover{page-break-after:always;height:24cm;margin:0;padding:55mm 22mm;background:#0f3d36;color:#fff;position:relative;width:17cm;overflow:hidden}
-.cover.blank{background:#fff}
-.cover .band{position:absolute;left:0;top:30mm;width:100%;height:4mm;background:#c9822b}
-.cover h1{font-size:30pt;margin:0 0 8mm}
-.cover p{font-size:13pt;color:#cfe3dd;text-align:left}
-.cover .by{position:absolute;bottom:20mm;left:22mm;letter-spacing:.2em;font:9pt "Segoe UI",sans-serif;color:#9fc4b8}
+.cover{page-break-after:always;height:24cm;width:17cm;margin:0;padding:14mm;background:#fff;color:#1a1a1a;overflow:hidden;font-family:"Sylfaen","Georgia",serif}
+.cover .frame{height:100%;border:.6mm solid #0f3d36;outline:.25mm solid #0f3d36;outline-offset:-2.6mm;display:flex;flex-direction:column;justify-content:space-between;align-items:center;padding:16mm 12mm;text-align:center}
+.cover .kind{font-size:12pt;letter-spacing:.04em;color:#333;line-height:1.5;max-width:11cm}
+.cover .mid{width:100%}
+.cover .orn{height:0;border-top:.4mm solid #0f3d36;width:30mm;margin:0 auto 9mm}
+.cover .orn:last-child{margin:9mm auto 0}
+.cover h1{font:700 26pt/1.25 "Sylfaen","Georgia",serif;margin:0 0 6mm;color:#0f3d36;text-align:center}
+.cover .sub{font:italic 14pt "Sylfaen","Georgia",serif;color:#444}
+.cover .foot{line-height:1.6}
+.cover .author{font-size:14pt;font-weight:700;letter-spacing:.02em}
+.cover .place{font-size:11pt;color:#444;margin-top:1mm}
 @page :first{margin:0}
 /* toc */
 .toc{page-break-after:always;page-break-before:always}
