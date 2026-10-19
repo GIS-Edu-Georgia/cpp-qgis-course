@@ -11,6 +11,7 @@
     <div class="en">References and const</div>
     <p class="topics">&amp; როგორც მეტსახელი · გადაცემა მნიშვნელობით და მითითებით · const &amp; · QGIS ხელმოწერების კითხვა</p>
     <div class="intro"><p>წინა თავში მაჩვენებელი გავიგეთ. QGIS-ის API-ში მასთან ერთად ყველგან გვხვდება <code>&amp;</code>: <code>const QgsFeature &amp;feature</code>. ამ თავის შემდეგ ამ ჩანაწერს დაუფიქრებლად წაიკითხავ.</p>
+<p>ჯერ ერთი მნიშვნელოვანი ცნება: <strong>ასლი</strong> (copy). როცა ფუნქციას ობიექტს ვაძლევთ, C++ ნაგულისხმევად ობიექტის ასლს ქმნის და ფუნქცია ასლზე მუშაობს. ორიგინალი არ იცვლება, მაგრამ ასლის შექმნა დიდი ფენისთვის ნელი და მეხსიერებატევადია. მითითება ამ ორივე პრობლემას გვარჩენს.</p>
 </div>
     <div class="hint">← → ისრებით გადაადგილება · F — სრული ეკრანი · P — ბეჭდვა</div>
   </section>
@@ -29,6 +30,7 @@
     <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
 }</code></pre></figure>
 <figure class="code out"><figcaption><span>შედეგი</span></figcaption><pre><code>300</code></pre></figure>
+<p><code>int &amp;ref = featureCount;</code> ნიშნავს: „<code>ref</code> არის <code>featureCount</code>-ის მეორე სახელი“. შემდეგ <code>ref = 300</code> რეალურად <code>featureCount</code>-ს ცვლის. აქ <code>&amp;</code> ტიპის გვერდით წერია და ნიშნავს „მითითება“; წინა თავში <code>&amp;x</code> (ცვლადის წინ) ნიშნავდა „მისამართი“. ორივე ერთი სიმბოლოა, მაგრამ მნიშვნელობა მდებარეობით განისაზღვრება.</p>
 <div class="box analogy"><div class="box-title">ბანკის პერსონალური ასისტენტი</div><div class="box-body">
 <p>სოლო მომსახურების ასისტენტი ერთხელ და სამუდამოდ გიმაგრდება. ის არ იცვლება ყოველ ვიზიტზე და ცარიელი არ არის. მითითება ზუსტად ასეა: იბადება კონკრეტულ ობიექტზე მიბმული, ვეღარ გადაიბმება სხვაზე და <code>nullptr</code> ვერ იქნება.</p>
 </div></div>
@@ -106,7 +108,7 @@
 }</code></pre></figure>
 <figure class="code out"><figcaption><span>შედეგი</span></figcaption><pre><code>After value: 100
 After ref: 125</code></pre></figure>
-<p>პირველ შემთხვევაში ფუნქციამ ობიექტის <strong>ასლი</strong> მიიღო და ორიგინალი არ შეცვლილა. მეორეში <code>&amp;</code>-ის გამო იმუშავა თავად ორიგინალზე.</p>
+<p>პირველ შემთხვევაში ფუნქციამ ობიექტის <strong>ასლი</strong> მიიღო და ორიგინალი არ შეცვლილა. მეორეში <code>&amp;</code>-ის გამო იმუშავა თავად ორიგინალზე. ტერმინები: პირველს <strong>გადაცემა მნიშვნელობით</strong> (pass by value) ჰქვია, მეორეს <strong>გადაცემა მითითებით</strong> (pass by reference).</p>
 </div>
   </section>
 
@@ -139,8 +141,18 @@ After ref: 125</code></pre></figure>
     <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
 }</code></pre></figure>
 <figure class="code out"><figcaption><span>შედეგი</span></figcaption><pre><code>Perimeter: 40</code></pre></figure>
+<p>ხაზ-ხაზ რას აკეთებს ეს კოდი:</p>
+<ul>
+<li><code>struct Point</code> — წერტილი ორი კოორდინატით (როგორც წინა თავში);</li>
+<li><code>std::vector&lt;Point&gt;</code> — <strong>სია</strong> (vector): ბევრი <code>Point</code> ერთად; სიებს თავი 09-ში დაწვრილებით გავეცნობით. აქ ის წარმოადგენს ნაკვეთის კონტურს, წვეროების თანმიმდევრობას;</li>
+<li><code>for (size_t i = 0; i &lt; ring.size(); ++i)</code> — <strong>ციკლი</strong>: <code>i</code> იწყება 0-დან და იზრდება (<code>++i</code> ნიშნავს „დაამატე 1“), სანამ წერტილების რაოდენობას არ გაუტოლდება. თითოეულ ნაბიჯზე ვასრულებთ <code>{ ... }</code> ბლოკს. <code>size_t</code> არის ტიპი, რომელიც რაოდენობებისთვის გამოიყენება;</li>
+<li><code>ring[i]</code> — სიის <code>i</code>-ური ელემენტი (ათვლა 0-დან იწყება);</li>
+<li><code>a</code> და <code>b</code> — ორი მეზობელი წერტილი, ე.ი. კონტურის ერთი გვერდი;</li>
+<li><code>std::hypot(...)</code> — მანძილი <code>a</code>-სა და <code>b</code>-ს შორის (თავი 03);</li>
+<li><code>total += ...</code> — გვერდების სიგრძეები ჯამდება.</li>
+</ul>
 <div class="box note"><div class="box-title">შენიშვნა</div><div class="box-body">
-<p><code>(i + 1) % ring.size()</code> ბოლო წერტილიდან პირველს უკავშირებს ანუ კონტურს ხურავს. თუ გადაიცემოდა <code>std::vector&lt;Point&gt; ring</code> (&amp;-ის გარეშე), ყოველ გამოძახებაზე მთელი წერტილების სია დაკოპირდებოდა.</p>
+<p><code>(i + 1) % ring.size()</code> ბოლო წერტილიდან პირველს უკავშირებს ანუ კონტურს ხურავს (<code>%</code> არის ნაშთი გაყოფიდან). თუ გადაიცემოდა <code>std::vector&lt;Point&gt; ring</code> (<code>&amp;</code>-ის გარეშე), ყოველ გამოძახებაზე მთელი წერტილების სია დაკოპირდებოდა.</p>
 </div></div>
 <div class="box warn"><div class="box-title">ყურადღება</div><div class="box-body">
 <p><code>const</code>-ის დარღვევა კომპილაციის შეცდომაა. <code>ring[0].x = 5;</code> ამ ფუნქციაში კომპილაციას ვერ გაივლის.</p>
@@ -182,6 +194,7 @@ After ref: 125</code></pre></figure>
 </tr>
 </tbody>
 </table>
+<p>თუ Python-ს იცნობ, იგივე ფუნქცია ორივე ენაზე:</p>
 <div class="box compare"><div class="box-body">
 <figure class="code python"><figcaption><span>Python</span></figcaption><pre><code class="hljs"><span class="hljs-keyword">def</span> <span class="hljs-title function_">count_features</span>(<span class="hljs-params">layer</span>):
     <span class="hljs-keyword">return</span> layer.featureCount()</code></pre></figure>

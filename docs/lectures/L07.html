@@ -23,7 +23,7 @@
 <figure class="code "><figcaption><span></span></figcaption><pre><code class="hljs">QgsMapLayer
  ├─ QgsVectorLayer   (ობიექტები, ატრიბუტები)
  └─ QgsRasterLayer   (პიქსელები, არხები)</code></pre></figure>
-<p>C++-ში მემკვიდრეობა იწერება <code>: public Base</code>.</p>
+<p>ფენა, რომლისგანაც ვიღებთ, არის <strong>ბაზისური კლასი</strong> (base class, მშობელი). ფენა, რომელიც იღებს, არის <strong>მემკვიდრე კლასი</strong> (derived class, შვილი). C++-ში მემკვიდრეობა იწერება <code>: public Base</code>-ით. ეს მნიშვნელოვანია, რომ კოდი არ გავიმეოროთ: საერთო თვისებები (სახელი, CRS) ერთხელ ვწერთ ბაზისურ კლასში.</p>
 </div>
   </section>
 
@@ -78,6 +78,57 @@
 }</code></pre></figure>
 <figure class="code out"><figcaption><span>შედეგი</span></figcaption><pre><code>Rivers is vector
 DEM is raster</code></pre></figure>
+<p>ხაზ-ხაზ ახსნა:</p>
+<table>
+<thead>
+<tr>
+<th>კოდი</th>
+<th>რას აკეთებს</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>class Layer { ... }</code></td>
+<td>ბაზისური კლასი: ყველა ფენისთვის საერთო თვისებები</td>
+</tr>
+<tr>
+<td><code>explicit Layer(std::string name)</code></td>
+<td>კონსტრუქტორი (თავი 06); <code>explicit</code> კრძალავს შემთხვევით, უნებლიე გარდაქმნას</td>
+</tr>
+<tr>
+<td><code>virtual ~Layer() = default;</code></td>
+<td><strong>დესტრუქტორი</strong>: სპეციალური მეთოდი, რომელიც ობიექტის წაშლისას სრულდება. <code>virtual</code> აუცილებელია ბაზისურ კლასში (იხ. ქვემოთ)</td>
+</tr>
+<tr>
+<td><code>virtual std::string type() const</code></td>
+<td>მეთოდი, რომელიც შვილებმა შეიძლება თავიანთი ვერსიით ჩაანაცვლონ</td>
+</tr>
+<tr>
+<td><code>class VectorLayer : public Layer</code></td>
+<td><code>VectorLayer</code> არის <code>Layer</code>-ის მემკვიდრე</td>
+</tr>
+<tr>
+<td><code>Layer(std::move(name))</code> კონსტრუქტორის სიაში</td>
+<td>მშობლის კონსტრუქტორს გადავცემთ სახელს</td>
+</tr>
+<tr>
+<td><code>... override</code></td>
+<td>„ვცვლი მშობლის მეთოდს“; კომპილატორი შეამოწმებს, რომ ასეთი მეთოდი მართლაც არსებობს</td>
+</tr>
+<tr>
+<td><code>std::vector&lt;Layer *&gt; layers = {&amp;rivers, &amp;dem};</code></td>
+<td>სია, რომელშიც სხვადასხვა ტიპის ფენებზე მაჩვენებლები დევს, ორივე <code>Layer *</code> ტიპისაა</td>
+</tr>
+<tr>
+<td><code>for (Layer *layer : layers)</code></td>
+<td>ციკლი სიის ყველა ელემენტზე (თავი 09)</td>
+</tr>
+<tr>
+<td><code>layer-&gt;type()</code></td>
+<td>გამოძახება მაჩვენებლით (<code>-&gt;</code>, თავი 04)</td>
+</tr>
+</tbody>
+</table>
 <p>ორივე ელემენტი <code>Layer *</code>-ია, მაგრამ <code>type()</code> თითოეულისთვის საკუთარ პასუხს აბრუნებს. სწორედ ამიტომ ინახავს QGIS ყველა ფენას ერთ სიაში, როგორც <code>QgsMapLayer *</code>.</p>
 <div class="box note"><div class="box-title">შენიშვნა</div><div class="box-body">
 <p><code>override</code> არ არის სავალდებულო, მაგრამ კომპილატორს ამოწმებს: თუ მეთოდის სახელი ან პარამეტრი შეეშალა, შეცდომას დაგიბრუნებს. <code>virtual ~Layer()</code> ბაზისურ კლასში აუცილებელია, რომ წაშლისას სწორი დესტრუქტორი გამოიძახოს.</p>
@@ -95,14 +146,14 @@ DEM is raster</code></pre></figure>
     }
 }</code></pre></figure>
 <figure class="code out"><figcaption><span>შედეგი</span></figcaption><pre><code>Rivers: 42 features</code></pre></figure>
-<p>თუ ობიექტი ვექტორული ფენა არ არის, <code>dynamic_cast</code> აბრუნებს <code>nullptr</code>-ს. ზუსტად ამიტომ ვამოწმებთ <code>if</code>-ში.</p>
+<p>თუ ობიექტი ვექტორული ფენა არ არის, <code>dynamic_cast</code> აბრუნებს <code>nullptr</code>-ს. ზუსტად ამიტომ ვამოწმებთ <code>if</code>-ში: ჯერ ვცდილობთ გარდაქმნას და ვინახავთ <code>vec</code>-ში; თუ <code>vec</code> არ არის <code>nullptr</code>, <code>if</code>-ის ბლოკი სრულდება. <code>auto *vec</code> ნიშნავს „ტიპი თვითონ გამოიცანი (<code>VectorLayer *</code>)“. <strong>გარდაქმნა</strong> (cast) ნიშნავს ერთი ტიპის მაჩვენებლის მეორე ტიპად ცნობას, როცა ობიექტი ამ ტიპისაა.</p>
 </div>
   </section>
 
   <section class="slide" data-title="qobject_cast QGIS-ში">
     <div class="eyebrow">07.4 · OOP</div>
     <h2>qobject_cast QGIS-ში</h2>
-    <div class="content"><p>QGIS-ის კლასები <code>QObject</code>-იდან მოდის, ამიტომ იქ <code>dynamic_cast</code>-ის უფრო სწრაფი ვერსია გამოიყენება:</p>
+    <div class="content"><p>QGIS-ის კლასები <code>QObject</code>-იდან მოდის (Qt-ის ბაზისური კლასი, თავი 10), ამიტომ იქ <code>dynamic_cast</code>-ის უფრო სწრაფი ვერსია გამოიყენება. ის იგივეს აკეთებს, ოღონდ Qt-ის მექანიზმით. თუ Python-ს იცნობ, <code>isinstance</code>-ს ჰგავს:</p>
 <div class="box compare"><div class="box-body">
 <figure class="code python"><figcaption><span>Python</span></figcaption><pre><code class="hljs">layer = iface.activeLayer()
 <span class="hljs-keyword">if</span> <span class="hljs-built_in">isinstance</span>(layer, QgsVectorLayer):

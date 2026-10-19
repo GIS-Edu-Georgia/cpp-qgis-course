@@ -11,6 +11,7 @@
     <div class="en">Classes and objects</div>
     <p class="topics">class და struct · public/private · კონსტრუქტორი · const მეთოდები · QGIS-ის სახელდების წესი</p>
     <div class="intro"><p>QGIS-ში თითქმის ყველაფერი კლასია: <code>QgsPointXY</code>, <code>QgsFeature</code>, <code>QgsVectorLayer</code>. კლასი აერთიანებს <strong>მონაცემს</strong> (წევრ-ცვლადებს) და <strong>ქცევას</strong> (მეთოდებს).</p>
+<p>წინა თავში <code>struct</code> გავიცანით: ის მხოლოდ მონაცემს აერთიანებს. <strong>კლასი</strong> (class) მას ამატებს ფუნქციებს, რომლებიც ამ მონაცემებზე მუშაობენ. კლასში მოთავსებულ ფუნქციას <strong>მეთოდი</strong> ეწოდება. ობიექტზე ორიენტირებული პროგრამირების (OOP) იდეა ისაა, რომ მონაცემი და მასთან დაკავშირებული ქმედებები ერთად ინახება.</p>
 </div>
     <div class="hint">← → ისრებით გადაადგილება · F — სრული ეკრანი · P — ბეჭდვა</div>
   </section>
@@ -20,6 +21,7 @@
     <div class="content"><div class="box analogy"><div class="box-title">ნახაზი და სახლი</div><div class="box-body">
 <p>კლასი არის ნახაზი, ობიექტი კი ამ ნახაზით აშენებული სახლი. ერთი ნახაზით შეიძლება ბევრი სახლი აშენდეს: ერთი კლასი <code>Parcel</code>, ბევრი კონკრეტული ნაკვეთი.</p>
 </div></div>
+<p>ქვემოთ ნაკვეთის მარტივი კლასია. თუ Python-ს იცნობ, შეადარე; თუ არა, უბრალოდ გადახედე C++ მხარეს და ქვემოთ დეტალურ ახსნას წაიკითხე:</p>
 <div class="box compare"><div class="box-body">
 <figure class="code python"><figcaption><span>Python</span></figcaption><pre><code class="hljs"><span class="hljs-keyword">class</span> <span class="hljs-title class_">Parcel</span>:
     <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, owner, w, h</span>):
@@ -44,7 +46,7 @@
   <section class="slide" data-title="public და private">
     <div class="eyebrow">06.2 · OOP</div>
     <h2>public და private</h2>
-    <div class="content"><p><code>private</code> წევრებს მხოლოდ თავად კლასის მეთოდები ხედავენ. გარედან მათზე წვდომა კომპილაციის შეცდომაა. ასე ობიექტი საკუთარ მდგომარეობას იცავს და გარე კოდი მას არასწორ მდგომარეობაში ვერ ჩააგდებს.</p>
+    <div class="content"><p><code>public</code> წევრებს ყველა ხედავს, <code>private</code> წევრებს მხოლოდ თავად კლასის მეთოდები. გარედან <code>private</code>-ზე წვდომა კომპილაციის შეცდომაა. ასე ობიექტი საკუთარ მდგომარეობას იცავს: გარე კოდი მას არასწორ მდგომარეობაში ვერ ჩააგდებს (მაგალითად, ვერ ჩაწერს უარყოფით სიგანეს, თუ ამას მეთოდი ამოწმებს).</p>
 <div class="box tip"><div class="box-title">QGIS-ის წესი</div><div class="box-body">
 <p>წევრ-ცვლადებს აქვთ <code>m</code> პრეფიქსი (<code>mOwner</code>, <code>mWidth</code>), მეთოდები კი <code>get</code>-ის გარეშეა: <code>feature.id()</code>, არა <code>feature.getId()</code>. შეცვლისთვის გამოიყენება <code>set</code>: <code>feature.setGeometry(...)</code>.</p>
 </div></div>
@@ -87,6 +89,61 @@
 }</code></pre></figure>
 <figure class="code out"><figcaption><span>შედეგი</span></figcaption><pre><code>Nino: 300 m2
 Nino: 500 m2</code></pre></figure>
+<p>ხაზ-ხაზ:</p>
+<table>
+<thead>
+<tr>
+<th>კოდი</th>
+<th>რას აკეთებს</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>class Parcel {</code></td>
+<td>ვქმნით ახალ ტიპს <code>Parcel</code></td>
+</tr>
+<tr>
+<td><code>public:</code></td>
+<td>აქედან დაწყებული ყველაფერი გარედანაც ხელმისაწვდომია</td>
+</tr>
+<tr>
+<td><code>Parcel(std::string owner, double width, double height)</code></td>
+<td><strong>კონსტრუქტორი</strong>: ობიექტის შექმნისას სრულდება და საწყის მნიშვნელობებს უნიშნავს</td>
+</tr>
+<tr>
+<td><code>: mOwner(std::move(owner)), mWidth(width), ...</code></td>
+<td>წევრების საწყისი მნიშვნელობები; <code>std::move</code> ტექსტს კოპირების გარეშე გადასცემს (ამას თავი 08-ში ავხსნით, ამჟამად ისე გადმოწერე, როგორც წერია)</td>
+</tr>
+<tr>
+<td><code>double area() const { ... }</code></td>
+<td>მეთოდი, რომელიც ფართობს გამოთვლის; ბოლოს <code>const</code> ნიშნავს, რომ ობიექტს არ ცვლის</td>
+</tr>
+<tr>
+<td><code>const std::string &amp;owner() const</code></td>
+<td>მფლობელის სახელს აბრუნებს კოპირების გარეშე</td>
+</tr>
+<tr>
+<td><code>void resize(...)</code></td>
+<td>ზომას ცვლის</td>
+</tr>
+<tr>
+<td><code>private:</code></td>
+<td>აქ მოთავსებული წევრები მხოლოდ კლასის შიგნიდან ჩანს</td>
+</tr>
+<tr>
+<td><code>std::string mOwner; double mWidth;...</code></td>
+<td>ობიექტის მონაცემები</td>
+</tr>
+<tr>
+<td><code>Parcel p(&quot;Nino&quot;, 20.0, 15.0);</code></td>
+<td><code>main</code>-ში ვქმნით ობიექტს და კონსტრუქტორს მნიშვნელობებს ვუგზავნით</td>
+</tr>
+<tr>
+<td><code>p.area()</code></td>
+<td>წერტილით ვუძახებთ ობიექტის მეთოდს</td>
+</tr>
+</tbody>
+</table>
 </div>
   </section>
 
@@ -98,6 +155,7 @@ Nino: 500 m2</code></pre></figure>
 <p>QGIS-ის მაგალითი:</p>
 <figure class="code cpp"><figcaption><span>C++</span></figcaption><pre><code class="hljs"><span class="hljs-function">QgsPointXY <span class="hljs-title">tbilisi</span><span class="hljs-params">(<span class="hljs-number">44.8271</span>, <span class="hljs-number">41.7151</span>)</span></span>;   <span class="hljs-comment">// x = გრძედი(lon), y = განედი(lat)</span>
 <span class="hljs-type">double</span> x = tbilisi.<span class="hljs-built_in">x</span>();</code></pre></figure>
+<p>აქ <code>tbilisi</code> არის <code>QgsPointXY</code> კლასის ობიექტი, კონსტრუქტორს გადავეცით ორი კოორდინატი, შემდეგ მეთოდით <code>x()</code> ავიღეთ პირველი.</p>
 <div class="box warn"><div class="box-title">გაითვალისწინე</div><div class="box-body">
 <p>QGIS-ში წერტილი <code>(x, y)</code> = <code>(გრძედი, განედი)</code>, ანუ <code>(lon, lat)</code>. ბევრ რუკის API-ში პირიქითაა. შეცდომა ძალიან გავრცელებულია.</p>
 </div></div>

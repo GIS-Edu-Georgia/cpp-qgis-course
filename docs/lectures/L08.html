@@ -10,7 +10,7 @@
     <h1>მეხსიერების მართვა და smart pointers</h1>
     <div class="en">Memory management and smart pointers</div>
     <p class="topics">stack და heap · new/delete · memory leak · unique_ptr · shared_ptr · QGIS-ის მფლობელობის წესები</p>
-    <div class="intro"><p>Python-ში მეხსიერებას ნაგვის შემგროვებელი (garbage collector) ასუფთავებს. C++-ში ეს შენი საქმეა. კარგი ამბავი ისაა, რომ თანამედროვე C++-ში ამას smart pointer-ები აკეთებენ.</p>
+    <div class="intro"><p>პროგრამა მუშაობისას მეხსიერებას იკავებს: ცვლადებისთვის, ფენებისთვის, გეომეტრიებისთვის. როცა რაიმე აღარ გვჭირდება, ეს მეხსიერება უნდა გავათავისუფლოთ, თორემ პროგრამა თანდათან გაივსება და შეიძლება გაჩერდეს. ზოგ ენაში (მაგალითად, Python-ში) ამას ავტომატურად აკეთებს ე.წ. ნაგვის შემგროვებელი (garbage collector). C++-ში ეს ჩვენი პასუხისმგებლობაა. კარგი ამბავი ისაა, რომ თანამედროვე C++-ში ამას <strong>smart pointer</strong>-ები აკეთებენ.</p>
 </div>
     <div class="hint">← → ისრებით გადაადგილება · F — სრული ეკრანი · P — ბეჭდვა</div>
   </section>
@@ -67,7 +67,7 @@
   <section class="slide" data-title="unique_ptr: ერთადერთი მფლობელი">
     <div class="eyebrow">08.3 · მეხსიერება</div>
     <h2>unique_ptr: ერთადერთი მფლობელი</h2>
-    <div class="content"><p><code>std::unique_ptr</code> ობიექტს ფლობს და scope-ის დასრულებისას ავტომატურად წაშლის.</p>
+    <div class="content"><p><strong>smart pointer</strong> არის ობიექტი, რომელიც მაჩვენებელივით იქცევა, მაგრამ თავად ზრუნავს მეხსიერების გათავისუფლებაზე. <code>std::unique_ptr</code> ობიექტს ფლობს და <strong>scope</strong>-ის (ფიგურული ფრჩხილებით შემოსაზღვრული ბლოკის) დასრულებისას ავტომატურად წაშლის.</p>
 <figure class="code cpp"><figcaption><span>C++</span><em>unique.cpp</em></figcaption><pre><code class="hljs"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;iostream&gt;</span></span>
 <span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;memory&gt;</span></span>
 <span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;string&gt;</span></span>
@@ -93,6 +93,13 @@
 using Parcel-1
 destroyed Parcel-1
 after scope</code></pre></figure>
+<p>გავარჩიოთ:</p>
+<ul>
+<li><code>Polygon</code> არის struct, რომელსაც აქვს <strong>კონსტრუქტორი</strong> (იბეჭდება „created“) და <strong>დესტრუქტორი</strong> <code>~Polygon()</code> (იბეჭდება „destroyed“). დესტრუქტორი ავტომატურად სრულდება, როცა ობიექტი ქრება;</li>
+<li><code>std::make_unique&lt;Polygon&gt;(&quot;Parcel-1&quot;)</code> ქმნის <code>Polygon</code>-ს heap-ზე და აბრუნებს <code>unique_ptr</code>-ს. კუთხური ფრჩხილები ტიპს უთითებს: რის მაჩვენებელია;</li>
+<li><code>p-&gt;name</code> — წევრთან მისვლა, როგორც ჩვეულებრივ მაჩვენებელთან;</li>
+<li>ბლოკი <code>{ ... }</code> იქმნება მხოლოდ იმისთვის, რომ მისი დასასრული „ჩანდეს“: <code>p</code> იქ ქრება და ობიექტიც მაშინვე იშლება.</li>
+</ul>
 <p><code>delete</code> არსად დაგვიწერია, მაგრამ ობიექტი ზუსტად ბლოკის ბოლოს განადგურდა. ამ პრინციპს RAII ჰქვია: რესურსი ობიექტის სიცოცხლეს ებმება.</p>
 </div>
   </section>
@@ -100,7 +107,7 @@ after scope</code></pre></figure>
   <section class="slide" data-title="მფლობელობის გადაცემა: std::move">
     <div class="eyebrow">08.4 · მეხსიერება</div>
     <h2>მფლობელობის გადაცემა: std::move</h2>
-    <div class="content"><p><code>unique_ptr</code>-ის კოპირება შეუძლებელია, რადგან მფლობელი ერთია. შეიძლება მხოლოდ გადაცემა.</p>
+    <div class="content"><p><code>unique_ptr</code>-ის კოპირება შეუძლებელია, რადგან მფლობელი ერთია. შეიძლება მხოლოდ <strong>გადაცემა</strong>. ამას <code>std::move</code> აკეთებს: „გადაეცი მფლობელობა“ (მანამდე ბევრგან დაწერილი <code>std::move(name)</code> ზუსტად ასეა: ტექსტს ახალ ადგილზე გადააქვს, კოპირების გარეშე).</p>
 <figure class="code cpp"><figcaption><span>C++</span></figcaption><pre><code class="hljs"><span class="hljs-keyword">auto</span> a = std::<span class="hljs-built_in">make_unique</span>&lt;Polygon&gt;(<span class="hljs-string">&quot;Parcel-2&quot;</span>);
 <span class="hljs-keyword">auto</span> b = std::<span class="hljs-built_in">move</span>(a);          <span class="hljs-comment">// ახლა b ფლობს, a ცარიელია</span>
 
@@ -149,6 +156,7 @@ destroyed Parcel-2</code></pre></figure>
 2
 1
 destroyed Shared</code></pre></figure>
+<p><code>use_count()</code> გვეუბნება, ამჟამად რამდენი მფლობელი ჰყავს ობიექტს. <code>auto b = a;</code> ქმნის მეორე მფლობელს, ამიტომ რიცხვი 2 ხდება. შიდა ბლოკის დასრულებისას <code>b</code> ქრება და რიცხვი ისევ 1-ია. ობიექტი მხოლოდ მაშინ წაიშლება, როცა ბოლო მფლობელიც წავა (<code>main</code>-ის ბოლოს).</p>
 </div>
   </section>
 

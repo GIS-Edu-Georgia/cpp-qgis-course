@@ -11,6 +11,7 @@
     <div class="en">Capstone — your own tool inside QGIS</div>
     <p class="topics">QGIS-ის აწყობა წყაროდან · დამოუკიდებელი C++ აპლიკაცია · C++ პლაგინის ჩონჩხი · CMake · ლიცენზია</p>
     <div class="intro"><p>საბოლოო მიზანი: საკუთარი C++ კოდი QGIS-თან ერთად გაუშვა. გზა სამ საფეხურად ვაგებთ: ჯერ ვმუშაობთ QGIS-ის ბიბლიოთეკასთან დამოუკიდებელ აპლიკაციაში, შემდეგ ვაკეთებთ პლაგინს, ბოლოს ვაწყობთ QGIS-ს წყაროდან.</p>
+<p>ამ თავში შემოდის ახალი ტერმინები: <strong>პლაგინი</strong> არის დამატება, რომელსაც QGIS ჩატვირთვისას აკავშირებს თავის მენიუსა და ფუნქციებთან; C++ პლაგინი არის <strong>დინამიური ბიბლიოთეკა</strong> (<code>.dll</code> Windows-ზე, <code>.so</code> Linux-ზე) — ცალკე შესრულებადი ფაილი, რომელიც უშუალოდ კი არ იხსნება, არამედ სხვა პროგრამა (QGIS) ტვირთავს. <strong>CMake</strong> კი არის „აწყობის დირიჟორი“: ტექსტური ფაილი (<code>CMakeLists.txt</code>), რომელიც ეუბნება, რომელი ფაილები და ბიბლიოთეკები დააკომპილოს და როგორ დააკავშიროს.</p>
 </div>
     <div class="hint">← → ისრებით გადაადგილება · F — სრული ეკრანი · P — ბეჭდვა</div>
   </section>
@@ -86,6 +87,53 @@
 <figure class="code out"><figcaption><span>შედეგი</span></figcaption><pre><code>Features: 42
 Total area: 0.183762</code></pre></figure>
 <p>რიცხვები საილუსტრაციოა: ისინი შენი მონაცემის მიხედვით განსხვავდება. ყურადღება მიაქციე <code>layer.isValid()</code> შემოწმებას: ფენის ჩატვირთვა შეიძლება ჩაიშალოს.</p>
+<p>ხაზ-ხაზ:</p>
+<table>
+<thead>
+<tr>
+<th>კოდი</th>
+<th>რას აკეთებს</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>#include &lt;qgs...h&gt;</code></td>
+<td>ვრთავთ QGIS-ის კლასებს (header ფაილები, თავი 03)</td>
+</tr>
+<tr>
+<td><code>int main(int argc, char *argv[])</code></td>
+<td><code>main</code>-ის ვერსია, რომელიც ბრძანების ხაზის არგუმენტებს იღებს (Qt მათ ითხოვს)</td>
+</tr>
+<tr>
+<td><code>QgsApplication app(argc, argv, false);</code></td>
+<td>QGIS-ის „გარემოს“ ობიექტი; <code>false</code> ნიშნავს, რომ გრაფიკული ინტერფეისი არ გვჭირდება (headless, ქვეთავი 1.3)</td>
+</tr>
+<tr>
+<td><code>QgsApplication::initQgis();</code></td>
+<td>QGIS-ის ინიციალიზაცია: მონაცემთა მკითხველებს, CRS ბაზას და სხვას ამზადებს</td>
+</tr>
+<tr>
+<td><code>QgsVectorLayer layer(&quot;rivers.geojson&quot;, &quot;rivers&quot;, &quot;ogr&quot;);</code></td>
+<td>ვქმნით ფენას: ფაილი, სახელი, მონაცემთა პროვაიდერი (<code>ogr</code> კითხულობს ბევრ ფორმატს)</td>
+</tr>
+<tr>
+<td><code>if (!layer.isValid()) {...}</code></td>
+<td>თუ ფენა ვერ ჩაიტვირთა, ვბეჭდავთ შეცდომას <code>std::cerr</code>-ით და ვასრულებთ პროგრამას კოდით <code>1</code> (შეცდომა)</td>
+</tr>
+<tr>
+<td><code>layer.featureCount()</code></td>
+<td>ობიექტების რაოდენობა</td>
+</tr>
+<tr>
+<td><code>while (it.nextFeature(feature))</code></td>
+<td>ციკლი ობიექტებზე (თავი 11)</td>
+</tr>
+<tr>
+<td><code>QgsApplication::exitQgis();</code></td>
+<td>გამართულად ვასრულებთ მუშაობას და ვათავისუფლებთ რესურსებს</td>
+</tr>
+</tbody>
+</table>
 </div>
   </section>
 
@@ -107,9 +155,11 @@ Total area: 0.183762</code></pre></figure>
 <span class="hljs-keyword">target_include_directories</span>(feature_counter PRIVATE <span class="hljs-variable">${QGIS_INCLUDE_DIR}</span>)
 <span class="hljs-keyword">target_link_libraries</span>(feature_counter PRIVATE
     <span class="hljs-variable">${QGIS_CORE_LIBRARY}</span> Qt6::Core Qt6::Gui Qt6::Xml Qt6::Widgets)</code></pre></figure>
+<p>ფაილის ნაწილები: <code>project(...)</code> აძლევს პროექტს სახელს; <code>find_package</code>, <code>find_path</code>, <code>find_library</code> ეძებენ საჭირო ბიბლიოთეკებს სისტემაში; <code>add_executable</code> ამბობს, რომ ვაწყობთ პროგრამას <code>main.cpp</code>-დან; <code>target_link_libraries</code> აკავშირებს მას QGIS-სა და Qt-თან.</p>
 <figure class="code bash"><figcaption><span>Shell</span></figcaption><pre><code class="hljs">cmake -S . -B build
 cmake --build build
 ./build/feature_counter</code></pre></figure>
+<p>პირველი ბრძანება ამზადებს აწყობას <code>build</code> საქაღალდეში, მეორე აკომპილებს, მესამე უშვებს შედეგს. ამისთვის <code>rivers.geojson</code> ფაილი იმავე საქაღალდეში უნდა იდოს, საიდანაც პროგრამას უშვებ (ან მიუთითე სრული გზა).</p>
 <div class="box warn"><div class="box-title">გაითვალისწინე</div><div class="box-body">
 <p><code>qgis_core</code> და Qt-ის ვერსიები უნდა ემთხვეოდეს იმას, რითაც თავად QGIS არის აწყობილი. პაკეტები (<code>qgis-dev</code> Linux-ზე, OSGeo4W Windows-ზე) ამ ჯგუფს ერთად გაძლევს. ზუსტი სახელები და ბილიკები სისტემაზეა დამოკიდებული.</p>
 </div></div>
@@ -177,6 +227,7 @@ MyTool::<span class="hljs-built_in">MyTool</span>(QgisInterface *iface)
         <span class="hljs-built_in">tr</span>(<span class="hljs-string">&quot;Features: %1&quot;</span>).<span class="hljs-built_in">arg</span>(layer-&gt;<span class="hljs-built_in">featureCount</span>()));
 }</code></pre></figure>
 <p>გამოიყენე ყველაფერი, რაც ისწავლე: <code>qobject_cast</code> + <code>nullptr</code> შემოწმება (თავები 04, 07), <code>connect</code> (თავი 10), <code>const</code> და <code>QString</code> (თავები 05, 10).</p>
+<p>ხაზ-ხაზ: <code>class MyTool : public QObject, public QgisPlugin</code> — ჩვენი კლასი მემკვიდრეობს <code>QObject</code>-იდან (რომ signal/slot გვქონდეს) და <code>QgisPlugin</code>-იდან (პლაგინის ინტერფეისი). <code>Q_OBJECT</code> არის Qt-ის მაკრო, რომელიც signal/slot მექანიზმს რთავს. <code>initGui()</code> QGIS-ს ჩატვირთვისას ეძახის: აქ ვქმნით მენიუს პუნქტს (<code>QAction</code>) და ვაკავშირებთ <code>run()</code> მეთოდთან. <code>unload()</code> გამორთვისას ასუფთავებს. <code>run()</code> კი ინსტრუმენტის ლოგიკაა: იღებს აქტიურ ფენას, ამოწმებს, რომ ვექტორულია, და შეტყობინებით აჩვენებს ობიექტების რაოდენობას. <code>iface</code> (<code>QgisInterface</code>) QGIS-ის ფანჯრასთან ურთიერთობის შესასვლელია. <code>tr(&quot;...&quot;)</code> აღნიშნავს ტექსტს, რომლის თარგმნაც მომავალში იქნება შესაძლებელი.</p>
 <div class="box warn"><div class="box-title">ჩონჩხი და რეალური კოდი</div><div class="box-body">
 <p>ზემოთ მოცემული კოდი არის სტრუქტურის ილუსტრაცია. პლაგინის ექსპორტირებული ფუნქციები (<code>classFactory</code>, <code>name</code>, <code>version</code> და სხვა) და <code>QgisPlugin</code>-ის კონსტრუქტორის ზუსტი ხელმოწერა ვერსიიდან ვერსიამდე შეიძლება შეიცვალოს. შენი QGIS-ის ვერსიის წყარო კოდში <code>src/plugins/</code> საქაღალდეშია მოქმედი მაგალითები. დაიწყე მათი კოპირებით და მერე შეცვალე.</p>
 </div></div>

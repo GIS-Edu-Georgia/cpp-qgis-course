@@ -10,18 +10,24 @@
     <h1>Qt: QString, QVariant, signals და slots</h1>
     <div class="en">Qt essentials for QGIS</div>
     <p class="topics">QString · QList · QVariant · QgsAttributes · QObject-ის ხე · signal/slot · lambda connect</p>
-    <div class="intro"><p>QGIS Qt-ზეა აგებული. API-ში <code>std::string</code>-ს თითქმის ვერ ნახავ: ყველგან <code>QString</code>, <code>QList</code>, <code>QVariant</code>. ამ თავში იმ მინიმუმს ვისწავლით, რომელიც QGIS-ის კოდის წასაკითხად საჭიროა.</p>
+    <div class="intro"><p><strong>Qt</strong> არის C++-ის ფართო ბიბლიოთეკა („ფრეიმვორკი“): ფანჯრები, ღილაკები, ტექსტი, კონტეინერები, ფაილები და მრავალი სხვა. QGIS Qt-ზეა აგებული, ამიტომ API-ში <code>std::string</code>-ს თითქმის ვერ ნახავ: ყველგან <code>QString</code>, <code>QList</code>, <code>QVariant</code>. ამ თავში იმ მინიმუმს ვისწავლით, რომელიც QGIS-ის კოდის წასაკითხად საჭიროა.</p>
+<p>Qt-ის კლასები <code>Q</code>-ზე იწყება და დიდი ნაწილი თავის header ფაილში ცხოვრობს (<code>#include &lt;QString&gt;</code>). QGIS-ის საკუთარი კლასები კი <code>Qgs</code>-ზე იწყება.</p>
 </div>
     <div class="hint">← → ისრებით გადაადგილება · F — სრული ეკრანი · P — ბეჭდვა</div>
   </section>
   <section class="slide" data-title="QString">
     <div class="eyebrow">10.1 · Qt</div>
     <h2>QString</h2>
-    <div class="content"><p><code>QString</code> არის Unicode ტექსტი, ამიტომ ქართული ასოებიც პრობლემის გარეშე მუშაობს.</p>
+    <div class="content"><p><code>QString</code> არის ტექსტის ტიპი, ისევე როგორც <code>std::string</code>, მაგრამ Qt-ისთვის გაწყობილი. ის Unicode ტექსტს ინახავს, ამიტომ ქართული ასოებიც პრობლემის გარეშე მუშაობს და ბევრი მოხერხებული ოპერაცია აქვს.</p>
 <figure class="code cpp"><figcaption><span>C++</span></figcaption><pre><code class="hljs">QString name = <span class="hljs-built_in">QStringLiteral</span>(<span class="hljs-string">&quot;მტკვარი&quot;</span>);
 QString info = <span class="hljs-built_in">QString</span>(<span class="hljs-string">&quot;%1: %2 კმ&quot;</span>).<span class="hljs-built_in">arg</span>(name).<span class="hljs-built_in">arg</span>(<span class="hljs-number">1364</span>);
 
 <span class="hljs-built_in">qDebug</span>() &lt;&lt; info.<span class="hljs-built_in">length</span>();</code></pre></figure>
+<ul>
+<li><code>QStringLiteral(&quot;...&quot;)</code> — ტექსტი, რომელიც კომპილაციისას მზადდება (ეფექტურობისთვის, ამჟამად ჩვეულებრივ ბრჭყალებად წაიკითხე);</li>
+<li><code>%1</code> და <code>%2</code> — ადგილები, რომლებშიც <code>.arg(...)</code> მნიშვნელობებს ჩასვამს თანმიმდევრობით; შედეგი: <code>მტკვარი: 1364 კმ</code>;</li>
+<li><code>qDebug() &lt;&lt; ...</code> — Qt-ის გზა, ტექსტი დიაგნოსტიკისთვის კონსოლში გამოვიტანოთ (როგორც <code>std::cout</code>).</li>
+</ul>
 <table>
 <thead>
 <tr>
@@ -72,7 +78,7 @@ QString info = <span class="hljs-built_in">QString</span>(<span class="hljs-stri
   <section class="slide" data-title="QList">
     <div class="eyebrow">10.2 · Qt</div>
     <h2>QList</h2>
-    <div class="content"><p><code>QList&lt;T&gt;</code> არის Qt-ის დინამიური მასივი, <code>std::vector</code>-ის ძმა.</p>
+    <div class="content"><p><code>QList&lt;T&gt;</code> არის Qt-ის სია, <code>std::vector</code>-ის ძმა (თავი 09): ელემენტები ერთმანეთის გვერდით ინახება და ზომა საჭიროებისას იზრდება. <code>&lt;T&gt;</code> ისევ ელემენტის ტიპია.</p>
 <figure class="code cpp"><figcaption><span>C++</span></figcaption><pre><code class="hljs">QList&lt;QString&gt; cities = {<span class="hljs-string">&quot;Tbilisi&quot;</span>, <span class="hljs-string">&quot;Batumi&quot;</span>};
 cities.<span class="hljs-built_in">append</span>(<span class="hljs-string">&quot;Kutaisi&quot;</span>);
 <span class="hljs-keyword">for</span> (<span class="hljs-type">const</span> QString &amp;c : cities) {
@@ -115,7 +121,7 @@ true</code></pre></figure>
   <section class="slide" data-title="QgsAttributes — ატრიბუტების ცხრილის ერთი სტრიქონი">
     <div class="eyebrow">10.4 · Qt</div>
     <h2>QgsAttributes — ატრიბუტების ცხრილის ერთი სტრიქონი</h2>
-    <div class="content"><p>ახლა გასაგებია <code>QgsAttributes</code> გვერდი, რომლითაც კურსი დაიწყო. ეს კლასი არის <code>QVariant</code>-ების მიმდევრობა: ფენის ცხრილის ერთი ჩანაწერი. თითოეული ელემენტი ერთი ველის მნიშვნელობაა.</p>
+    <div class="content"><p>ახლა გასაგებია <code>QgsAttributes</code> გვერდი, რომლითაც კურსი დაიწყო. ატრიბუტების ცხრილში ობიექტის ერთი სტრიქონი სხვადასხვა ტიპის მნიშვნელობებისგან შედგება (ტექსტი, რიცხვი, ათწილადი, NULL). ამიტომ <code>QgsAttributes</code> არის <code>QVariant</code>-ების მიმდევრობა: ფენის ცხრილის ერთი ჩანაწერი. თითოეული ელემენტი ერთი ველის მნიშვნელობაა.</p>
 <figure class="code cpp"><figcaption><span>C++</span><em>attrs.cpp</em></figcaption><pre><code class="hljs"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;QList&gt;</span></span>
 <span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;QString&gt;</span></span>
 <span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;QVariant&gt;</span></span>
@@ -137,6 +143,8 @@ true</code></pre></figure>
 <figure class="code out"><figcaption><span>შედეგი</span></figcaption><pre><code>Mtkvari
 1364
 NULL</code></pre></figure>
+<p>ახსნა: სიაში სამი ელემენტი ძევს: ტექსტი, რიცხვი და ცარიელი <code>QVariant()</code> (უცნობი მნიშვნელობა, NULL). ციკლში <code>for (const QVariant &amp;v : attrs)</code> თითოეულს გადავხედავთ; <code>v.isNull()</code> ამოწმებს, ცარიელია თუ არა; <code>v.toString()</code> ნებისმიერ მნიშვნელობას ტექსტად გადააქცევს; <code>? :</code> არის „თუ... მაშინ... თორემ...“: <code>პირობა ? თუ_ჭეშმარიტია : თუ_მცდარია</code>.</p>
+<p>თუ Python-ს იცნობ, შედარება:</p>
 <div class="box compare"><div class="box-body">
 <figure class="code python"><figcaption><span>Python</span></figcaption><pre><code class="hljs">feature = layer.getFeature(<span class="hljs-number">1</span>)
 <span class="hljs-built_in">print</span>(feature.attributes())
@@ -151,7 +159,7 @@ QVariant name = attrs.<span class="hljs-built_in">at</span>(<span class="hljs-nu
   <section class="slide" data-title="QObject-ის ხე">
     <div class="eyebrow">10.5 · Qt</div>
     <h2>QObject-ის ხე</h2>
-    <div class="content"><p><code>QObject</code>-ები მშობელ-შვილის ხეში ცხოვრობენ. როცა მშობელი იშლება, თავის შვილებსაც წაშლის. ამიტომ Qt-ში ხშირად <code>new</code> გვხვდება <code>delete</code>-ის გარეშე.</p>
+    <div class="content"><p><code>QObject</code> არის Qt-ის ბაზისური კლასი: მისგან მოდის ყველა ფანჯარა, ღილაკი და QGIS-ის ბევრი კლასიც (<code>QgsMapLayer</code>, <code>QgsProject</code>). მისი მნიშვნელოვანი თვისებაა, რომ <code>QObject</code>-ები მშობელ-შვილის ხეში ცხოვრობენ. როცა მშობელი იშლება, თავის შვილებსაც წაშლის. ამიტომ Qt-ში ხშირად <code>new</code> გვხვდება <code>delete</code>-ის გარეშე (კონტრასტია თავი 08-ის წესებთან: აქ მფლობელი მშობელი ობიექტია).</p>
 <figure class="code cpp"><figcaption><span>C++</span></figcaption><pre><code class="hljs"><span class="hljs-keyword">auto</span> *dialog = <span class="hljs-keyword">new</span> <span class="hljs-built_in">QDialog</span>();
 <span class="hljs-keyword">auto</span> *button = <span class="hljs-keyword">new</span> <span class="hljs-built_in">QPushButton</span>(<span class="hljs-string">&quot;OK&quot;</span>, dialog);   <span class="hljs-comment">// dialog არის მშობელი</span>
 <span class="hljs-comment">// delete dialog;  -&gt;  button-იც ავტომატურად წაიშლება</span></code></pre></figure>
@@ -161,13 +169,17 @@ QVariant name = attrs.<span class="hljs-built_in">at</span>(<span class="hljs-nu
   <section class="slide" data-title="signals და slots">
     <div class="eyebrow">10.6 · Qt</div>
     <h2>signals და slots</h2>
-    <div class="content"><p>signal არის „რაღაც მოხდა“, slot — „ამაზე რეაგირება“. <code>connect</code> მათ აკავშირებს.</p>
+    <div class="content"><p>გრაფიკულ პროგრამაში ბევრი რამ მოვლენების საპასუხოდ ხდება: მომხმარებელმა დააჭირა ღილაკს, პროექტს დაემატა ფენა. Qt ამას ხსნის <strong>signal/slot</strong> მექანიზმით: signal არის „რაღაც მოხდა“, slot — „ამაზე რეაგირება“. <code>connect</code> მათ აკავშირებს.</p>
 <figure class="code cpp"><figcaption><span>C++</span></figcaption><pre><code class="hljs"><span class="hljs-built_in">connect</span>(QgsProject::<span class="hljs-built_in">instance</span>(), &amp;QgsProject::layersAdded,
         <span class="hljs-keyword">this</span>, &amp;MyTool::onLayersAdded);</code></pre></figure>
 <p>ან lambda-თი, დამატებითი მეთოდის გარეშე:</p>
 <figure class="code cpp"><figcaption><span>C++</span></figcaption><pre><code class="hljs"><span class="hljs-built_in">connect</span>(button, &amp;QPushButton::clicked, <span class="hljs-keyword">this</span>, [<span class="hljs-keyword">this</span>]() {
     <span class="hljs-built_in">qDebug</span>() &lt;&lt; <span class="hljs-string">&quot;clicked&quot;</span>;
 });</code></pre></figure>
+<p><code>connect(გამომგზავნი, &amp;კლასი::signal, მიმღები, &amp;კლასი::slot)</code>: ოთხი არგუმენტია. მეორე მაგალითში ბოლო არგუმენტი lambda-ა (თავი 09), ანუ ადგილზე დაწერილი პატარა ფუნქცია, რომელიც ღილაკზე დაჭერისას შესრულდება. <code>this</code> არის მიმდინარე ობიექტი, რომელშიც ვიმყოფებით.</p>
+<div class="box note"><div class="box-title">Qt-ის კოდის აწყობა</div><div class="box-body">
+<p>Qt-ზე დაწერილ კოდს აწყობისას Qt-ის ბიბლიოთეკები სჭირდება (თავი 12-ში CMake-ით დავაკავშირებთ). ამ თავის მაგალითები QGIS-ის გარეშეც იკომპილება, თუ Qt დაგიყენებია.</p>
+</div></div>
 <div class="box analogy"><div class="box-title">საფოსტო ყუთი</div><div class="box-body">
 <p>signal არის ზარის ხმა კარზე: ის არავის ეუბნება, ვინ გაიგონებს. slot არის ის, ვინც ზარზე რეაგირებს. <code>connect</code> ამათ ერთმანეთს აკავშირებს და გამომგზავნს მიმღები არ აინტერესებს.</p>
 </div></div>

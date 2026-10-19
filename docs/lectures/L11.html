@@ -10,7 +10,8 @@
     <h1>api.qgis.org-ის კითხვა</h1>
     <div class="en">Reading the QGIS C++ API documentation</div>
     <p class="topics">კლასის გვერდის სტრუქტურა · ხელმოწერების გაშიფვრა · სასარგებლო კლასები · სტრატეგია</p>
-    <div class="intro"><p>თავიდან ეს გვერდები გაუგებარი იყო. ახლა უკვე გაქვს ყველა ინსტრუმენტი: ტიპები, მაჩვენებლები, მითითებები, კლასები, <code>QVariant</code>. ამ თავში სისტემატურად ვისწავლით დოკუმენტაციის „კითხვას“.</p>
+    <div class="intro"><p>დოკუმენტაცია (api.qgis.org) თავიდან გაუგებარი ჩანს, რადგან ის პროგრამისტისთვისაა დაწერილი და ხშირად ტერმინებს არ განმარტავს. ახლა უკვე გაქვს ყველა საჭირო ინსტრუმენტი: ტიპები, მაჩვენებლები, მითითებები, კლასები, <code>QVariant</code>. ამ თავში სისტემატურად ვისწავლით დოკუმენტაციის „კითხვას“.</p>
+<p>ეს გვერდები ავტომატურად გენერირდება კოდის header (<code>.h</code>) ფაილებიდან ინსტრუმენტით <strong>Doxygen</strong>, ამიტომ დოკუმენტაცია ზუსტად ის არის, რაც კოდშია. რამდენიმე სასარგებლო ტერმინი: <strong>enum</strong> — დასახელებული მნიშვნელობების ნაკრები (მაგალითად, ფენის ტიპები: ვექტორული, რასტრული); <strong>typedef</strong> — არსებული ტიპის მეორე სახელი; <strong>static</strong> მეთოდი — მეთოდი, რომელსაც ობიექტის გარეშე, პირდაპირ კლასიდან ვუძახებთ.</p>
 </div>
     <div class="hint">← → ისრებით გადაადგილება · F — სრული ეკრანი · P — ბეჭდვა</div>
   </section>
@@ -178,6 +179,8 @@ QgsFeature feature;
     <span class="hljs-type">double</span> area = feature.<span class="hljs-built_in">geometry</span>().<span class="hljs-built_in">area</span>();
     <span class="hljs-built_in">qDebug</span>() &lt;&lt; feature.<span class="hljs-built_in">id</span>() &lt;&lt; area;
 }</code></pre></figure>
+<p>ხაზ-ხაზ: <code>getFeatures()</code> იძლევა იტერატორს (ობიექტებს სათითაოდ გვაწვდის); <code>QgsFeature feature;</code> ცარიელი ობიექტია, რომელშიც ყოველ ნაბიჯზე ახალი მოხვდება; <code>while (it.nextFeature(feature))</code> იმეორებს ციკლს, სანამ ობიექტები არსებობს; ციკლის შიგნით <code>feature.geometry().area()</code> ჯერ გეომეტრიას იღებს, შემდეგ მის ფართობს; <code>qDebug()</code> კი შედეგს ბეჭდავს.</p>
+<p>თუ Python-ს იცნობ, შედარება:</p>
 <div class="box compare"><div class="box-body">
 <figure class="code python"><figcaption><span>Python</span></figcaption><pre><code class="hljs"><span class="hljs-keyword">for</span> f <span class="hljs-keyword">in</span> layer.getFeatures():
     <span class="hljs-built_in">print</span>(f.<span class="hljs-built_in">id</span>(), f.geometry().area())</code></pre></figure>

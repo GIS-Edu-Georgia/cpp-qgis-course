@@ -1,26 +1,68 @@
 <!doctype html>
 <html lang="ka"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>L01 · რუკა: Python-იდან C++-მდე — შესავალი QGIS-ის პროგრამირებაში</title>
+<title>L01 · შესავალი: რა არის QGIS-ის პროგრამირება — შესავალი QGIS-ის პროგრამირებაში</title>
 <link rel="stylesheet" href="../assets/slides.css"></head>
-<body data-total="8">
+<body data-total="11">
 <div class="bar"><i></i></div>
 <main id="deck">
-  <section class="slide title" data-title="რუკა: Python-იდან C++-მდე">
+  <section class="slide title" data-title="შესავალი: რა არის QGIS-ის პროგრამირება">
     <div class="eyebrow">ლექცია 01 · შესავალი</div>
-    <h1>რუკა: Python-იდან C++-მდე</h1>
-    <div class="en">The map — from Python to C++</div>
-    <p class="topics">PyQGIS როგორც C++ API-ს სარკე · QGIS-ის არქიტექტურა · პირველი C++ პროგრამა</p>
-    <div class="intro"><p>წინამდებარე სახელმძღვანელოს მიზანია, მკითხველს დაეხმაროს PyQGIS-ის საწყისი ცოდნიდან პროფესიულ დონეზე გადასვლაში, QGIS-ის C++ API-ის დოკუმენტაციის (api.qgis.org) სიღრმისეულად გააზრებასა და საკუთარი პროგრამული კოდის QGIS-ის ბირთვთან ინტეგრირების უნარის განვითარებაში.</p>
+    <h1>შესავალი: რა არის QGIS-ის პროგრამირება</h1>
+    <div class="en">Introduction — what is programming inside QGIS</div>
+    <p class="topics">პროგრამირება და API · PyQGIS და C++ · QGIS-ის არქიტექტურა · კომპილაცია · პირველი C++ პროგრამა</p>
+    <div class="intro"><p>წინამდებარე სახელმძღვანელოს მიზანია, მკითხველს დაეხმაროს QGIS-ის მომხმარებლობიდან მის პროგრამირებამდე გადასვლაში: QGIS-ის C++ API-ის დოკუმენტაციის (api.qgis.org) გააზრებასა და საკუთარი პროგრამული კოდის QGIS-ის ბირთვთან ინტეგრირების უნარის განვითარებაში.</p>
+<p>წიგნი დაწერილია იმ მკითხველისთვის, რომელიც პროგრამირებას პირველად ეცნობა. წინასწარ საჭიროა მხოლოდ GIS-ის საბაზისო ცოდნა (ფენა, ობიექტი, კოორდინატი). Python-ისა და PyQGIS-ის ცოდნა სასარგებლოა, მაგრამ სავალდებულო არ არის: ყველა ტერმინი აქვე აიხსნება.</p>
 <p>გამოცემაში განხილული ყველა პრაქტიკული მაგალითი ეფუძნება გეოგრაფიულ მონაცემებს და მოიცავს ისეთ ფუნდამენტურ კომპონენტებს, როგორებიცაა სივრცითი ფენები, გეოგრაფიული ობიექტები, კოორდინატები და სივრცითი მახასიათებლები (მაგალითად, ფართობები).</p>
 </div>
     <div class="hint">← → ისრებით გადაადგილება · F — სრული ეკრანი · P — ბეჭდვა</div>
   </section>
-  <section class="slide" data-title="PyQGIS არის C++-ის სარკე">
+  <section class="slide" data-title="რა არის პროგრამირება და რას ვსწავლობთ">
     <div class="eyebrow">01.1 · შესავალი</div>
+    <h2>რა არის პროგრამირება და რას ვსწავლობთ</h2>
+    <div class="content"><p><strong>პროგრამა</strong> არის ინსტრუქციების თანმიმდევრობა, რომელსაც კომპიუტერი ასრულებს. ინსტრუქციებს ვწერთ ტექსტად, სპეციალურ ენაზე. ამ ტექსტს <strong>წყარო კოდი</strong> (source code) ჰქვია, ენას კი <strong>პროგრამირების ენა</strong>.</p>
+<div class="box analogy"><div class="box-title">რეცეპტი</div><div class="box-body">
+<p>წყარო კოდი რეცეპტს ჰგავს: ნაბიჯ-ნაბიჯ წერია, რა გააკეთოს შემსრულებელმა. შემსრულებელი აქ კომპიუტერია, ის კი ზუსტად ასრულებს მხოლოდ იმას, რაც დაწერილია, და არაფერს ხვდება „თავისით“.</p>
+</div></div>
+<p>QGIS არის GIS პროგრამა, რომელსაც ვიყენებთ რუკების სახატავად და სივრცითი ანალიზისთვის. ის თავადაც პროგრამაა და მისი კოდი ღიაა. მასთან პროგრამული გზით სამუშაოდ სამი დონე არსებობს:</p>
+<table>
+<thead>
+<tr>
+<th>დონე</th>
+<th>ენა</th>
+<th>რა შეგვიძლია</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. QGIS-ის Python კონსოლი და სკრიპტები</td>
+<td>Python (PyQGIS)</td>
+<td>გავაავტომატოთ განმეორებადი სამუშაო: ფენების დამუშავება, ექსპორტი</td>
+</tr>
+<tr>
+<td>2. პლაგინები</td>
+<td>Python</td>
+<td>დავამატოთ ახალი ღილაკები და ინსტრუმენტები</td>
+</tr>
+<tr>
+<td>3. QGIS-ის ბირთვი</td>
+<td>C++</td>
+<td>შევცვალოთ ან გავაფართოვოთ თავად პროგრამა, ავაგოთ სწრაფი ან დახურული კომპონენტები</td>
+</tr>
+</tbody>
+</table>
+<p>ეს წიგნი მესამე დონისკენ გვატარებს: ვისწავლით C++-ს იმ მოცულობით, რაც QGIS-ის ბირთვის გასაგებად გვჭირდება.</p>
+<h3>რა არის API</h3>
+<p><strong>API</strong> (Application Programming Interface) არის „მენიუ“ პროგრამისტისთვის: ჩამონათვალი იმისა, რა ფუნქციები და კლასები აქვს ბიბლიოთეკას და როგორ გამოვიძახოთ ისინი. QGIS-ის API-ის აღწერა ვებგვერდზეა <code>api.qgis.org</code>. ამ წიგნის მთავარი მიზანია, ეს გვერდები გავიგოთ.</p>
+</div>
+  </section>
+
+  <section class="slide" data-title="PyQGIS არის C++-ის სარკე">
+    <div class="eyebrow">01.2 · შესავალი</div>
     <h2>PyQGIS არის C++-ის სარკე</h2>
-    <div class="content"><p>PyQGIS ცალკე ბიბლიოთეკა არ არის. QGIS-ის ბირთვი C++-ზეა დაწერილი, Python-ის კლასები კი ავტომატურად გენერირდება (SIP-ის საშუალებით) იმავე C++ კლასებიდან. ამიტომ სახელები და ლოგიკა ერთი და იგივეა: <code>QgsVectorLayer</code>, <code>QgsFeature</code>, <code>QgsGeometry</code>.</p>
+    <div class="content"><p><strong>PyQGIS</strong> არის QGIS-ის Python-იდან გამოყენების საშუალება. ის ცალკე ბიბლიოთეკა არ არის. QGIS-ის ბირთვი C++-ზეა დაწერილი, Python-ის კლასები კი ავტომატურად გენერირდება (SIP-ის საშუალებით) იმავე C++ კლასებიდან. ამიტომ სახელები და ლოგიკა ერთი და იგივეა: <code>QgsVectorLayer</code>, <code>QgsFeature</code>, <code>QgsGeometry</code>.</p>
+<p><strong>ბიბლიოთეკა</strong> (library) არის მზა კოდის ნაკრები, რომელსაც საკუთარ პროგრამაში ვიყენებთ, რომ ყველაფერი თავიდან არ დავწეროთ. <strong>კლასი</strong> (class) კი არის „ნახაზი“ რაიმე ობიექტისა (მაგალითად, ვექტორული ფენისა); კლასებს თავი 06-ში დაწვრილებით გავეცნობით.</p>
 <h3>რა არის SIP?</h3>
-<p><strong>SIP ( აPython–C++ Binding Generator)</strong> არის ინსტრუმენტი, რომელიც C++-ზე დაწერილი კლასებისა და ფუნქციების Python-იდან გამოყენების შესაძლებლობას უზრუნველყოფს. QGIS-ში SIP გამოიყენება C++ კლასებსა და Python ინტერფეისს შორის დამაკავშირებელი კოდის გენერირებისთვის.</p>
+<p><strong>SIP (Python–C++ Binding Generator)</strong> არის ინსტრუმენტი, რომელიც C++-ზე დაწერილი კლასებისა და ფუნქციების Python-იდან გამოყენების შესაძლებლობას უზრუნველყოფს. QGIS-ში SIP გამოიყენება C++ კლასებსა და Python ინტერფეისს შორის დამაკავშირებელი კოდის გენერირებისთვის.</p>
 <p>QGIS-ის ბირთვი დაწერილია C++-ზე, ხოლო PyQGIS Python-იდან ამ ბირთვის ფუნქციონალზე წვდომის საშუალებას იძლევა. SIP-ის მეშვეობით იქმნება დამაკავშირებელი ფენა, რომლის საშუალებითაც Python-ის კოდიდან შესაძლებელია QGIS-ის C++ კლასებისა და მეთოდების გამოყენება.</p>
 <p>მაგალითად, PyQGIS-ში შეგვიძლია გამოვიყენოთ შემდეგი კლასები:</p>
 <ul>
@@ -33,12 +75,12 @@
 <div class="box analogy"><div class="box-title">გზამკვლევი ორ ენაზე</div><div class="box-body">
 <p>წარმოიდგინე საქართველოს რუკა ორ ენაზე. ქალაქები და გზები ერთი და იგივეა, განსხვავდება მხოლოდ წარწერების ენა. PyQGIS არის „ქართული წარწერებით“ რუკა, C++ API — „ორიგინალის“.</p>
 </div></div>
-<p>საბოლოოდ, თუ PyQGIS-ში იცი რა უნდა გააკეთო, C++-ში ახალი ლოგიკა კი არ გჭირდება, არამედ ახალი <strong>გრამატიკა</strong>: ტიპები, მაჩვენებლები, კომპილაცია.</p>
+<p>საბოლოოდ, QGIS-ის ლოგიკა (ფენა, ობიექტი, გეომეტრია) ორივე ენაში ერთია. C++-ში ახალია <strong>გრამატიკა</strong>: ტიპები, მაჩვენებლები, კომპილაცია. სწორედ მათ შევისწავლით.</p>
 </div>
   </section>
 
   <section class="slide" data-title="QGIS-ის არქიტექტურა">
-    <div class="eyebrow">01.2 · შესავალი</div>
+    <div class="eyebrow">01.3 · შესავალი</div>
     <h2>QGIS-ის არქიტექტურა</h2>
     <div class="content"><p>QGIS-ის წყარო კოდი რამდენიმე ბიბლიოთეკადაა დაყოფილი:</p>
 <table>
@@ -80,13 +122,125 @@
 <div class="box tip"><div class="box-title">დაიმახსოვრე</div><div class="box-body">
 <p><code>core</code> არ იცნობს ინტერფეისს, <code>gui</code> კი <code>core</code>-ს ეყრდნობა. ამიტომაც შეგიძლია <code>core</code> ფანჯრების გარეშე, სერვერზეც გამოიყენო.</p>
 </div></div>
+<h3>რას ნიშნავს <code>core</code> და <code>gui</code></h3>
+<ul>
+<li><code>core</code> — QGIS-ის ძირითადი ფუნქციონალია: გეოგრაფიული მონაცემების დამუშავება, სივრცითი ფენები, გეომეტრიები, კოორდინატთა სისტემები და სხვა.</li>
+<li><code>gui</code> — გრაფიკულ ინტერფეისთან დაკავშირებული ფუნქციონალია: რუკის ფანჯარა, დიალოგური ფანჯრები, ღილაკები და მომხმარებელთან ურთიერთქმედება.</li>
+</ul>
+<h3>რას ნიშნავს „<code>core</code> არ იცნობს ინტერფეისს, <code>gui</code> კი <code>core</code>-ს ეყრდნობა“</h3>
+<p>ეს ნიშნავს, რომ <code>core</code>-ის ფუნქციონალი არ არის დამოკიდებული გრაფიკულ ინტერფეისზე. მას შეუძლია გეოგრაფიული მონაცემების დამუშავება ისე, რომ ეკრანზე რუკის ფანჯარა ან სხვა გრაფიკული ელემენტები საერთოდ არ არსებობდეს.</p>
+<p>მეორე მხრივ, <code>gui</code> იყენებს <code>core</code>-ის შესაძლებლობებს, რათა ეს მონაცემები მომხმარებლისთვის ვიზუალურად წარმოადგინოს და მათთან ინტერაქცია უზრუნველყოს.</p>
+<table>
+<thead>
+<tr>
+<th>შრე</th>
+<th>რას შეიცავს</th>
+<th>მიმართულება</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>GUI</strong></td>
+<td>რუკის ჩვენება, ღილაკები, დიალოგები</td>
+<td>იყენებს <code>core</code>-ს ↓</td>
+</tr>
+<tr>
+<td><strong>Core</strong></td>
+<td>ფენები, გეომეტრიები, სივრცითი გამოთვლები</td>
+<td>არ იცნობს <code>gui</code>-ს</td>
+</tr>
+</tbody>
+</table>
+<p>დამოკიდებულების მიმართულება: <strong>GUI → Core</strong>. <code>core</code>-ს GUI არ სჭირდება.</p>
+<h3>რატომ არის ეს მნიშვნელოვანი</h3>
+<p>წარმოიდგინე, რომ გჭირდება ერთი მილიონი გეოგრაფიული ობიექტის დამუშავება სერვერზე, რუკის ფანჯრის გახსნის გარეშე. <code>core</code>-ის გამოყენებით შეგიძლია:</p>
+<ul>
+<li>წაიკითხო გეოგრაფიული ფენები;</li>
+<li>გამოთვალო ფართობები და მანძილები;</li>
+<li>გაფილტრო გეოგრაფიული ობიექტები;</li>
+<li>დაამუშაო მონაცემები და შეინახო შედეგები.</li>
+</ul>
+<p>ამ ამოცანებისთვის გრაფიკული ინტერფეისი საჭირო არ არის. მაგალითად, PyQGIS-ში:</p>
+<figure class="code python"><figcaption><span>Python</span></figcaption><pre><code class="hljs"><span class="hljs-keyword">from</span> qgis.core <span class="hljs-keyword">import</span> QgsApplication, QgsVectorLayer
+
+<span class="hljs-comment"># QGIS-ის ინიციალიზაცია გრაფიკული ინტერფეისის გარეშე</span>
+app = QgsApplication([], <span class="hljs-literal">False</span>)
+app.initQgis()
+
+<span class="hljs-comment"># ვექტორული ფენის შექმნა</span>
+layer = QgsVectorLayer(
+    <span class="hljs-string">&quot;/data/roads.gpkg|layername=roads&quot;</span>,
+    <span class="hljs-string">&quot;roads&quot;</span>,
+    <span class="hljs-string">&quot;ogr&quot;</span>
+)
+
+<span class="hljs-keyword">if</span> layer.isValid():
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;ფენა წარმატებით ჩაიტვირთა&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;ობიექტების რაოდენობა:&quot;</span>, layer.featureCount())
+
+app.exitQgis()</code></pre></figure>
+<p>აქ <code>QgsApplication([], False)</code> მიუთითებს, რომ QGIS გრაფიკული ინტერფეისის გარეშე მუშაობს. ამას ხშირად <strong>headless</strong> რეჟიმს უწოდებენ.</p>
+<div class="box note"><div class="box-title">შენიშვნა</div><div class="box-body">
+<p>გრაფიკული ინტერფეისის გარეშე მუშაობა არ ნიშნავს, რომ QGIS-ის ინიციალიზაცია აღარ გვჭირდება. საჭიროა გარემოს სწორად მომზადება, ხოლო კონკრეტული ოპერაციებისთვის შესაძლოა დამატებითი დამოკიდებულებებიც იყოს საჭირო.</p>
+</div></div>
+<div class="box tip"><div class="box-title">რა უნდა დაიმახსოვრო</div><div class="box-body">
+<ul>
+<li><code>qgis.core</code> შეიცავს QGIS-ის ძირითად ფუნქციონალს.</li>
+<li><code>qgis.gui</code> შეიცავს გრაფიკულ ინტერფეისთან დაკავშირებულ ფუნქციონალს.</li>
+<li><code>gui</code> იყენებს <code>core</code>-ს, მაგრამ <code>core</code> არ არის დამოკიდებული <code>gui</code>-ზე.</li>
+<li>ამიტომ <code>core</code>-ის გამოყენება შესაძლებელია სერვერზე და გრაფიკული ინტერფეისის გარეშე, სათანადო ინიციალიზაციის პირობებში.</li>
+</ul>
+</div></div>
+<p>მთავარი აზრი: QGIS მხოლოდ დესკტოპ-აპლიკაცია არ არის. მისი ძირითადი გეოსივრცითი ფუნქციონალი შეიძლება გამოიყენო სერვერულ პროგრამებში, ავტომატიზაციის სკრიპტებსა და მონაცემთა დამუშავების სამუშაო პროცესებში.</p>
 </div>
   </section>
 
   <section class="slide" data-title="ერთი და იგივე ამოცანა ორ ენაზე">
-    <div class="eyebrow">01.3 · შესავალი</div>
+    <div class="eyebrow">01.4 · შესავალი</div>
     <h2>ერთი და იგივე ამოცანა ორ ენაზე</h2>
-    <div class="content"><p>ამოცანა: ფენის ყველა ობიექტის სახელის გამოტანა.</p>
+    <div class="content"><p>ამოცანა: ფენის ყველა ობიექტის სახელის გამოტანა. ჯერ ტერმინები, რომლებსაც კოდში შევხვდებით:</p>
+<table>
+<thead>
+<tr>
+<th>ტერმინი</th>
+<th>რას ნიშნავს</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ფენა (<code>layer</code>)</td>
+<td>მონაცემთა ერთი ნაკრები რუკაზე, მაგალითად მდინარეების ფენა</td>
+</tr>
+<tr>
+<td>ობიექტი (<code>feature</code>)</td>
+<td>ფენის ერთი ჩანაწერი: გეომეტრია და ატრიბუტები, მაგალითად ერთი მდინარე</td>
+</tr>
+<tr>
+<td>ატრიბუტი</td>
+<td>ობიექტის ერთი თვისება, მაგალითად <code>name</code> ველი</td>
+</tr>
+<tr>
+<td>იტერატორი (<code>iterator</code>)</td>
+<td>„მომხსენებელი“, რომელიც ფენის ობიექტებს სათითაოდ გვაწვდის</td>
+</tr>
+</tbody>
+</table>
+<p>პირველად ვნახოთ იგივე ლოგიკა C++-ში. თითოეული ხაზი ცალკე აიხსნება:</p>
+<figure class="code cpp"><figcaption><span>C++</span></figcaption><pre><code class="hljs">QgsVectorLayer *layer =
+  <span class="hljs-built_in">qobject_cast</span>&lt;QgsVectorLayer *&gt;(iface-&gt;<span class="hljs-built_in">activeLayer</span>());   <span class="hljs-comment">// 1</span>
+QgsFeatureIterator it = layer-&gt;<span class="hljs-built_in">getFeatures</span>();            <span class="hljs-comment">// 2</span>
+QgsFeature feature;                                       <span class="hljs-comment">// 3</span>
+<span class="hljs-keyword">while</span> (it.<span class="hljs-built_in">nextFeature</span>(feature)) {                         <span class="hljs-comment">// 4</span>
+  <span class="hljs-built_in">qDebug</span>() &lt;&lt; feature.<span class="hljs-built_in">attribute</span>(<span class="hljs-string">&quot;name&quot;</span>).<span class="hljs-built_in">toString</span>();       <span class="hljs-comment">// 5</span>
+}</code></pre></figure>
+<ol>
+<li>ვიღებთ რუკაზე ახლა არჩეულ ფენას და ვაცხადებთ, რომ ის ვექტორული ფენაა (<code>*</code> და <code>qobject_cast</code> თავებში 04 და 07 აიხსნება);</li>
+<li>ფენას ვთხოვთ ობიექტების იტერატორს;</li>
+<li>ვქმნით ცარიელ ობიექტს, რომელშიც თითოეულს ჩავწერთ;</li>
+<li>სანამ ახალი ობიექტი არსებობს (<code>nextFeature</code>), ციკლი მეორდება;</li>
+<li>ვბეჭდავთ ობიექტის <code>name</code> ატრიბუტს.</li>
+</ol>
+<p>თუ Python-ს იცნობ, იგივე შედეგი შედარებისთვის:</p>
 <div class="box compare"><div class="box-body">
 <figure class="code python"><figcaption><span>Python</span></figcaption><pre><code class="hljs">layer = iface.activeLayer()
 <span class="hljs-keyword">for</span> feature <span class="hljs-keyword">in</span> layer.getFeatures():
@@ -99,33 +253,127 @@ QgsFeature feature;
   <span class="hljs-built_in">qDebug</span>() &lt;&lt; feature.<span class="hljs-built_in">attribute</span>(<span class="hljs-string">&quot;name&quot;</span>).<span class="hljs-built_in">toString</span>();
 }</code></pre></figure>
 </div></div>
-<p>რა არის იგივე: <code>getFeatures</code>, <code>attribute</code>. რა არის ახალი: ტიპების სახელები (<code>QgsVectorLayer</code>), <code>*</code> ნიშანი, <code>;</code> ყოველი ხაზის ბოლოს, <code>qobject_cast</code>. თითოეულს ამ კურსში ცალკე გავარჩევთ.</p>
+<p>ორივეგან ერთი და იგივე სახელებია (<code>getFeatures</code>, <code>attribute</code>). C++-ში ემატება ტიპები (<code>QgsVectorLayer</code>), <code>*</code> ნიშანი, <code>;</code> ყოველი ინსტრუქციის ბოლოს და ტიპის გარდაქმნა <code>qobject_cast</code>. თითოეულს ამ წიგნში ცალკე გავარჩევთ.</p>
+</div>
+  </section>
+
+  <section class="slide" data-title="როგორ მუშაობს კომპილაცია">
+    <div class="eyebrow">01.5 · შესავალი</div>
+    <h2>როგორ მუშაობს კომპილაცია</h2>
+    <div class="content"><p>კომპიუტერი პირდაპირ ვერ კითხულობს ადამიანის დაწერილ ტექსტს. მას სჭირდება <strong>მანქანური კოდი</strong>, ანუ ნულებისა და ერთიანების თანმიმდევრობა.</p>
+<p>C++ პროგრამა <strong>კომპილდება</strong>: წყარო კოდს <strong>კომპილატორი</strong> (compiler) გადააქცევს ერთ ფაილად, რომელსაც კომპიუტერი უშუალოდ ასრულებს. ამ ფაილს <strong>შესრულებადი ფაილი</strong> (executable) ჰქვია, Windows-ზე ის <code>.exe</code>-ა.</p>
+<figure class="code "><figcaption><span></span></figcaption><pre><code class="hljs">წყარო კოდი (.cpp)  →  კომპილატორი  →  შესრულებადი ფაილი  →  გაშვება</code></pre></figure>
+<div class="box analogy"><div class="box-title">თარგმანი</div><div class="box-body">
+<p>წარმოიდგინე წიგნი, რომელიც ქართულად დაწერე. კომპილატორი პროფესიონალი მთარგმნელია: მთელ წიგნს წინასწარ თარგმნის და გიბრუნებს გამზადებულ ინგლისურ ვერსიას. ამის შემდეგ მკითხველი უკვე მზა ტექსტს კითხულობს. მთარგმნელი მეტს აღარ სჭირდება.</p>
+</div></div>
+<p>ამიტომ პროცესს ორი ეტაპი აქვს: ჯერ <strong>აწყობა</strong> (build), შემდეგ <strong>გაშვება</strong> (run). თუ კოდში შეცდომაა, კომპილატორი აწყობისას გვეტყვის და პროგრამა საერთოდ არ შეიქმნება. ეს კარგია: შეცდომა ჩანს, სანამ ვინმე პროგრამას გამოიყენებს.</p>
+<div class="box note"><div class="box-title">ინტერპრეტატორი</div><div class="box-body">
+<p>Python-ს თარგმნა არ სჭირდება მანამ, სანამ ვუშვებთ: პროგრამა სახელწოდებით <strong>ინტერპრეტატორი</strong> კოდს ხაზ-ხაზ კითხულობს და მაშინვე ასრულებს. ეს მოხერხებულია, თუმცა უფრო ნელია, ხოლო კოდის ტექსტი გამშვებ პირთან რჩება.</p>
+</div></div>
+</div>
+  </section>
+
+  <section class="slide" data-title="სამუშაო გარემოს მომზადება">
+    <div class="eyebrow">01.6 · შესავალი</div>
+    <h2>სამუშაო გარემოს მომზადება</h2>
+    <div class="content"><p>C++ კოდის დასაწერად და გასაშვებად გჭირდება სამი რამ:</p>
+<table>
+<thead>
+<tr>
+<th>რა</th>
+<th>რისთვის</th>
+<th>მაგალითი</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>რედაქტორი</strong></td>
+<td>კოდის წასაკითხად და დასაწერად</td>
+<td>Visual Studio Code, Qt Creator</td>
+</tr>
+<tr>
+<td><strong>კომპილატორი</strong></td>
+<td>კოდის გადასაყვანად</td>
+<td><code>g++</code> (GCC)</td>
+</tr>
+<tr>
+<td><strong>ტერმინალი</strong></td>
+<td>ბრძანებების აკრეფისთვის</td>
+<td>PowerShell, Linux ტერმინალი</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Linux-ზე</strong> (Ubuntu/Debian) კომპილატორის დასაყენებლად:</p>
+<figure class="code bash"><figcaption><span>Shell</span></figcaption><pre><code class="hljs"><span class="hljs-built_in">sudo</span> apt install g++
+g++ --version</code></pre></figure>
+<p><strong>Windows-ზე</strong> უმარტივესია MSYS2 (msys2.org): დააყენე და მის ტერმინალში გაუშვი <code>pacman -S mingw-w64-ucrt-x86_64-gcc</code>. შემდეგ <code>C:\msys64\ucrt64\bin</code> დაამატე სისტემის <code>Path</code>-ში და ახალ ტერმინალში შეამოწმე <code>g++ --version</code>. თუ ვერსია დაიბეჭდა, გარემო მზადაა.</p>
+<div class="box tip"><div class="box-title">თუ ვერ დააყენე</div><div class="box-body">
+<p>დასაწყისისთვის კოდის გასაშვებად შეგიძლია გამოიყენო ონლაინ კომპილატორი (მაგალითად, onlinegdb.com ან godbolt.org). თავები 02–10 არ საჭიროებს QGIS-ის დაყენებას.</p>
+</div></div>
 </div>
   </section>
 
   <section class="slide" data-title="პირველი C++ პროგრამა">
-    <div class="eyebrow">01.4 · შესავალი</div>
+    <div class="eyebrow">01.7 · შესავალი</div>
     <h2>პირველი C++ პროგრამა</h2>
-    <div class="content"><p>C++ პროგრამა კომპილდება: წყარო კოდს კომპილატორი გადააქცევს მანქანურ ფაილად, რომელსაც შემდეგ ვუშვებთ. Python-ში ეს ეტაპი არ გვქონდა.</p>
+    <div class="content"><p>შექმენი ფაილი <code>main.cpp</code> და ჩაწერე:</p>
 <figure class="code cpp"><figcaption><span>C++</span><em>main.cpp</em></figcaption><pre><code class="hljs"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;iostream&gt;</span></span>
 
 <span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
     std::cout &lt;&lt; <span class="hljs-string">&quot;Hello, Georgia!&quot;</span> &lt;&lt; std::endl;
     <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
 }</code></pre></figure>
+<p>ტერმინალში, იმავე საქაღალდეში:</p>
 <figure class="code bash"><figcaption><span>Shell</span></figcaption><pre><code class="hljs">g++ main.cpp -o hello
 ./hello</code></pre></figure>
+<p>პირველი ბრძანება აკომპილებს <code>main.cpp</code>-ს და ქმნის შესრულებად ფაილს <code>hello</code>-ს (<code>-o</code> არის „გამოსასვლელი ფაილის სახელი“). მეორე ბრძანება მას უშვებს. (Windows PowerShell-ში გაუშვი <code>.\hello.exe</code>.)</p>
 <figure class="code out"><figcaption><span>შედეგი</span></figcaption><pre><code>Hello, Georgia!</code></pre></figure>
-<div class="box note"><div class="box-title">ნაწილები</div><div class="box-body">
-<p><code>#include</code> ჩართავს ბიბლიოთეკას, <code>main()</code> არის პროგრამის შესასვლელი წერტილი, <code>std::cout</code> გამოიტანს ტექსტს ეკრანზე.</p>
+<h3>ხაზ-ხაზ</h3>
+<table>
+<thead>
+<tr>
+<th>ხაზი</th>
+<th>რას აკეთებს</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>#include &lt;iostream&gt;</code></td>
+<td>„ჩაიტვირთე სტანდარტული ბიბლიოთეკის ნაწილი, რომელიც ეკრანზე ტექსტის გამოტანას ემსახურება“</td>
+</tr>
+<tr>
+<td><code>int main() { ... }</code></td>
+<td>პროგრამის შესასვლელი წერტილი: აქედან იწყება შესრულება. <code>int</code> ნიშნავს, რომ ფუნქცია მთელ რიცხვს დააბრუნებს</td>
+</tr>
+<tr>
+<td><code>std::cout &lt;&lt; &quot;...&quot;</code></td>
+<td>ტექსტის გამოტანა ეკრანზე. <code>&lt;&lt;</code> „ატარებს“ ტექსტს გამოსატან არხში</td>
+</tr>
+<tr>
+<td><code>std::endl</code></td>
+<td>ახალ ხაზზე გადასვლა</td>
+</tr>
+<tr>
+<td><code>return 0;</code></td>
+<td>პროგრამა მუშაობას ამთავრებს და ატყობინებს, რომ ყველაფერი რიგზეა (<code>0</code> = წარმატება)</td>
+</tr>
+<tr>
+<td><code>;</code></td>
+<td>ყოველი ინსტრუქციის დამასრულებელი ნიშანი</td>
+</tr>
+</tbody>
+</table>
+<div class="box warn"><div class="box-title">ხშირი შეცდომები</div><div class="box-body">
+<p>პროგრამა არ აიწყობა, თუ <code>;</code> გამოგრჩა, ფიგურული ფრჩხილი <code>}</code> დაგავიწყდა ან <code>main</code>-ის სახელი შეცდომით დაწერე. კომპილატორის შეტყობინებაში ყოველთვის წაიკითხე ხაზის ნომერი: ის გიჩვენებს, სად უნდა დაიწყო ძებნა.</p>
 </div></div>
 </div>
   </section>
 
   <section class="slide" data-title="Python vs C++ ერთი შეხედვით">
-    <div class="eyebrow">01.5 · შესავალი</div>
+    <div class="eyebrow">01.8 · შესავალი</div>
     <h2>Python vs C++ ერთი შეხედვით</h2>
-    <div class="content"><table>
+    <div class="content"><p>ცხრილი მათთვის, ვინც Python-ს იცნობს. თუ არ იცნობ, უბრალოდ გაიგე, რა არის C++-ის მხარე:</p>
+<table>
 <thead>
 <tr>
 <th></th>
@@ -170,27 +418,31 @@ QgsFeature feature;
   </section>
 
   <section class="slide" data-title="სავარჯიშო და შეჯამება">
-    <div class="eyebrow">01.6 · შესავალი</div>
+    <div class="eyebrow">01.9 · შესავალი</div>
     <h2>სავარჯიშო და შეჯამება</h2>
     <div class="content"><div class="box exercise"><div class="box-title">სავარჯიშო</div><div class="box-body">
 <ol>
-<li>გახსენი <code>api.qgis.org</code> და მოძებნე კლასი <code>QgsFeature</code>. ჩამოწერე სამი მეთოდი, რომლებიც PyQGIS-იდან უკვე იცი.</li>
+<li>გახსენი <code>api.qgis.org</code>, მოძებნე კლასი <code>QgsFeature</code> და ჩამოწერე სამი მეთოდის სახელი.</li>
+<li>დააყენე კომპილატორი და გაუშვი <code>g++ --version</code>.</li>
 <li>დაწერე და გაუშვი „Hello“ პროგრამა, ოღონდ გამოიტანე შენი ქალაქის სახელი.</li>
 <li>დაამატე მეორე ხაზი: <code>Population: 1100000</code> (თბილისის მიახლოებითი მოსახლეობა).</li>
+<li>განზრახ წაშალე ერთი <code>;</code> და წაიკითხე კომპილატორის შეტყობინება.</li>
 </ol>
 </div></div>
 <div class="box summary"><div class="box-title">შეჯამება</div><div class="box-body">
 <ul>
-<li>PyQGIS და C++ API ერთი და იგივე კლასებია სხვადასხვა „გრამატიკით“.</li>
+<li>პროგრამა = ინსტრუქციები; წყარო კოდი = ამ ინსტრუქციების ტექსტი.</li>
+<li>API არის ბიბლიოთეკის „მენიუ“; QGIS-ის API-ის აღწერა <code>api.qgis.org</code>-ზეა.</li>
+<li>PyQGIS და C++ API ერთი და იგივე კლასებია სხვადასხვა ენაზე.</li>
 <li><code>core</code> — ლოგიკა, <code>gui</code> — ინტერფეისი, <code>app</code> — პროგრამა.</li>
-<li>C++ კოდი იკომპილება და მკაცრად ტიპიზირებულია.</li>
+<li>C++ კოდი იკომპილება: წყარო კოდი → კომპილატორი → შესრულებადი ფაილი.</li>
 </ul>
 </div></div>
 </div>
   </section>
   <section class="slide end" data-title="შემდეგ ლექციაში">
     <div class="eyebrow">შემდეგ ლექციაში</div>
-    <h2>02 · ტიპები და ცვლადები</h2><p class="topics">int · double · bool · auto · const · ტიპების გარდაქმნა · კოორდინატები და სიზუსტე</p>
+    <h2>02 · ტიპები და ცვლადები</h2><p class="topics">ცვლადი · int · double · bool · auto · const · ტიპების გარდაქმნა · კოორდინატები და სიზუსტე</p>
     <a class="btn" href="L02.html">გახსნა →</a>
     <a class="btn ghost" href="../index.html">სარჩევი</a>
     

@@ -2,24 +2,27 @@
 <html lang="ka"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>L04 · მაჩვენებლები (Pointers) — შესავალი QGIS-ის პროგრამირებაში</title>
 <link rel="stylesheet" href="../assets/slides.css"></head>
-<body data-total="8">
+<body data-total="9">
 <div class="bar"><i></i></div>
 <main id="deck">
   <section class="slide title" data-title="მაჩვენებლები (Pointers)">
     <div class="eyebrow">ლექცია 04 · მეხსიერება</div>
     <h1>მაჩვენებლები (Pointers)</h1>
     <div class="en">Pointers</div>
-    <p class="topics">მისამართი და მნიშვნელობა · &amp; და * · -&gt; · nullptr · ჩამოკიდებული მაჩვენებელი</p>
-    <div class="intro"><p>ეს ყველაზე მნიშვნელოვანი თემაა. QGIS-ის API-ში ყოველ მეორე ფუნქციას აქვს <code>*</code> ან <code>-&gt;</code>: <code>QgsMapLayer *layer</code>, <code>layer-&gt;name()</code>.</p>
+    <p class="topics">მეხსიერება და მისამართი · struct · &amp; და * · -&gt; · nullptr · ჩამოკიდებული მაჩვენებელი</p>
+    <div class="intro"><p>ეს ყველაზე მნიშვნელოვანი თემაა. QGIS-ის API-ში ყოველ მეორე ფუნქციას აქვს <code>*</code> ან <code>-&gt;</code>: <code>QgsMapLayer *layer</code>, <code>layer-&gt;name()</code>. ამ თავის შემდეგ ისინი გასაგები იქნება.</p>
 </div>
     <div class="hint">← → ისრებით გადაადგილება · F — სრული ეკრანი · P — ბეჭდვა</div>
   </section>
-  <section class="slide" data-title="კურიერი და მისამართი">
+  <section class="slide" data-title="მეხსიერება და მისამართი">
     <div class="eyebrow">04.1 · მეხსიერება</div>
-    <h2>კურიერი და მისამართი</h2>
-    <div class="content"><div class="box analogy"><div class="box-title">კურიერი</div><div class="box-body">
+    <h2>მეხსიერება და მისამართი</h2>
+    <div class="content"><p>როცა ცვლადს ვქმნით, კომპიუტერი მეხსიერებაში (RAM) ადგილს გვიმზადებს. წარმოიდგინე მეხსიერება უზარმაზარ საწყობად, სადაც უამრავი ყუთია და თითოეულს <strong>მისამართი</strong> (ნომერი) აქვს. ცვლადის მნიშვნელობა ერთ-ერთ ამ ყუთში დევს.</p>
+<p>მანამდე ცვლადს მხოლოდ სახელით მივმართავდით (<code>layerCount</code>). C++-ს შეუძლია გვითხრას მისი <strong>მისამართიც</strong>, და სწორედ ამაზეა აგებული <strong>მაჩვენებელი</strong> (pointer): ცვლადი, რომელიც მნიშვნელობას კი არა, სხვა ცვლადის მისამართს ინახავს.</p>
+<div class="box analogy"><div class="box-title">კურიერი</div><div class="box-body">
 <p>კურიერს მძიმე ამანათი მოუვიდა. ის მას ადრესატთან კი არ მიაქვს, არამედ ეუბნება: „ამანათი ამ საწყობის ამ მისამართზეა“. მაჩვენებელი არის სწორედ <strong>მისამართი</strong>, არა თავად ამანათი. ბევრად იაფია მისამართის გადაცემა, ვიდრე მილიონობით წერტილიანი ფენის კოპირება.</p>
 </div></div>
+<p>ეს QGIS-ისთვის არსებითია: ფენა შეიძლება უზარმაზარი იყოს, ამიტომ ფუნქციებს ხშირად თავად ფენას კი არა, მისი მისამართის გადავცემთ.</p>
 <p>ორი სიმბოლო:</p>
 <table>
 <thead>
@@ -42,6 +45,7 @@
 </tr>
 </tbody>
 </table>
+<p>ტიპის გვერდით <code>*</code> ნიშნავს „ეს მაჩვენებელია“: <code>int *ptr</code> ნიშნავს „მაჩვენებელი <code>int</code>-ზე“.</p>
 </div>
   </section>
 
@@ -62,6 +66,12 @@
 <figure class="code out"><figcaption><span>შედეგი</span></figcaption><pre><code>Layer count: 5
 Address: 0x7ffd5c3a1a24
 Value at address: 5</code></pre></figure>
+<p>გავარჩიოთ:</p>
+<ul>
+<li><code>int layerCount = 5;</code> — ჩვეულებრივი ცვლადი;</li>
+<li><code>int *ptr = &amp;layerCount;</code> — <code>ptr</code> არის მაჩვენებელი და მასში ჩაიწერა <code>layerCount</code>-ის მისამართი;</li>
+<li><code>ptr</code> დაბეჭდავს მისამართს, <code>*ptr</code> კი „გადადის ამ მისამართზე და ამოიღებს მნიშვნელობას“, ანუ <code>5</code>-ს.</li>
+</ul>
 <div class="box note"><div class="box-title">შენიშვნა</div><div class="box-body">
 <p>მისამართი ყოველ გაშვებაზე და ყოველ კომპიუტერზე განსხვავებულია (Windows-ზე ის ასე გამოიყურება: <code>000000BF7C3BF970</code>). მნიშვნელობა კი ერთი და იგივეა.</p>
 </div></div>
@@ -69,10 +79,25 @@ Value at address: 5</code></pre></figure>
 </div>
   </section>
 
-  <section class="slide" data-title="მაჩვენებელი ობიექტზე: ისარი">
+  <section class="slide" data-title="struct — საკუთარი ტიპი">
     <div class="eyebrow">04.3 · მეხსიერება</div>
+    <h2>struct — საკუთარი ტიპი</h2>
+    <div class="content"><p>ბევრი რამ ერთ ცვლადში არ ეტევა. ფენას აქვს სახელიც და ობიექტების რაოდენობაც. ასეთ შემთხვევაში ვქმნით <strong>struct</strong>-ს: ტიპს, რომელიც რამდენიმე ცვლადს აერთიანებს.</p>
+<figure class="code cpp"><figcaption><span>C++</span></figcaption><pre><code class="hljs"><span class="hljs-keyword">struct</span> <span class="hljs-title class_">Layer</span> {
+    std::string name;      <span class="hljs-comment">// ფენის სახელი (ტექსტი)</span>
+    <span class="hljs-type">int</span> featureCount;      <span class="hljs-comment">// ობიექტების რაოდენობა</span>
+};
+
+Layer rivers{<span class="hljs-string">&quot;Rivers&quot;</span>, <span class="hljs-number">42</span>};    <span class="hljs-comment">// ახალი ცვლადი: სახელი Rivers, 42 ობიექტი</span>
+std::cout &lt;&lt; rivers.name;      <span class="hljs-comment">// წერტილით ვუკავშირდებით წევრებს</span></code></pre></figure>
+<p><code>name</code> და <code>featureCount</code> არის <code>Layer</code>-ის <strong>წევრები</strong>. ობიექტის წევრთან წერტილით მივდივართ: <code>rivers.name</code>. struct-ის უფრო ძლიერ ვერსიას (<strong>class</strong>) თავი 06-ში გავეცნობით.</p>
+</div>
+  </section>
+
+  <section class="slide" data-title="მაჩვენებელი ობიექტზე: ისარი">
+    <div class="eyebrow">04.4 · მეხსიერება</div>
     <h2>მაჩვენებელი ობიექტზე: ისარი</h2>
-    <div class="content"><p>მაჩვენებელი ხშირად მიუთითებს მთელ ობიექტზე. წევრთან მისასვლელად წერტილის ნაცვლად <code>-&gt;</code> გამოიყენება.</p>
+    <div class="content"><p>მაჩვენებელი ხშირად მიუთითებს მთელ ობიექტზე. მაშინ წევრთან მისასვლელად წერტილის ნაცვლად <code>-&gt;</code> (ისარი) გამოიყენება.</p>
 <figure class="code cpp"><figcaption><span>C++</span><em>layer_ptr.cpp</em></figcaption><pre><code class="hljs"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;iostream&gt;</span></span>
 <span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;string&gt;</span></span>
 
@@ -93,7 +118,7 @@ Value at address: 5</code></pre></figure>
 }</code></pre></figure>
 <figure class="code out"><figcaption><span>შედეგი</span></figcaption><pre><code>Rivers: 42
 50</code></pre></figure>
-<p>ხედავ? <code>ptr</code>-ით ცვლილება პირდაპირ <code>rivers</code>-ს შეეხო, რადგან ორივე ერთსა და იმავე ობიექტზე მიუთითებს, კოპირება არ მომხდარა.</p>
+<p>ხედავ? <code>ptr</code>-ით ცვლილება პირდაპირ <code>rivers</code>-ს შეეხო, რადგან ორივე ერთსა და იმავე ობიექტზე მიუთითებს, კოპირება არ მომხდარა. <code>+=</code> ნიშნავს „დაუმატე“: <code>featureCount += 8</code> იგივეა, რაც <code>featureCount = featureCount + 8</code>.</p>
 <div class="box tip"><div class="box-title">წესი</div><div class="box-body">
 <p>ობიექტზე — <code>.</code> (<code>rivers.name</code>), მაჩვენებლით — <code>-&gt;</code> (<code>ptr-&gt;name</code>). ზუსტად ამიტომ გვაქვს QGIS-ში <code>layer-&gt;featureCount()</code>.</p>
 </div></div>
@@ -101,9 +126,9 @@ Value at address: 5</code></pre></figure>
   </section>
 
   <section class="slide" data-title="nullptr — „ფენა არ არის არჩეული“">
-    <div class="eyebrow">04.4 · მეხსიერება</div>
+    <div class="eyebrow">04.5 · მეხსიერება</div>
     <h2>nullptr — „ფენა არ არის არჩეული“</h2>
-    <div class="content"><p>მაჩვენებელი შეიძლება არაფერზე მიუთითებდეს. ამას <code>nullptr</code> ჰქვია.</p>
+    <div class="content"><p>მაჩვენებელი შეიძლება არაფერზე მიუთითებდეს. ამას <code>nullptr</code> ჰქვია და ნიშნავს „ცარიელი მისამართი“.</p>
 <figure class="code cpp"><figcaption><span>C++</span><em>nullptr.cpp</em></figcaption><pre><code class="hljs"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;iostream&gt;</span></span>
 <span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;string&gt;</span></span>
 
@@ -123,7 +148,8 @@ Value at address: 5</code></pre></figure>
     <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
 }</code></pre></figure>
 <figure class="code out"><figcaption><span>შედეგი</span></figcaption><pre><code>No active layer</code></pre></figure>
-<p>ეს QGIS-ის ყოველდღიური სიტუაციაა: <code>iface-&gt;activeLayer()</code> აბრუნებს <code>nullptr</code>-ს, თუ ფენა არ არის მონიშნული. PyQGIS-ში ეს <code>None</code> იყო.</p>
+<p>ეს QGIS-ის ყოველდღიური სიტუაციაა: ფუნქცია <code>iface-&gt;activeLayer()</code> აბრუნებს <code>nullptr</code>-ს, თუ ფენა არ არის მონიშნული. <code>if (...) {...} else {...}</code> არის პირობის შემოწმება: თუ პირობა სრულდება, სრულდება პირველი ბლოკი, წინააღმდეგ შემთხვევაში მეორე.</p>
+<p>თუ Python-ს იცნობ, <code>nullptr</code> მისი <code>None</code>-ის ანალოგია:</p>
 <div class="box compare"><div class="box-body">
 <figure class="code python"><figcaption><span>Python</span></figcaption><pre><code class="hljs">layer = iface.activeLayer()
 <span class="hljs-keyword">if</span> layer <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>:
@@ -140,7 +166,7 @@ Value at address: 5</code></pre></figure>
   </section>
 
   <section class="slide" data-title="ჩამოკიდებული მაჩვენებელი">
-    <div class="eyebrow">04.5 · მეხსიერება</div>
+    <div class="eyebrow">04.6 · მეხსიერება</div>
     <h2>ჩამოკიდებული მაჩვენებელი</h2>
     <div class="content"><div class="box warn"><div class="box-title">საშიში ადგილი</div><div class="box-body">
 <p>თუ ობიექტი აღარ არსებობს, მაჩვენებელი მაინც ინახავს ძველ მისამართს. ეს ჰგავს კურიერს, რომელიც მისამართზე მიდის, სადაც სახლი უკვე დაანგრიეს.</p>
@@ -149,12 +175,12 @@ Value at address: 5</code></pre></figure>
     <span class="hljs-type">int</span> count = <span class="hljs-number">10</span>;
     <span class="hljs-keyword">return</span> &amp;count;      <span class="hljs-comment">// შეცდომა: count ფუნქციის დასრულებისას იშლება</span>
 }</code></pre></figure>
-<p><code>count</code> ლოკალური ცვლადია და ფუნქციის დასრულებისას იშლება. დაბრუნებული მისამართი უკვე არავის ეკუთვნის. ამის თავიდან ასაცილებლად არსებობს smart pointer-ები (თავი 08).</p>
+<p><code>count</code> <strong>ლოკალური ცვლადია</strong>: ის მხოლოდ ფუნქციის შიგნით არსებობს და მისი დასრულებისას იშლება. დაბრუნებული მისამართი უკვე არავის ეკუთვნის. ასეთ მაჩვენებელს ჩამოკიდებული (dangling) ჰქვია. ამის თავიდან ასაცილებლად არსებობს smart pointer-ები (თავი 08).</p>
 </div>
   </section>
 
   <section class="slide" data-title="სავარჯიშო და შეჯამება">
-    <div class="eyebrow">04.6 · მეხსიერება</div>
+    <div class="eyebrow">04.7 · მეხსიერება</div>
     <h2>სავარჯიშო და შეჯამება</h2>
     <div class="content"><div class="box exercise"><div class="box-title">სავარჯიშო</div><div class="box-body">
 <ol>
@@ -165,7 +191,9 @@ Value at address: 5</code></pre></figure>
 </div></div>
 <div class="box summary"><div class="box-title">შეჯამება</div><div class="box-body">
 <ul>
+<li>მეხსიერების ყოველ ადგილს მისამართი აქვს.</li>
 <li>მაჩვენებელი ინახავს <strong>მისამართს</strong>; <code>&amp;</code> მისამართს იღებს, <code>*</code> მნიშვნელობას კითხულობს.</li>
+<li><code>struct</code> რამდენიმე ცვლადს ერთ ტიპად აერთიანებს; წევრებთან წერტილით ვუკავშირდებით.</li>
 <li>ობიექტზე მაჩვენებლით ვიყენებთ <code>-&gt;</code>-ს.</li>
 <li><code>nullptr</code> = „არაფერზე მიუთითებს“; ყოველთვის შეამოწმე გამოყენებამდე.</li>
 <li>ლოკალური ცვლადის მისამართს ფუნქციიდან არ აბრუნებენ.</li>

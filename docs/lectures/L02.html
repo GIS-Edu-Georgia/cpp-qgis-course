@@ -2,24 +2,48 @@
 <html lang="ka"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>L02 · ტიპები და ცვლადები — შესავალი QGIS-ის პროგრამირებაში</title>
 <link rel="stylesheet" href="../assets/slides.css"></head>
-<body data-total="9">
+<body data-total="10">
 <div class="bar"><i></i></div>
 <main id="deck">
   <section class="slide title" data-title="ტიპები და ცვლადები">
     <div class="eyebrow">ლექცია 02 · საფუძვლები</div>
     <h1>ტიპები და ცვლადები</h1>
     <div class="en">Types and variables</div>
-    <p class="topics">int · double · bool · auto · const · ტიპების გარდაქმნა · კოორდინატები და სიზუსტე</p>
-    <div class="intro"><p>Python-ში <code>x = 5</code> საკმარისია. C++-ში კომპილატორს წინასწარ უნდა ეცოდინებოდეს, რა სახის მონაცემია ცვლადში. ამიტომ QGIS-ის დოკუმენტაციაში ყველგან ტიპები წერია.</p>
+    <p class="topics">ცვლადი · int · double · bool · auto · const · ტიპების გარდაქმნა · კოორდინატები და სიზუსტე</p>
+    <div class="intro"><p>ამ თავში ვისწავლით, როგორ ვინახავთ მონაცემებს პროგრამაში: კოორდინატებს, ობიექტების რაოდენობას, ფენის სახელს. ეს ყველაფრის საფუძველია: QGIS-ის კოდში ყოველი ხაზი რაღაც მონაცემს ინახავს ან გადააქვს.</p>
 </div>
     <div class="hint">← → ისრებით გადაადგილება · F — სრული ეკრანი · P — ბეჭდვა</div>
   </section>
-  <section class="slide" data-title="ცვლადი როგორც ეტიკეტიანი ყუთი">
+  <section class="slide" data-title="რა არის ცვლადი">
     <div class="eyebrow">02.1 · საფუძვლები</div>
-    <h2>ცვლადი როგორც ეტიკეტიანი ყუთი</h2>
-    <div class="content"><div class="box analogy"><div class="box-title">ყუთი და ეტიკეტი</div><div class="box-body">
-<p>Python-ში ყუთს არ აქვს ფორმა: ერთსა და იმავე ყუთში ჯერ რიცხვს ჩადებ, მერე ტექსტს. C++-ში ყუთი კონკრეტული ფორმისაა: <code>int</code>-ის ყუთში მხოლოდ მთელი რიცხვი ჯდება, <code>double</code>-ის ყუთში ათწილადი. ეს იმიტომაა მკაცრი, რომ კომპიუტერმა წინასწარ იცოდეს, რამდენ მეხსიერებას დაიკავებს.</p>
+    <h2>რა არის ცვლადი</h2>
+    <div class="content"><p><strong>ცვლადი</strong> (variable) არის კომპიუტერის მეხსიერებაში დაკავებული ადგილი, რომელსაც სახელი აქვს და რომელშიც მონაცემს ვინახავთ. სახელით შემდეგ ამ მონაცემს ვპოულობთ და ვცვლით.</p>
+<div class="box analogy"><div class="box-title">ყუთი და ეტიკეტი</div><div class="box-body">
+<p>ცვლადი ეტიკეტიანი ყუთია. ეტიკეტზე წერია სახელი (<code>lat</code>), ყუთში კი რაღაც მნიშვნელობა დევს (<code>41.7151</code>). ყუთის ფორმა განსაზღვრავს, რა ჩაეტევა შიგნით: ერთში მხოლოდ მთელი რიცხვი, მეორეში ათწილადი, მესამეში ტექსტი.</p>
 </div></div>
+<p>C++ <strong>მკაცრად ტიპიზებული</strong> ენაა: ყუთის ფორმას (<strong>ტიპს</strong>) წინასწარ ვწერთ. ამით კომპილატორმა იცის, რამდენ მეხსიერებას დაუთმოს ცვლადს და რა მოქმედებებია დასაშვები. ტიპის გარეშე ცვლადი არ შეიქმნება.</p>
+</div>
+  </section>
+
+  <section class="slide" data-title="ცვლადის შექმნა">
+    <div class="eyebrow">02.2 · საფუძვლები</div>
+    <h2>ცვლადის შექმნა</h2>
+    <div class="content"><p>ცვლადის შექმნას <strong>გამოცხადება</strong> ჰქვია. ფორმულა მარტივია:</p>
+<figure class="code "><figcaption><span></span></figcaption><pre><code class="hljs">ტიპი  სახელი  =  საწყისი_მნიშვნელობა;</code></pre></figure>
+<figure class="code cpp"><figcaption><span>C++</span></figcaption><pre><code class="hljs"><span class="hljs-type">double</span> lat = <span class="hljs-number">41.7151</span>;       <span class="hljs-comment">// ათწილადი რიცხვი</span>
+<span class="hljs-type">int</span> vertexCount = <span class="hljs-number">12</span>;       <span class="hljs-comment">// მთელი რიცხვი</span>
+<span class="hljs-type">bool</span> isValid = <span class="hljs-literal">true</span>;        <span class="hljs-comment">// ჭეშმარიტი ან მცდარი</span></code></pre></figure>
+<ul>
+<li><code>double</code>, <code>int</code>, <code>bool</code> — ტიპები;</li>
+<li><code>lat</code>, <code>vertexCount</code>, <code>isValid</code> — ჩვენ მიერ არჩეული სახელები;</li>
+<li><code>=</code> — „ჩაწერე ამ ყუთში“ (მინიჭება, არა მათემატიკური ტოლობა);</li>
+<li><code>;</code> — ინსტრუქციის დასასრული;</li>
+<li><code>//</code> — <strong>კომენტარი</strong>: ტექსტი, რომელსაც კომპილატორი უგულებელყოფს და რომელიც მხოლოდ ადამიანისთვისაა.</li>
+</ul>
+<div class="box note"><div class="box-title">სახელდების წესები</div><div class="box-body">
+<p>სახელი შეიძლება შეიცავდეს ასოებს, ციფრებს და <code>_</code>-ს, მაგრამ ციფრით არ იწყება (<code>2lat</code> არასწორია). რეგისტრი მნიშვნელოვანია: <code>Lat</code> და <code>lat</code> სხვადასხვა ცვლადია. QGIS-ში სახელებს წერენ „აქლემის“ სტილით: <code>vertexCount</code>, <code>isValid</code>, ანუ პირველი სიტყვა პატარაა, შემდეგი სიტყვები დიდი ასოთი იწყება.</p>
+</div></div>
+<p>თუ Python-ს იცნობ, შედარებისთვის:</p>
 <div class="box compare"><div class="box-body">
 <figure class="code python"><figcaption><span>Python</span></figcaption><pre><code class="hljs">lat = <span class="hljs-number">41.7151</span>
 vertex_count = <span class="hljs-number">12</span>
@@ -32,7 +56,7 @@ is_valid = <span class="hljs-literal">True</span></code></pre></figure>
   </section>
 
   <section class="slide" data-title="ძირითადი ტიპები">
-    <div class="eyebrow">02.2 · საფუძვლები</div>
+    <div class="eyebrow">02.3 · საფუძვლები</div>
     <h2>ძირითადი ტიპები</h2>
     <div class="content"><table>
 <thead>
@@ -50,12 +74,12 @@ is_valid = <span class="hljs-literal">True</span></code></pre></figure>
 </tr>
 <tr>
 <td><code>double</code></td>
-<td>ათწილადი (ზუსტი)</td>
+<td>ათწილადი (მაღალი სიზუსტით)</td>
 <td><code>double lat = 41.7151;</code></td>
 </tr>
 <tr>
 <td><code>bool</code></td>
-<td><code>true</code> / <code>false</code></td>
+<td><code>true</code> ან <code>false</code></td>
 <td><code>bool isValid = true;</code></td>
 </tr>
 <tr>
@@ -69,12 +93,13 @@ is_valid = <span class="hljs-literal">True</span></code></pre></figure>
 <td><code>std::string city = &quot;Batumi&quot;;</code></td>
 </tr>
 <tr>
-<td><code>qint64</code> (Qt)</td>
-<td>დიდი მთელი რიცხვი</td>
+<td><code>qint64</code> (Qt-ის ტიპი)</td>
+<td>ძალიან დიდი მთელი რიცხვი</td>
 <td>ფენაში მილიონობით ობიექტი</td>
 </tr>
 </tbody>
 </table>
+<p><code>int</code> დაახლოებით ±2 მილიარდამდე რიცხვს იტევს, ამიტომ ძალიან დიდი რაოდენობებისთვის (ობიექტების რაოდენობა დიდ ფენაში) QGIS იყენებს <code>qint64</code>-ს. ტექსტის ტიპს, რომელსაც QGIS-ში სინამდვილეში ვხვდებით (<code>QString</code>), თავი 10-ში გავეცნობით.</p>
 <div class="box tip"><div class="box-title">კოორდინატებისთვის</div><div class="box-body">
 <p>კოორდინატებს ყოველთვის <code>double</code>-ში ვინახავთ. QGIS-ის <code>QgsPointXY</code> შიგნით სწორედ ორ <code>double</code>-ს შეიცავს.</p>
 </div></div>
@@ -82,9 +107,10 @@ is_valid = <span class="hljs-literal">True</span></code></pre></figure>
   </section>
 
   <section class="slide" data-title="კოდი შედეგით">
-    <div class="eyebrow">02.3 · საფუძვლები</div>
+    <div class="eyebrow">02.4 · საფუძვლები</div>
     <h2>კოდი შედეგით</h2>
-    <div class="content"><figure class="code cpp"><figcaption><span>C++</span><em>coords.cpp</em></figcaption><pre><code class="hljs"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;iostream&gt;</span></span>
+    <div class="content"><p>ახლა ცვლადებს ეკრანზე გამოვიტანთ. <code>std::cout</code> არის გამოტანის არხი (ქვეთავი 1.7-დან), ხოლო <code>&lt;&lt;</code> ჯაჭვივით აერთებს ერთმანეთზე გამოსატან ნაწილებს. <code>&quot;\n&quot;</code> ნიშნავს „ახალი ხაზი“.</p>
+<figure class="code cpp"><figcaption><span>C++</span><em>coords.cpp</em></figcaption><pre><code class="hljs"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;iostream&gt;</span></span>
 
 <span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
     <span class="hljs-type">double</span> lat = <span class="hljs-number">41.7151</span>;
@@ -100,27 +126,27 @@ is_valid = <span class="hljs-literal">True</span></code></pre></figure>
 <figure class="code out"><figcaption><span>შედეგი</span></figcaption><pre><code>Tbilisi: 41.7151, 44.8271
 Vertices: 12
 Valid: true</code></pre></figure>
-<p><code>std::boolalpha</code> გვაიძულებს, <code>bool</code> გამოვიტანოთ სიტყვებით. მის გარეშე დაიბეჭდებოდა <code>1</code>.</p>
+<p><code>std::boolalpha</code> კომპიუტერს ეუბნება: <code>bool</code> გამოიტანე სიტყვით (<code>true</code>/<code>false</code>). მის გარეშე დაიბეჭდებოდა <code>1</code> ან <code>0</code>.</p>
 </div>
   </section>
 
   <section class="slide" data-title="const და auto">
-    <div class="eyebrow">02.4 · საფუძვლები</div>
+    <div class="eyebrow">02.5 · საფუძვლები</div>
     <h2>const და auto</h2>
-    <div class="content"><p><code>const</code> ნიშნავს, რომ მნიშვნელობას შემდეგ აღარ შევცვლით. <code>auto</code> კომპილატორს უთხრებს, რომ ტიპი თვითონ გამოიცნოს მარჯვენა მხარიდან.</p>
-<figure class="code cpp"><figcaption><span>C++</span></figcaption><pre><code class="hljs"><span class="hljs-type">const</span> <span class="hljs-type">double</span> EARTH_RADIUS_KM = <span class="hljs-number">6371.0</span>;   <span class="hljs-comment">// არ იცვლება</span>
-<span class="hljs-keyword">auto</span> area = <span class="hljs-number">50.0</span>;                         <span class="hljs-comment">// double</span>
-<span class="hljs-keyword">auto</span> count = <span class="hljs-number">12</span>;                          <span class="hljs-comment">// int</span></code></pre></figure>
+    <div class="content"><p><code>const</code> (constant, „მუდმივა“) ნიშნავს, რომ მნიშვნელობას შემდეგ აღარ შევცვლით. <code>auto</code> კომპილატორს ეუბნება, რომ ტიპი თვითონ გამოიცნოს მარჯვენა მხარიდან.</p>
+<figure class="code cpp"><figcaption><span>C++</span></figcaption><pre><code class="hljs"><span class="hljs-type">const</span> <span class="hljs-type">double</span> EARTH_RADIUS_KM = <span class="hljs-number">6371.0</span>;   <span class="hljs-comment">// დედამიწის რადიუსი, არ იცვლება</span>
+<span class="hljs-keyword">auto</span> area = <span class="hljs-number">50.0</span>;                         <span class="hljs-comment">// კომპილატორი ხვდება: double</span>
+<span class="hljs-keyword">auto</span> count = <span class="hljs-number">12</span>;                          <span class="hljs-comment">// კომპილატორი ხვდება: int</span></code></pre></figure>
 <div class="box warn"><div class="box-title">ყურადღება</div><div class="box-body">
-<p><code>const</code> ცვლადს მნიშვნელობა მხოლოდ შექმნისას ეძლევა. მოგვიანებით ცვლილების მცდელობა კომპილაციის შეცდომას იძლევა და ეს კარგია: შეცდომა კოდის გაშვებამდე ჩანს.</p>
+<p><code>const</code> ცვლადს მნიშვნელობა მხოლოდ შექმნისას ეძლევა. მოგვიანებით ცვლილების მცდელობა კომპილაციის შეცდომას იძლევა. ეს კარგია: შეცდომა კოდის გაშვებამდე ჩანს. QGIS-ის კოდში <code>const</code> ძალიან ხშირად გვხვდება (იხ. თავი 05).</p>
 </div></div>
 </div>
   </section>
 
   <section class="slide" data-title="მთელი რიცხვების გაყოფა">
-    <div class="eyebrow">02.5 · საფუძვლები</div>
+    <div class="eyebrow">02.6 · საფუძვლები</div>
     <h2>მთელი რიცხვების გაყოფა</h2>
-    <div class="content"><p>ეს პირველი ხაფანგია Python-იდან მოსულებისთვის.</p>
+    <div class="content"><p>ეს პირველი ხაფანგია: როცა ორივე რიცხვი <code>int</code>-ია, გაყოფის შედეგიც <code>int</code>-ია და წილადი ნაწილი უბრალოდ იკვეთება.</p>
 <figure class="code cpp"><figcaption><span>C++</span><em>division.cpp</em></figcaption><pre><code class="hljs"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;iostream&gt;</span></span>
 
 <span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
@@ -133,14 +159,17 @@ Valid: true</code></pre></figure>
 }</code></pre></figure>
 <figure class="code out"><figcaption><span>შედეგი</span></figcaption><pre><code>3
 3.5</code></pre></figure>
-<p>ორი <code>int</code>-ის გაყოფა <code>int</code>-ს იძლევა და წილადი ნაწილი იკარგება (Python-ში <code>7 / 2</code> იყო <code>3.5</code>, ხოლო <code>7 // 2</code> — <code>3</code>). თუ ერთი მხარე <code>double</code>-ა, შედეგიც <code>double</code> იქნება.</p>
+<p>ჯერ 7 ჰექტარი გავყავით 2 ნაკვეთზე და მივიღეთ <code>3</code> (არა <code>3.5</code>), რადგან ორივე რიცხვი მთელია. მეორე ხაზში <code>2.0</code> ათწილადია, ამიტომ მთელი გამოთვლა ათწილადებში ხდება და შედეგია <code>3.5</code>.</p>
+<div class="box tip"><div class="box-title">წესი</div><div class="box-body">
+<p>საშუალოს ან ფართობის გამოთვლისას დარწმუნდი, რომ ერთი მაინც <code>double</code>-ია, თორემ შედეგი „მოიჭრება“.</p>
+</div></div>
 </div>
   </section>
 
   <section class="slide" data-title="სიზუსტე და გარდაქმნა">
-    <div class="eyebrow">02.6 · საფუძვლები</div>
+    <div class="eyebrow">02.7 · საფუძვლები</div>
     <h2>სიზუსტე და გარდაქმნა</h2>
-    <div class="content"><p>ათწილადებს ზუსტად ვერ ვადარებთ ერთმანეთს <code>==</code>-ით, რადგან კომპიუტერი ორობით სისტემაში ინახავს.</p>
+    <div class="content"><p>კომპიუტერი ათწილადებს ორობით სისტემაში ინახავს და ზოგიერთ რიცხვს ზუსტად ვერ წარმოადგენს. ეს ისეთივე პრობლემაა, როგორც ათობით სისტემაში 1/3 = 0.3333…: უსასრულოა და სადმე უნდა შევწყვიტოთ. ამიტომ ორი ათწილადის <code>==</code>-ით შედარება სანდო არ არის.</p>
 <figure class="code cpp"><figcaption><span>C++</span><em>precision.cpp</em></figcaption><pre><code class="hljs"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;iostream&gt;</span></span>
 <span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;cmath&gt;</span></span>
 
@@ -157,35 +186,44 @@ Valid: true</code></pre></figure>
 <figure class="code out"><figcaption><span>შედეგი</span></figcaption><pre><code>false
 true
 3</code></pre></figure>
+<p>ახსნა:</p>
+<ul>
+<li><code>a == 0.3</code> სამართლიანად გვეპასუხება <code>false</code>, რადგან <code>0.1 + 0.2</code> კომპიუტერში ზუსტად <code>0.3</code> არ არის;</li>
+<li><code>std::abs(a - 0.3) &lt; 1e-9</code> ამოწმებს, მათ შორის სხვაობა 0.000000001-ზე ნაკლებია თუ არა (<code>std::abs</code> აბსოლუტური მნიშვნელობაა, <code>1e-9</code> კი 10⁻⁹) და პასუხია <code>true</code>;</li>
+<li><code>static_cast&lt;int&gt;(3.99)</code> არის <strong>აშკარა გარდაქმნა</strong> ათწილადიდან მთელზე და ათწილადი ნაწილი უბრალოდ იკვეთება: <code>3</code>.</li>
+</ul>
 <div class="box tip"><div class="box-title">წესი</div><div class="box-body">
-<p>ათწილადები ვადარო სიზუსტით (<code>abs(a - b) &lt; epsilon</code>). <code>static_cast&lt;int&gt;(...)</code> აკეთებს აშკარა გარდაქმნას და ათწილადი ნაწილი უბრალოდ იკვეთება.</p>
+<p>ათწილადები ვადარო სიზუსტით (<code>abs(a - b) &lt; epsilon</code>). გარდაქმნა გააკეთე აშკარად, <code>static_cast&lt;...&gt;(...)</code>-ით, რომ ყველამ დაინახოს, სად იკარგება ინფორმაცია.</p>
 </div></div>
 </div>
   </section>
 
   <section class="slide" data-title="სავარჯიშო და შეჯამება">
-    <div class="eyebrow">02.7 · საფუძვლები</div>
+    <div class="eyebrow">02.8 · საფუძვლები</div>
     <h2>სავარჯიშო და შეჯამება</h2>
     <div class="content"><div class="box exercise"><div class="box-title">სავარჯიშო</div><div class="box-body">
 <ol>
 <li>გამოაცხადე ცვლადები ბათუმისთვის: განედი <code>41.6168</code>, გრძედი <code>41.6367</code>, მოსახლეობა <code>int</code>-ად (მიახლოებით 170000). გამოიტანე ისინი.</li>
-<li>წარმოიდგინე 5 ნაკვეთი, საერთო ფართობი 12 ჰექტარი. გამოთვალე საშუალო ფართობი სწორად (<code>double</code>).</li>
-<li>რას დაბეჭდავს <code>static_cast&lt;int&gt;(-2.7)</code>? შეამოწმე.</li>
+<li>წარმოიდგინე 5 ნაკვეთი, საერთო ფართობი 12 ჰექტარი. გამოთვალე საშუალო ფართობი სწორად (<code>double</code>) და არასწორად (<code>int</code>-ებით). შეადარე.</li>
+<li>რას დაბეჭდავს <code>static_cast&lt;int&gt;(-2.7)</code>? ჯერ გამოიცანი, მერე შეამოწმე.</li>
+<li>შეეცადე <code>const double PI = 3.14;</code>-ს მოგვიანებით შეცვლას და წაიკითხე კომპილატორის შეტყობინება.</li>
 </ol>
 </div></div>
 <div class="box summary"><div class="box-title">შეჯამება</div><div class="box-body">
 <ul>
-<li>ტიპი ცვლადის „ყუთის ფორმაა“: <code>int</code>, <code>double</code>, <code>bool</code>.</li>
+<li>ცვლადი = სახელიანი ყუთი მეხსიერებაში; ტიპი = ყუთის ფორმა.</li>
+<li>ძირითადი ტიპები: <code>int</code>, <code>double</code>, <code>bool</code>, <code>char</code>, <code>std::string</code>.</li>
 <li>კოორდინატები — <code>double</code>, რაოდენობები — <code>int</code> ან <code>qint64</code>.</li>
 <li><code>int / int</code> იძლევა <code>int</code>-ს.</li>
 <li>ათწილადებს ვადარებთ ზღვრით, არა <code>==</code>-ით.</li>
+<li><code>const</code> = არ იცვლება; <code>auto</code> = ტიპს თვითონ გამოიცნობს.</li>
 </ul>
 </div></div>
 </div>
   </section>
   <section class="slide end" data-title="შემდეგ ლექციაში">
     <div class="eyebrow">შემდეგ ლექციაში</div>
-    <h2>03 · ფუნქციები და namespace</h2><p class="topics">ფუნქციის ხელმოწერა · overload · default არგუმენტი · .h/.cpp დაყოფა · namespace და ::</p>
+    <h2>03 · ფუნქციები და namespace</h2><p class="topics">რა არის ფუნქცია · პარამეტრები და დაბრუნება · overload · default არგუმენტი · .h/.cpp დაყოფა · namespace და ::</p>
     <a class="btn" href="L03.html">გახსნა →</a>
     <a class="btn ghost" href="../index.html">სარჩევი</a>
     <a class="btn ghost" href="L01.html">← წინა ლექცია</a>
