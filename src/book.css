@@ -37,6 +37,7 @@ code{font-family:"Cascadia Mono",Consolas,"Segoe UI","Sylfaen",monospace;font-si
 .opener .topics{color:#444;text-align:left}
 .sec h2{font-size:14pt;margin:8mm 0 3mm;color:#0f3d36;border-bottom:1px solid #c9822b;padding-bottom:1mm;break-after:avoid}
 .sec h2 span{color:#c9822b;margin-right:2mm}
+.sec h3{font-size:11.5pt;margin:5mm 0 1.5mm;color:#0f6b5c;break-after:avoid}
 /* code */
 figure.code{margin:3mm 0;border:1px solid #bfc9c5;border-radius:3px;break-inside:avoid;background:#f5f8f6}
 figure.code figcaption{display:flex;gap:3mm;font:600 7pt "Segoe UI",sans-serif;letter-spacing:.08em;text-transform:uppercase;padding:1mm 3mm;background:#dfe8e4;color:#27403a}
