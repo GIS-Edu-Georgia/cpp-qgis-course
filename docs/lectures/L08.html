@@ -2,7 +2,7 @@
 <html lang="ka"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>L08 · მეხსიერების მართვა და smart pointers — შესავალი QGIS-ის პროგრამირებაში</title>
 <link rel="stylesheet" href="../assets/slides.css"></head>
-<body data-total="9">
+<body data-total="10">
 <div class="bar"><i></i></div>
 <main id="deck">
   <section class="slide title" data-title="მეხსიერების მართვა და smart pointers">
@@ -14,8 +14,42 @@
 </div>
     <div class="hint">← → ისრებით გადაადგილება · F — სრული ეკრანი · P — ბეჭდვა</div>
   </section>
-  <section class="slide" data-title="stack და heap">
+  <section class="slide" data-title="სამი ცნება: მფლობელობა, წვდომა, გადაცემა">
     <div class="eyebrow">08.1 · მეხსიერება</div>
+    <h2>სამი ცნება: მფლობელობა, წვდომა, გადაცემა</h2>
+    <div class="content"><p>მეხსიერების უსაფრთხოდ მართვისთვის ეს სამი ცნება უნდა გავარჩიოთ:</p>
+<table>
+<thead>
+<tr>
+<th>ცნება</th>
+<th>კითხვა</th>
+<th>მაგალითი</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>მფლობელობა</strong> (ownership)</td>
+<td>ვის ევალება ობიექტის სიცოცხლის ციკლი, ანუ ვინ წაშლის მას</td>
+<td><code>unique_ptr</code>, პროექტი (<code>QgsProject</code>), მშობელი <code>QObject</code></td>
+</tr>
+<tr>
+<td><strong>წვდომა</strong> (access)</td>
+<td>რით მივმართავთ ობიექტს, თუ ის ჩვენი საკუთრება არ არის</td>
+<td><code>T *</code> ან <code>T &amp;</code> მაჩვენებელი/მითითება (თავები 04–05)</td>
+</tr>
+<tr>
+<td><strong>გადაცემა</strong> (transfer)</td>
+<td>როდის იცვლება მფლობელი და რა ხდება ძველ მაჩვენებელთან</td>
+<td><code>std::move</code>, <code>addMapLayer</code> (პროექტი იღებს ფენას)</td>
+</tr>
+</tbody>
+</table>
+<p>ჩვეულებრივი <code>T *</code> და <code>T &amp;</code> <strong>ობიექტს არ ფლობენ</strong>: ისინი მხოლოდ წვდომას იძლევიან. ფლობა სხვაგან განისაზღვრება და ეს უნდა ვიცოდეთ, სანამ მაჩვენებელს გამოვიყენებთ.</p>
+</div>
+  </section>
+
+  <section class="slide" data-title="stack და heap">
+    <div class="eyebrow">08.2 · მეხსიერება</div>
     <h2>stack და heap</h2>
     <div class="content"><table>
 <thead>
@@ -55,7 +89,7 @@
   </section>
 
   <section class="slide" data-title="new და delete">
-    <div class="eyebrow">08.2 · მეხსიერება</div>
+    <div class="eyebrow">08.3 · მეხსიერება</div>
     <h2>new და delete</h2>
     <div class="content"><figure class="code cpp"><figcaption><span>C++</span></figcaption><pre><code class="hljs">Polygon *p = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Polygon</span>(<span class="hljs-string">&quot;Parcel-1&quot;</span>);   <span class="hljs-comment">// heap-ზე შეიქმნა</span>
 <span class="hljs-comment">// ... ვიყენებთ ...</span>
@@ -65,7 +99,7 @@
   </section>
 
   <section class="slide" data-title="unique_ptr: ერთადერთი მფლობელი">
-    <div class="eyebrow">08.3 · მეხსიერება</div>
+    <div class="eyebrow">08.4 · მეხსიერება</div>
     <h2>unique_ptr: ერთადერთი მფლობელი</h2>
     <div class="content"><p><strong>smart pointer</strong> არის ობიექტი, რომელიც მაჩვენებელივით იქცევა, მაგრამ თავად ზრუნავს მეხსიერების გათავისუფლებაზე. <code>std::unique_ptr</code> ობიექტს ფლობს და <strong>scope</strong>-ის (ფიგურული ფრჩხილებით შემოსაზღვრული ბლოკის) დასრულებისას ავტომატურად წაშლის.</p>
 <figure class="code cpp"><figcaption><span>C++</span><em>unique.cpp</em></figcaption><pre><code class="hljs"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;iostream&gt;</span></span>
@@ -105,7 +139,7 @@ after scope</code></pre></figure>
   </section>
 
   <section class="slide" data-title="მფლობელობის გადაცემა: std::move">
-    <div class="eyebrow">08.4 · მეხსიერება</div>
+    <div class="eyebrow">08.5 · მეხსიერება</div>
     <h2>მფლობელობის გადაცემა: std::move</h2>
     <div class="content"><p><code>unique_ptr</code>-ის კოპირება შეუძლებელია, რადგან მფლობელი ერთია. შეიძლება მხოლოდ <strong>გადაცემა</strong>. ამას <code>std::move</code> აკეთებს: „გადაეცი მფლობელობა“ (მანამდე ბევრგან დაწერილი <code>std::move(name)</code> ზუსტად ასეა: ტექსტს ახალ ადგილზე გადააქვს, კოპირების გარეშე).</p>
 <figure class="code cpp"><figcaption><span>C++</span></figcaption><pre><code class="hljs"><span class="hljs-keyword">auto</span> a = std::<span class="hljs-built_in">make_unique</span>&lt;Polygon&gt;(<span class="hljs-string">&quot;Parcel-2&quot;</span>);
@@ -125,7 +159,7 @@ destroyed Parcel-2</code></pre></figure>
   </section>
 
   <section class="slide" data-title="shared_ptr: ბევრი მფლობელი">
-    <div class="eyebrow">08.5 · მეხსიერება</div>
+    <div class="eyebrow">08.6 · მეხსიერება</div>
     <h2>shared_ptr: ბევრი მფლობელი</h2>
     <div class="content"><p>როცა ერთ ობიექტს რამდენიმე ადგილი იყენებს, გამოიყენება <code>std::shared_ptr</code>. ობიექტი წაიშლება მაშინ, როცა ბოლო მფლობელიც გაქრება (reference counting).</p>
 <figure class="code cpp"><figcaption><span>C++</span><em>shared.cpp</em></figcaption><pre><code class="hljs"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;iostream&gt;</span></span>
@@ -161,7 +195,7 @@ destroyed Shared</code></pre></figure>
   </section>
 
   <section class="slide" data-title="რა ხდება QGIS-ში">
-    <div class="eyebrow">08.6 · მეხსიერება</div>
+    <div class="eyebrow">08.7 · მეხსიერება</div>
     <h2>რა ხდება QGIS-ში</h2>
     <div class="content"><p>QGIS-ს საკუთარი მფლობელობის წესები აქვს და დოკუმენტაცია მათ განმარტავს:</p>
 <table>
@@ -191,13 +225,16 @@ destroyed Shared</code></pre></figure>
 </tbody>
 </table>
 <div class="box warn"><div class="box-title">ყურადღება</div><div class="box-body">
-<p>თუ ფენას <code>new QgsVectorLayer(...)</code>-ით ქმნი და პროექტს აძლევ, თავად <code>delete</code> აღარ დაწერო. ფენა პროექტის საკუთრებაა და ორმაგი წაშლა პროგრამას დაამსხვრევს.</p>
+<p>თუ ფენას <code>new QgsVectorLayer(...)</code>-ით ქმნი და პროექტს აძლევ, თავად <code>delete</code> აღარ დაწერო. ფენა პროექტის საკუთრებაა და ორმაგი წაშლა პროგრამას დაამსხვრევს. (<code>addMapLayer</code>-ს მეორე პარამეტრი აქვს <code>takeOwnership = true</code>: ნაგულისხმევად პროექტი ფლობს ფენას.)</p>
+</div></div>
+<div class="box warn"><div class="box-title">QGIS-ის ყველა ობიექტი smart pointer-ით არ იმართება</div><div class="box-body">
+<p>ეს თავი smart pointer-ებს ასწავლის, მაგრამ არ ნიშნავს, რომ QGIS-ის ყველა ობიექტი <code>unique_ptr</code>-ში ან <code>shared_ptr</code>-ში უნდა მოვაქციოთ. QGIS-ის ბევრი კლასი <code>QObject</code>-ია და მფლობელობას მშობლის ან პროექტის ხის მექანიზმით წყვეტს. <code>shared_ptr</code>-ში ასეთი ობიექტის ჩადებამ შეიძლება ორმაგი წაშლა გამოიწვიოს, რადგან ორი სხვადასხვა მექანიზმი ერთსა და იმავე ობიექტს გაანადგურებს. ყოველთვის წაიკითხე დოკუმენტაცია: ვინ ფლობს ობიექტს, როცა მას პარამეტრად გადასცემ ან უკან იღებ.</p>
 </div></div>
 </div>
   </section>
 
   <section class="slide" data-title="სავარჯიშო და შეჯამება">
-    <div class="eyebrow">08.7 · მეხსიერება</div>
+    <div class="eyebrow">08.8 · მეხსიერება</div>
     <h2>სავარჯიშო და შეჯამება</h2>
     <div class="content"><div class="box exercise"><div class="box-title">სავარჯიშო</div><div class="box-body">
 <ol>

@@ -115,7 +115,10 @@ After ref: 125</code></pre></figure>
   <section class="slide" data-title="const &amp; — უსაფრთხო დათვალიერება">
     <div class="eyebrow">05.4 · მეხსიერება</div>
     <h2>const &amp; — უსაფრთხო დათვალიერება</h2>
-    <div class="content"><p>თუ ფუნქციას მხოლოდ წასაკითხად სჭირდება ობიექტი, ვწერთ <code>const T &amp;</code>. კოპირება არ ხდება და ფუნქციას ცვლილების უფლებაც არ აქვს.</p>
+    <div class="content"><p>თუ ფუნქციას მხოლოდ წასაკითხად სჭირდება ობიექტი, ვწერთ <code>const T &amp;</code>. კოპირება არ ხდება და ფუნქციას ამ მითითებით ცვლილების უფლებაც არ აქვს.</p>
+<div class="box note"><div class="box-title">ორი დაზუსტება</div><div class="box-body">
+<p>(1) <code>const</code> ზღუდავს ცვლილებას მხოლოდ <strong>ამ მითითებით</strong>; ეს არ ნიშნავს, რომ ობიექტი ყველასთვის უცვლელია: სხვა ადგილიდან, სხვა (არა-<code>const</code>) მითითებით, მისი შეცვლა შეიძლება. (2) <code>const &amp;</code> ყოველთვის უფრო სწრაფ პროგრამას არ გვაძლევს: პატარა ტიპებისთვის (<code>int</code>, <code>double</code>) მნიშვნელობით გადაცემა ჩვეულებრივ ისევე კარგია. მთავარი სარგებელი დიდი ობიექტის ზედმეტი კოპირების თავიდან აცილება და კოდის მკითხველისთვის მკაფიო განზრახვაა: „ამ ფუნქციაში ობიექტს მხოლოდ ვკითხულობ“.</p>
+</div></div>
 <figure class="code cpp"><figcaption><span>C++</span><em>perimeter.cpp</em></figcaption><pre><code class="hljs"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;iostream&gt;</span></span>
 <span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;vector&gt;</span></span>
 <span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;cmath&gt;</span></span>

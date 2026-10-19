@@ -78,7 +78,10 @@ QString info = <span class="hljs-built_in">QString</span>(<span class="hljs-stri
   <section class="slide" data-title="QList">
     <div class="eyebrow">10.2 · Qt</div>
     <h2>QList</h2>
-    <div class="content"><p><code>QList&lt;T&gt;</code> არის Qt-ის სია, <code>std::vector</code>-ის ძმა (თავი 09): ელემენტები ერთმანეთის გვერდით ინახება და ზომა საჭიროებისას იზრდება. <code>&lt;T&gt;</code> ისევ ელემენტის ტიპია.</p>
+    <div class="content"><p><code>QList&lt;T&gt;</code> არის Qt-ის სია, <code>std::vector</code>-ის ახლობელი (თავი 09): ზომა საჭიროებისას იზრდება, ელემენტებს ინდექსით მივწვდებით. <code>&lt;T&gt;</code> ისევ ელემენტის ტიპია.</p>
+<div class="box note"><div class="box-title">QList და std::vector ერთი და იგივე არ არის</div><div class="box-body">
+<p>მათი API და მეხსიერების ორგანიზაცია განსხვავდება და Qt-ის ვერსიებს შორისაც იცვლება: Qt6-ში <code>QList</code> უკვე თანმიმდევრულად (ერთმანეთის გვერდით) ინახავს ელემენტებს, Qt5-ში კი ეს ყოველთვის ასე არ იყო. ამიტომ ერთს მეორეთი ავტომატურად ნუ ჩაანაცვლებ; კონკრეტული მეთოდები და გარანტიები კონკრეტულ დოკუმენტაციაში გადაამოწმე.</p>
+</div></div>
 <figure class="code cpp"><figcaption><span>C++</span></figcaption><pre><code class="hljs">QList&lt;QString&gt; cities = {<span class="hljs-string">&quot;Tbilisi&quot;</span>, <span class="hljs-string">&quot;Batumi&quot;</span>};
 cities.<span class="hljs-built_in">append</span>(<span class="hljs-string">&quot;Kutaisi&quot;</span>);
 <span class="hljs-keyword">for</span> (<span class="hljs-type">const</span> QString &amp;c : cities) {
@@ -114,6 +117,15 @@ Tbilisi
 true</code></pre></figure>
 <div class="box tip"><div class="box-title">დაიმახსოვრე</div><div class="box-body">
 <p><code>QVariant</code> არ „იცის“ წინასწარ, რა ტიპია შიგნით, ამიტომ კითხვისას თავად ვირჩევთ <code>toInt()</code>, <code>toString()</code>, <code>toDouble()</code>. თუ გარდაქმნა შეუძლებელია, შედეგი ნულოვანი ან ცარიელია.</p>
+</div></div>
+<div class="box warn"><div class="box-title">წარუმატებელი გარდაქმნა და ნამდვილი ნული</div><div class="box-body">
+<p><code>QVariant(&quot;abc&quot;).toInt()</code> დაგიბრუნებს <code>0</code>-ს, ისევე როგორც <code>QVariant(0).toInt()</code>. როგორ გაარჩიო? <code>toInt()</code>-ს აქვს არასავალდებულო პარამეტრი <code>bool *ok</code>:</p>
+<figure class="code cpp"><figcaption><span>C++</span></figcaption><pre><code class="hljs"><span class="hljs-type">bool</span> ok = <span class="hljs-literal">false</span>;
+<span class="hljs-type">int</span> value = v.<span class="hljs-built_in">toInt</span>(&amp;ok);
+<span class="hljs-keyword">if</span> (!ok) {
+    <span class="hljs-comment">// გარდაქმნა ვერ მოხერხდა; ეს ნამდვილი ნული არ არის</span>
+}</code></pre></figure>
+<p>ატრიბუტებთან მუშაობისას ეს განსაკუთრებით მნიშვნელოვანია: ველი შეიძლება იყოს NULL, ცარიელი ტექსტი ან მართლა <code>0</code>, და სამივე სხვადასხვა რამეს ნიშნავს.</p>
 </div></div>
 </div>
   </section>
@@ -159,7 +171,7 @@ QVariant name = attrs.<span class="hljs-built_in">at</span>(<span class="hljs-nu
   <section class="slide" data-title="QObject-ის ხე">
     <div class="eyebrow">10.5 · Qt</div>
     <h2>QObject-ის ხე</h2>
-    <div class="content"><p><code>QObject</code> არის Qt-ის ბაზისური კლასი: მისგან მოდის ყველა ფანჯარა, ღილაკი და QGIS-ის ბევრი კლასიც (<code>QgsMapLayer</code>, <code>QgsProject</code>). მისი მნიშვნელოვანი თვისებაა, რომ <code>QObject</code>-ები მშობელ-შვილის ხეში ცხოვრობენ. როცა მშობელი იშლება, თავის შვილებსაც წაშლის. ამიტომ Qt-ში ხშირად <code>new</code> გვხვდება <code>delete</code>-ის გარეშე (კონტრასტია თავი 08-ის წესებთან: აქ მფლობელი მშობელი ობიექტია).</p>
+    <div class="content"><p><code>QObject</code> არის Qt-ის ბაზისური კლასი: მისგან მოდის ყველა ფანჯარა, ღილაკი და QGIS-ის ბევრი კლასიც (<code>QgsMapLayer</code>, <code>QgsProject</code>). მისი მნიშვნელოვანი თვისებაა, რომ <code>QObject</code>-ები მშობელ-შვილის ხეში ცხოვრობენ. როცა მშობელი იშლება, თავის შვილებსაც წაშლის. ამიტომ Qt-ში ხშირად <code>new</code> გვხვდება <code>delete</code>-ის გარეშე (კონტრასტია თავი 08-ის წესებთან: აქ მფლობელი მშობელი ობიექტია). ეს წესი მხოლოდ მაშინ მუშაობს, თუ მშობელ-შვილის კავშირი მართლა დაყენებულია (მაგალითად, კონსტრუქტორში მშობელი გადაეცა). <code>new QPushButton(&quot;OK&quot;)</code> მშობლის გარეშე ავტომატურად არავის შვილი არ არის და მისი წაშლა შენს საქმეა.</p>
 <figure class="code cpp"><figcaption><span>C++</span></figcaption><pre><code class="hljs"><span class="hljs-keyword">auto</span> *dialog = <span class="hljs-keyword">new</span> <span class="hljs-built_in">QDialog</span>();
 <span class="hljs-keyword">auto</span> *button = <span class="hljs-keyword">new</span> <span class="hljs-built_in">QPushButton</span>(<span class="hljs-string">&quot;OK&quot;</span>, dialog);   <span class="hljs-comment">// dialog არის მშობელი</span>
 <span class="hljs-comment">// delete dialog;  -&gt;  button-იც ავტომატურად წაიშლება</span></code></pre></figure>

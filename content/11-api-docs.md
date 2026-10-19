@@ -40,7 +40,7 @@ topics: კლასის გვერდის სტრუქტურა · 
 | `QgsFeatureId id() const` | `QgsFeature` | ობიექტის უნიკალური ნომერი |
 | `bool isValid() const` | `QgsFeature` | ობიექტი ვალიდურია თუ არა |
 | `QgsFeatureIterator getFeatures(const QgsFeatureRequest &request = QgsFeatureRequest()) const` | `QgsVectorLayer` | ობიექტების iterator; პარამეტრი არასავალდებულოა (default) |
-| `double area() const` | `QgsGeometry` | გეომეტრიის ფართობი |
+| `double area() const` | `QgsGeometry` | გეომეტრიის გეგმური ფართობი (კოორდინატების ერთეულის კვადრატი) |
 | `static QgsGeometry fromPointXY(const QgsPointXY &point)` | `QgsGeometry` | `static`: გამოიძახება `QgsGeometry::fromPointXY(...)`-ით |
 | `QList<QgsMapLayer *> mapLayersByName(const QString &name) const` | `QgsProject` | ფენების სია სახელით; ელემენტები მაჩვენებლებია, შეამოწმე ცარიელია თუ არა |
 
@@ -92,9 +92,24 @@ while (it.nextFeature(f)) {
 ```
 :::
 
-::: note
-`area()` ფენის CRS ერთეულებში აბრუნებს ფართობს (გეოგრაფიულ CRS-ში ეს გრადუსია). მეტრებში ზუსტი გამოთვლისთვის `QgsDistanceArea` გამოიყენება. ასეთი ნიუანსები ხშირად **Detailed Description**-შია.
+::: warn ფართობი და CRS
+`QgsGeometry::area()` დოკუმენტაციის მიხედვით გეგმური (planar) ფართობია, გამოთვლილი კოორდინატების ერთეულებში. გეოგრაფიულ CRS-ში (გრადუსები) ის კვადრატული გრადუსია და კვადრატულ მეტრებად არ ითვლება. გეოდეზიური (ელიფსოიდური) გამოთვლისთვის დოკუმენტაცია `QgsDistanceArea`-ს გვირჩევს (იხ. თავი 12). ასეთი ნიუანსები ხშირად დოკუმენტაციის აღწერაშია, ამიტომ ხელმოწერასთან ერთად აღწერაც წაიკითხე.
 :::
+
+## ვერსიები
+
+ამ თავის ხელმოწერები გადამოწმებულია `api.qgis.org`-ის **4.3.0-Master** დოკუმენტაციასთან. თუ შენი QGIS სხვა ვერსიისაა (მაგ. 3.x), გვერდის ზედა ნაწილში ვერსიის არჩევით გადაამოწმე იგივე კლასი: ზოგ მეთოდს განსხვავებული overload შეიძლება ჰქონდეს. მაგალითად, `QgsGeometry::buffer` ახალ დოკუმენტაციაში ორი სახითაა: `buffer(double distance, int segments, QgsFeedback *feedback = nullptr) const` და გაფართოებული ვერსია სტილის პარამეტრებით.
+
+## ბილიკი დოკუმენტაციიდან კოდამდე
+
+ვთქვათ, გვინდა ფენის ობიექტების რაოდენობა. ეტაპები:
+
+1. გახსენი `QgsVectorLayer`-ის გვერდი და მოძებნე „count“. იპოვე `long long featureCount() const`;
+2. გვერდის ზედა ნაწილში წერია header: `#include <qgsvectorlayer.h>`;
+3. ეს კლასი `qgis_core` ბიბლიოთეკაშია (იხ. თავი 01, არქიტექტურის ცხრილი), ამიტომ CMake-ში `qgis_core` უნდა მივაბათ;
+4. გამოიყენე: `long long n = layer->featureCount();` (მაჩვენებელზე `->`, ობიექტზე `.`).
+
+ანუ ყოველ ახალ მეთოდზე სამი რამ გვჭირდება: **ხელმოწერა**, **`#include`** და **ბიბლიოთეკა**, რომელშიც ის დევს.
 
 ## ძირითადი კლასები ერთ ცხრილში
 

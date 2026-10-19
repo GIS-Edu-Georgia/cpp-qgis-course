@@ -2,7 +2,7 @@
 <html lang="ka"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>L11 · api.qgis.org-ის კითხვა — შესავალი QGIS-ის პროგრამირებაში</title>
 <link rel="stylesheet" href="../assets/slides.css"></head>
-<body data-total="9">
+<body data-total="11">
 <div class="bar"><i></i></div>
 <main id="deck">
   <section class="slide title" data-title="api.qgis.org-ის კითხვა">
@@ -109,7 +109,7 @@
 <tr>
 <td><code>double area() const</code></td>
 <td><code>QgsGeometry</code></td>
-<td>გეომეტრიის ფართობი</td>
+<td>გეომეტრიის გეგმური ფართობი (კოორდინატების ერთეულის კვადრატი)</td>
 </tr>
 <tr>
 <td><code>static QgsGeometry fromPointXY(const QgsPointXY &amp;point)</code></td>
@@ -190,14 +190,35 @@ QgsFeatureIterator it = layer-&gt;<span class="hljs-built_in">getFeatures</span>
   <span class="hljs-built_in">qDebug</span>() &lt;&lt; f.<span class="hljs-built_in">id</span>() &lt;&lt; f.<span class="hljs-built_in">geometry</span>().<span class="hljs-built_in">area</span>();
 }</code></pre></figure>
 </div></div>
-<div class="box note"><div class="box-title">შენიშვნა</div><div class="box-body">
-<p><code>area()</code> ფენის CRS ერთეულებში აბრუნებს ფართობს (გეოგრაფიულ CRS-ში ეს გრადუსია). მეტრებში ზუსტი გამოთვლისთვის <code>QgsDistanceArea</code> გამოიყენება. ასეთი ნიუანსები ხშირად <strong>Detailed Description</strong>-შია.</p>
+<div class="box warn"><div class="box-title">ფართობი და CRS</div><div class="box-body">
+<p><code>QgsGeometry::area()</code> დოკუმენტაციის მიხედვით გეგმური (planar) ფართობია, გამოთვლილი კოორდინატების ერთეულებში. გეოგრაფიულ CRS-ში (გრადუსები) ის კვადრატული გრადუსია და კვადრატულ მეტრებად არ ითვლება. გეოდეზიური (ელიფსოიდური) გამოთვლისთვის დოკუმენტაცია <code>QgsDistanceArea</code>-ს გვირჩევს (იხ. თავი 12). ასეთი ნიუანსები ხშირად დოკუმენტაციის აღწერაშია, ამიტომ ხელმოწერასთან ერთად აღწერაც წაიკითხე.</p>
 </div></div>
 </div>
   </section>
 
-  <section class="slide" data-title="ძირითადი კლასები ერთ ცხრილში">
+  <section class="slide" data-title="ვერსიები">
     <div class="eyebrow">11.5 · ორიენტაცია</div>
+    <h2>ვერსიები</h2>
+    <div class="content"><p>ამ თავის ხელმოწერები გადამოწმებულია <code>api.qgis.org</code>-ის <strong>4.3.0-Master</strong> დოკუმენტაციასთან. თუ შენი QGIS სხვა ვერსიისაა (მაგ. 3.x), გვერდის ზედა ნაწილში ვერსიის არჩევით გადაამოწმე იგივე კლასი: ზოგ მეთოდს განსხვავებული overload შეიძლება ჰქონდეს. მაგალითად, <code>QgsGeometry::buffer</code> ახალ დოკუმენტაციაში ორი სახითაა: <code>buffer(double distance, int segments, QgsFeedback *feedback = nullptr) const</code> და გაფართოებული ვერსია სტილის პარამეტრებით.</p>
+</div>
+  </section>
+
+  <section class="slide" data-title="ბილიკი დოკუმენტაციიდან კოდამდე">
+    <div class="eyebrow">11.6 · ორიენტაცია</div>
+    <h2>ბილიკი დოკუმენტაციიდან კოდამდე</h2>
+    <div class="content"><p>ვთქვათ, გვინდა ფენის ობიექტების რაოდენობა. ეტაპები:</p>
+<ol>
+<li>გახსენი <code>QgsVectorLayer</code>-ის გვერდი და მოძებნე „count“. იპოვე <code>long long featureCount() const</code>;</li>
+<li>გვერდის ზედა ნაწილში წერია header: <code>#include &lt;qgsvectorlayer.h&gt;</code>;</li>
+<li>ეს კლასი <code>qgis_core</code> ბიბლიოთეკაშია (იხ. თავი 01, არქიტექტურის ცხრილი), ამიტომ CMake-ში <code>qgis_core</code> უნდა მივაბათ;</li>
+<li>გამოიყენე: <code>long long n = layer-&gt;featureCount();</code> (მაჩვენებელზე <code>-&gt;</code>, ობიექტზე <code>.</code>).</li>
+</ol>
+<p>ანუ ყოველ ახალ მეთოდზე სამი რამ გვჭირდება: <strong>ხელმოწერა</strong>, <strong><code>#include</code></strong> და <strong>ბიბლიოთეკა</strong>, რომელშიც ის დევს.</p>
+</div>
+  </section>
+
+  <section class="slide" data-title="ძირითადი კლასები ერთ ცხრილში">
+    <div class="eyebrow">11.7 · ორიენტაცია</div>
     <h2>ძირითადი კლასები ერთ ცხრილში</h2>
     <div class="content"><table>
 <thead>
@@ -259,7 +280,7 @@ QgsFeatureIterator it = layer-&gt;<span class="hljs-built_in">getFeatures</span>
   </section>
 
   <section class="slide" data-title="შეცდომის კითხვა">
-    <div class="eyebrow">11.6 · ორიენტაცია</div>
+    <div class="eyebrow">11.8 · ორიენტაცია</div>
     <h2>შეცდომის კითხვა</h2>
     <div class="content"><p>კომპილატორის შეცდომა პირველად საშიშად გამოიყურება, მაგრამ ხშირად ერთი ხაზი გვეუბნება მთავარს:</p>
 <table>
@@ -292,7 +313,7 @@ QgsFeatureIterator it = layer-&gt;<span class="hljs-built_in">getFeatures</span>
   </section>
 
   <section class="slide" data-title="სავარჯიშო და შეჯამება">
-    <div class="eyebrow">11.7 · ორიენტაცია</div>
+    <div class="eyebrow">11.9 · ორიენტაცია</div>
     <h2>სავარჯიშო და შეჯამება</h2>
     <div class="content"><div class="box exercise"><div class="box-title">სავარჯიშო</div><div class="box-body">
 <ol>
@@ -313,7 +334,7 @@ QgsFeatureIterator it = layer-&gt;<span class="hljs-built_in">getFeatures</span>
   </section>
   <section class="slide end" data-title="შემდეგ ლექციაში">
     <div class="eyebrow">შემდეგ ლექციაში</div>
-    <h2>12 · პროექტი: საკუთარი ინსტრუმენტი QGIS-ში</h2><p class="topics">QGIS-ის აწყობა წყაროდან · დამოუკიდებელი C++ აპლიკაცია · C++ პლაგინის ჩონჩხი · CMake · ლიცენზია</p>
+    <h2>12 · პროექტი: საკუთარი ინსტრუმენტი QGIS-ში</h2><p class="topics">დამოუკიდებელი C++ აპლიკაცია · CRS და ფართობი · CMake · C++ პლაგინის სტრუქტურა · QGIS-ის აწყობა · ლიცენზია</p>
     <a class="btn" href="L12.html">გახსნა →</a>
     <a class="btn ghost" href="../index.html">სარჩევი</a>
     <a class="btn ghost" href="L10.html">← წინა ლექცია</a>

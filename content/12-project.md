@@ -3,68 +3,100 @@ n: 12
 title: პროექტი: საკუთარი ინსტრუმენტი QGIS-ში
 en: Capstone — your own tool inside QGIS
 eyebrow: პრაქტიკა
-topics: QGIS-ის აწყობა წყაროდან · დამოუკიდებელი C++ აპლიკაცია · C++ პლაგინის ჩონჩხი · CMake · ლიცენზია
+topics: დამოუკიდებელი C++ აპლიკაცია · CRS და ფართობი · CMake · C++ პლაგინის სტრუქტურა · QGIS-ის აწყობა · ლიცენზია
 ---
 
-საბოლოო მიზანი: საკუთარი C++ კოდი QGIS-თან ერთად გაუშვა. გზა სამ საფეხურად ვაგებთ: ჯერ ვმუშაობთ QGIS-ის ბიბლიოთეკასთან დამოუკიდებელ აპლიკაციაში, შემდეგ ვაკეთებთ პლაგინს, ბოლოს ვაწყობთ QGIS-ს წყაროდან.
+საბოლოო მიზანი: საკუთარი C++ კოდი QGIS-თან ერთად გაუშვა. გზა სამ საფეხურად ვაგებთ: ჯერ ვმუშაობთ QGIS-ის ბიბლიოთეკასთან დამოუკიდებელ აპლიკაციაში, შემდეგ ვაკეთებთ პლაგინის სტრუქტურას, ბოლოს (არასავალდებულოდ) ვაწყობთ QGIS-ს წყაროდან.
 
-ამ თავში შემოდის ახალი ტერმინები: **პლაგინი** არის დამატება, რომელსაც QGIS ჩატვირთვისას აკავშირებს თავის მენიუსა და ფუნქციებთან; C++ პლაგინი არის **დინამიური ბიბლიოთეკა** (`.dll` Windows-ზე, `.so` Linux-ზე) — ცალკე შესრულებადი ფაილი, რომელიც უშუალოდ კი არ იხსნება, არამედ სხვა პროგრამა (QGIS) ტვირთავს. **CMake** კი არის „აწყობის დირიჟორი“: ტექსტური ფაილი (`CMakeLists.txt`), რომელიც ეუბნება, რომელი ფაილები და ბიბლიოთეკები დააკომპილოს და როგორ დააკავშიროს.
+ამ თავში შემოდის ახალი ტერმინები: **პლაგინი** არის დამატება, რომელსაც QGIS ჩატვირთვისას აკავშირებს თავის მენიუსა და ფუნქციებთან; C++ პლაგინი არის **დინამიური ბიბლიოთეკა** (`.dll` Windows-ზე, `.so` Linux-ზე) — ცალკე ფაილი, რომელიც უშუალოდ კი არ იხსნება, არამედ სხვა პროგრამა (QGIS) ტვირთავს. **CMake** კი არის „აწყობის დირიჟორი“: ტექსტური ფაილი (`CMakeLists.txt`), რომელიც ეუბნება, რომელი ფაილები და ბიბლიოთეკები დააკომპილოს და როგორ დააკავშიროს.
+
+::: warn გაიგე, რა არის და რა არ არის შემოწმებული
+ამ თავის კოდი შედგენილია QGIS-ის API-ის დოკუმენტაციისა და QGIS-ის რეალური წყაროს (`src/plugins/topology`) მიხედვით, მაგრამ ავტორს ის ჯერ არ აუწყვია და არ გაუშვია ყველა გარემოში. გამოიყენე ის როგორც გზამკვლევი, პირველად გაუშვი ერთ კონკრეტულ სისტემაზე და სისტემის ბილიკები და ვერსიები მოარგე შენს ინსტალაციას. API-ის ხელმოწერები შემოწმებულია `api.qgis.org`-ის 4.3.0-Master დოკუმენტაციასთან; QGIS 3.x-ში ზოგი overload შეიძლება განსხვავდებოდეს.
+:::
 
 ## გეგმა
 
 | საფეხური | შედეგი | სირთულე |
 |---|---|---|
-| 1 | კონსოლური პროგრამა, რომელიც `qgis_core`-ს იყენებს | დაბალი |
-| 2 | C++ პლაგინი, რომელიც QGIS-ის მენიუში ჩნდება | საშუალო |
-| 3 | QGIS-ის აწყობა წყარო კოდიდან (შენი კოდით ან მის გარეშე) | მაღალი |
+| 1 | კონსოლური პროგრამა, რომელიც `qgis_core`-ს იყენებს და პოლიგონების ფართობს ითვლის | დაბალი |
+| 2 | C++ პლაგინის სტრუქტურა: რა ფაილებისგან შედგება და როგორ ერთვება QGIS-ში | საშუალო |
+| 3 | QGIS-ის აწყობა წყარო კოდიდან (გაფართოებული, არასავალდებულო) | მაღალი |
 
 ::: tip რჩევა
-ბევრი ადამიანი პირდაპირ მესამე საფეხურზე ხტება და იჭედება აწყობის დეტალებში. პირველი ორი უკვე გასაგებ შედეგს იძლევა და გასწავლის ბიბლიოთეკების ერთად მუშაობას.
+ბევრი პირდაპირ მესამე საფეხურზე ხტება და აწყობის დეტალებში იჭედება. პირველი ორი უკვე გასაგებ შედეგს იძლევა და გასწავლის ბიბლიოთეკების ერთად მუშაობას.
 :::
 
-## საფეხური 1: პირველი პროგრამა `qgis_core`-ზე
+## CRS და ფართობი: ჯერ ეს უნდა გავიგოთ
 
-ამოცანა: ფენის ობიექტების დათვლა და ფართობების ჯამი.
+ფართობის გამოთვლა მხოლოდ ფორმულა არ არის. **CRS** (კოორდინატთა სისტემა) განსაზღვრავს, რას ნიშნავს კოორდინატის რიცხვი: გრადუსს თუ მეტრს. `QgsGeometry::area()` ითვლის **გეგმურ (დეკარტულ) ფართობს** კოორდინატების ერთეულებში. თუ მონაცემები გეოგრაფიულ CRS-შია (მაგალითად, WGS 84, გრადუსებში), შედეგი **კვადრატული გრადუსია** და კვადრატულ მეტრებად ვერ ჩაითვლება.
+
+| გზა | როდის | შედეგის ერთეული |
+|---|---|---|
+| `geometry().area()` | მონაცემები უკვე საპროექციო CRS-შია (მეტრებში, მაგ. UTM) | CRS-ის ერთეულის კვადრატი |
+| `QgsDistanceArea::measureArea(...)` | ზუსტი ელიფსოიდური გამოთვლა, ნებისმიერი CRS-ისთვის | დამოკიდებულია `areaUnits()`-ზე (ელიფსოიდის გამოყენებისას კვადრატული მეტრი) |
+| გადაპროექტება `QgsCoordinateTransform`-ით | გვინდა გეომეტრია სხვა CRS-ში | ახალი CRS-ის ერთეული |
+
+::: analogy რუკა და მასშტაბი
+რუკაზე „5 სანტიმეტრი“ არაფერს ნიშნავს, სანამ მასშტაბი არ ვიცით. კოორდინატის რიცხვიც ასეა: მნიშვნელობა მხოლოდ CRS-ით მიიღება.
+:::
+
+## საფეხური 1: პოლიგონების ფართობი `qgis_core`-ზე
+
+ამოცანა: რაიონების (პოლიგონების) ფენის ჩატვირთვა, ობიექტების დათვლა და ფართობების ჯამის გამოთვლა ელიფსოიდურად.
 
 ```cpp main.cpp
 #include <iostream>
 
 #include <qgsapplication.h>
+#include <qgsdistancearea.h>
 #include <qgsfeature.h>
 #include <qgsgeometry.h>
+#include <qgsproject.h>
 #include <qgsvectorlayer.h>
 
 int main(int argc, char *argv[]) {
     QgsApplication app(argc, argv, false);     // false = GUI არ გვჭირდება
+    QgsApplication::setPrefixPath("/usr", true); // QGIS-ის ინსტალაციის საქაღალდე
     QgsApplication::initQgis();
 
-    QgsVectorLayer layer("rivers.geojson", "rivers", "ogr");
+    QgsVectorLayer layer("districts.geojson", "districts", "ogr");
     if (!layer.isValid()) {
         std::cerr << "Layer failed to load\n";
         return 1;
     }
 
+    // ელიფსოიდური ფართობი: წყარო CRS + ელიფსოიდი
+    QgsDistanceArea da;
+    da.setSourceCrs(layer.crs(), QgsProject::instance()->transformContext());
+    da.setEllipsoid("WGS84");
+
     std::cout << "Features: " << layer.featureCount() << "\n";
 
-    double totalArea = 0.0;
+    double planar = 0.0;      // კოორდინატების ერთეულის კვადრატი
+    double ellipsoidal = 0.0; // კვადრატული მეტრი
     QgsFeature feature;
     QgsFeatureIterator it = layer.getFeatures();
     while (it.nextFeature(feature)) {
-        totalArea += feature.geometry().area();
+        planar += feature.geometry().area();
+        ellipsoidal += da.measureArea(feature.geometry());
     }
-    std::cout << "Total area: " << totalArea << "\n";
+    std::cout << "Planar sum: " << planar << " (CRS units^2)\n";
+    std::cout << "Ellipsoidal sum: " << ellipsoidal << " m2\n";
 
     QgsApplication::exitQgis();
     return 0;
 }
 ```
 
+გამოსავალი ასე შეიძლება გამოიყურებოდეს (რიცხვები საილუსტრაციოა და შენს მონაცემებზეა დამოკიდებული):
+
 ```output
-Features: 42
-Total area: 0.183762
+Features: 12
+Planar sum: 0.0382741 (CRS units^2)
+Ellipsoidal sum: 453812345 m2
 ```
 
-რიცხვები საილუსტრაციოა: ისინი შენი მონაცემის მიხედვით განსხვავდება. ყურადღება მიაქციე `layer.isValid()` შემოწმებას: ფენის ჩატვირთვა შეიძლება ჩაიშალოს.
+თუ ფენა გეოგრაფიულ CRS-შია, პირველი რიცხვი პატარაა (კვადრატული გრადუსი), მეორე კი კვადრატული მეტრებია. სწორედ ამიტომ ორივეს ერთად ვბეჭდავთ.
 
 ხაზ-ხაზ:
 
@@ -73,58 +105,92 @@ Total area: 0.183762
 | `#include <qgs...h>` | ვრთავთ QGIS-ის კლასებს (header ფაილები, თავი 03) |
 | `int main(int argc, char *argv[])` | `main`-ის ვერსია, რომელიც ბრძანების ხაზის არგუმენტებს იღებს (Qt მათ ითხოვს) |
 | `QgsApplication app(argc, argv, false);` | QGIS-ის „გარემოს“ ობიექტი; `false` ნიშნავს, რომ გრაფიკული ინტერფეისი არ გვჭირდება (headless, ქვეთავი 1.3) |
-| `QgsApplication::initQgis();` | QGIS-ის ინიციალიზაცია: მონაცემთა მკითხველებს, CRS ბაზას და სხვას ამზადებს |
-| `QgsVectorLayer layer("rivers.geojson", "rivers", "ogr");` | ვქმნით ფენას: ფაილი, სახელი, მონაცემთა პროვაიდერი (`ogr` კითხულობს ბევრ ფორმატს) |
-| `if (!layer.isValid()) {...}` | თუ ფენა ვერ ჩაიტვირთა, ვბეჭდავთ შეცდომას `std::cerr`-ით და ვასრულებთ პროგრამას კოდით `1` (შეცდომა) |
-| `layer.featureCount()` | ობიექტების რაოდენობა |
+| `QgsApplication::setPrefixPath("/usr", true);` | ვეუბნებით, სად დგას QGIS (პლაგინები, რესურსები); Linux-ზე სისტემური ინსტალაციისას ჩვეულებრივ `/usr` |
+| `QgsApplication::initQgis();` | QGIS-ის ინიციალიზაცია (static მეთოდია: კლასიდან გამოიძახება); ამზადებს მონაცემთა პროვაიდერებს, CRS ბაზას და სხვას |
+| `QgsVectorLayer layer("districts.geojson", "districts", "ogr");` | ვქმნით ფენას: ფაილი, სახელი, მონაცემთა პროვაიდერი (`ogr` კითხულობს ბევრ ფორმატს) |
+| `if (!layer.isValid())` | თუ ფენა ვერ ჩაიტვირთა, ვბეჭდავთ შეცდომას `std::cerr`-ით და ვასრულებთ პროგრამას კოდით `1` |
+| `QgsDistanceArea da; da.setSourceCrs(...); da.setEllipsoid("WGS84");` | ზუსტი გაზომვის ობიექტი: ვუთითებთ ფენის CRS-ს და ელიფსოიდს |
+| `da.measureArea(geometry)` | გეომეტრიის ფართობი ელიფსოიდზე |
 | `while (it.nextFeature(feature))` | ციკლი ობიექტებზე (თავი 11) |
 | `QgsApplication::exitQgis();` | გამართულად ვასრულებთ მუშაობას და ვათავისუფლებთ რესურსებს |
 
-## CMake
+::: note
+`setPrefixPath` ბილიკი სისტემაზეა დამოკიდებული: Linux-ის პაკეტიდან დაყენებისას ჩვეულებრივ `/usr`, ხელით აწყობისას — `--prefix`-ის მნიშვნელობა, Windows-ზე (OSGeo4W) — QGIS-ის საქაღალდე. თუ ბილიკი არასწორია, ფენა `isValid() == false` დაგიბრუნებს.
+:::
 
-`CMakeLists.txt` უთხრის კომპილატორს, სად არის QGIS-ის header-ები და ბიბლიოთეკები.
+## CMake: ერთი კონკრეტული გარემო
+
+ქვემოთ მაგალითი **Ubuntu/Debian-ისთვისაა**, სადაც QGIS 3.x და Qt5 სისტემური პაკეტებით დგას. QGIS 4-სთვის გამოიყენება Qt6, ამიტომ `Qt5` უნდა შეიცვალოს `Qt6`-ით. სხვა სისტემებზე ბილიკები და პაკეტების სახელები განსხვავდება.
+
+დამოკიდებულებების დაყენება:
+
+```bash
+sudo apt install build-essential cmake qgis libqgis-dev qtbase5-dev
+```
+
+`CMakeLists.txt`:
 
 ```cmake CMakeLists.txt
 cmake_minimum_required(VERSION 3.16)
-project(feature_counter LANGUAGES CXX)
+project(district_area LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# QGIS 4 = Qt6, QGIS 3 = Qt5. აირჩიე შენი QGIS-ის შესაბამისი.
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Xml Widgets)
+# QGIS 3.x = Qt5. QGIS 4 = Qt6: შეცვალე Qt5 -> Qt6.
+find_package(Qt5 REQUIRED COMPONENTS Core Gui Xml Widgets)
 
 find_path(QGIS_INCLUDE_DIR qgsapplication.h PATH_SUFFIXES qgis)
 find_library(QGIS_CORE_LIBRARY qgis_core)
 
-add_executable(feature_counter main.cpp)
-target_include_directories(feature_counter PRIVATE ${QGIS_INCLUDE_DIR})
-target_link_libraries(feature_counter PRIVATE
-    ${QGIS_CORE_LIBRARY} Qt6::Core Qt6::Gui Qt6::Xml Qt6::Widgets)
+if(NOT QGIS_INCLUDE_DIR OR NOT QGIS_CORE_LIBRARY)
+  message(FATAL_ERROR "QGIS headers or qgis_core not found")
+endif()
+
+add_executable(district_area main.cpp)
+target_include_directories(district_area PRIVATE ${QGIS_INCLUDE_DIR})
+target_link_libraries(district_area PRIVATE
+    ${QGIS_CORE_LIBRARY} Qt5::Core Qt5::Gui Qt5::Xml Qt5::Widgets)
 ```
 
-ფაილის ნაწილები: `project(...)` აძლევს პროექტს სახელს; `find_package`, `find_path`, `find_library` ეძებენ საჭირო ბიბლიოთეკებს სისტემაში; `add_executable` ამბობს, რომ ვაწყობთ პროგრამას `main.cpp`-დან; `target_link_libraries` აკავშირებს მას QGIS-სა და Qt-თან.
+ფაილის ნაწილები: `project(...)` აძლევს პროექტს სახელს; `find_package`, `find_path`, `find_library` ეძებენ საჭირო ბიბლიოთეკებს სისტემაში (პირობა `if(NOT ...)` გვაჩერებს, თუ ვერაფერი იპოვა); `add_executable` ამბობს, რომ ვაწყობთ პროგრამას `main.cpp`-დან; `target_link_libraries` აკავშირებს მას QGIS-სა და Qt-თან.
 
 ```bash
 cmake -S . -B build
 cmake --build build
-./build/feature_counter
+cd /path/to/data      # საქაღალდე, სადაც districts.geojson დევს
+/path/to/build/district_area
 ```
 
-პირველი ბრძანება ამზადებს აწყობას `build` საქაღალდეში, მეორე აკომპილებს, მესამე უშვებს შედეგს. ამისთვის `rivers.geojson` ფაილი იმავე საქაღალდეში უნდა იდოს, საიდანაც პროგრამას უშვებ (ან მიუთითე სრული გზა).
+პირველი ბრძანება ამზადებს აწყობას `build` საქაღალდეში, მეორე აკომპილებს და აკავშირებს (compile + link), მესამე უშვებს შედეგს. პროგრამა `districts.geojson`-ს ეძებს იმ საქაღალდეში, საიდანაც გაუშვი (ან მიუთითე სრული გზა კოდში).
 
-::: warn გაითვალისწინე
-`qgis_core` და Qt-ის ვერსიები უნდა ემთხვეოდეს იმას, რითაც თავად QGIS არის აწყობილი. პაკეტები (`qgis-dev` Linux-ზე, OSGeo4W Windows-ზე) ამ ჯგუფს ერთად გაძლევს. ზუსტი სახელები და ბილიკები სისტემაზეა დამოკიდებული.
-:::
+### ტიპური შეცდომები და მათი გამოსწორება
 
-## საფეხური 2: C++ პლაგინის ჩონჩხი
+| შეცდომა | მიზეზი | რა გააკეთო |
+|---|---|---|
+| `qgsapplication.h: No such file or directory` | კომპილატორმა QGIS-ის header-ები ვერ იპოვა | დააყენე `libqgis-dev` და შეამოწმე `QGIS_INCLUDE_DIR` |
+| `undefined reference to QgsApplication::...` | `qgis_core` არ არის მიბმული | შეამოწმე `target_link_libraries` |
+| `libqgis_core.so.3.xx: cannot open shared object file` | გაშვებისას ბიბლიოთეკა ვერ მოიძებნა | დაამატე ბილიკი `LD_LIBRARY_PATH`-ში ან `RPATH`-ში |
+| `Layer failed to load` | არასწორი ფაილის გზა ან `setPrefixPath` | შეამოწმე ფაილის გზა და `setPrefixPath`-ის მნიშვნელობა |
+| Qt5/Qt6 შეუსაბამობა | პროგრამა სხვა Qt ვერსიით აიწყო, ვიდრე QGIS | გამოიყენე ის Qt, რომელზეც QGIS არის აწყობილი |
 
-C++ პლაგინი არის დინამიური ბიბლიოთეკა, რომელსაც QGIS გაშვებისას ტვირთავს. მას აქვს `QgisPlugin` ინტერფეისი და ექსპორტირებული ფუნქციები.
+## საფეხური 2: C++ პლაგინი QGIS-ის წყაროში
+
+C++ პლაგინი არის დინამიური ბიბლიოთეკა, რომელსაც QGIS გაშვებისას ტვირთავს. QGIS-ის რეპოზიტორიაში უკვე არსებობს რეალური C++ პლაგინები (`src/plugins/topology`, `geometry_checker`, `offline_editing`). საუკეთესო სასწავლო გზაა მათი სტრუქტურის გამეორება. ქვემოთ მინიმალური პლაგინია, აგებული `topology`-ს მიხედვით.
+
+**პლაგინის სავალდებულო ნაწილები** (QGIS-ის `qgisplugin.h`-იდან):
+
+1. კლასი, რომელიც მემკვიდრეობს `QgisPlugin`-იდან და ახორციელებს `initGui()` და `unload()` მეთოდებს;
+2. `extern "C"` ფუნქციები: `classFactory`, `name`, `description`, `category`, `type`, `version`, `icon`, `unload`. QGIS მათ პლაგინის ბიბლიოთეკიდან ეძახის სახელით, ამიტომ ისინი C++-ის სახელების გადაკეთების (name mangling) გარეშე უნდა გამოჩნდეს; ამას მაკრო `QGISEXTERN` აკეთებს;
+3. `CMakeLists.txt`, რომელიც `MODULE` ტიპის ბიბლიოთეკას ქმნის.
 
 ```cpp mytool.h
-#pragma once
-#include <QAction>
-#include <QObject>
-#include <qgisplugin.h>
+#ifndef MYTOOL_H
+#define MYTOOL_H
 
+#include <QObject>
+#include "../qgisplugin.h"
+
+class QAction;
 class QgisInterface;
 
 class MyTool : public QObject, public QgisPlugin {
@@ -132,34 +198,46 @@ class MyTool : public QObject, public QgisPlugin {
 public:
     explicit MyTool(QgisInterface *iface);
 
-    void initGui() override;      // QGIS გვიძახებს ჩატვირთვისას
-    void unload() override;       // და გამორთვისას
-
-private slots:
-    void run();
+public slots:
+    void initGui() override;    // QGIS გვიძახებს ჩატვირთვისას
+    void unload() override;     // და გამორთვისას
+    void run();                 // მენიუს პუნქტის დაჭერისას
 
 private:
     QgisInterface *mIface = nullptr;
     QAction *mAction = nullptr;
 };
+
+#endif
 ```
 
 ```cpp mytool.cpp
-#include "mytool.h"
+#include "qgisinterface.h"
+#include "qgsapplication.h"
+#include "qgsmaplayer.h"
+#include "qgsvectorlayer.h"
 
+#include <QAction>
 #include <QMessageBox>
-#include <qgisinterface.h>
-#include <qgsvectorlayer.h>
+#include <QString>
+
+#include "mytool.h"
+#include "moc_mytool.cpp"
+
+static const QString sName = QObject::tr("Feature Counter");
+static const QString sDescription = QObject::tr("Counts features of the active vector layer");
+static const QString sCategory = QObject::tr("Vector");
+static const QString sPluginVersion = QObject::tr("Version 0.1");
+static const QgisPlugin::PluginType sPluginType = QgisPlugin::UI;
+static const QString sPluginIcon = QString();
 
 MyTool::MyTool(QgisInterface *iface)
-    : QgisPlugin(QStringLiteral("Feature Counter"),
-                 QStringLiteral("Counts features of the active layer"),
-                 QStringLiteral("Analysis"), QStringLiteral("0.1"),
-                 QgisPlugin::UI),
+    : QgisPlugin(sName, sDescription, sCategory, sPluginVersion, sPluginType),
       mIface(iface) {}
 
 void MyTool::initGui() {
-    mAction = new QAction(tr("Count features"), this);
+    delete mAction;
+    mAction = new QAction(sName, this);
     connect(mAction, &QAction::triggered, this, &MyTool::run);
     mIface->addPluginToMenu(tr("&My Tools"), mAction);
 }
@@ -179,17 +257,47 @@ void MyTool::run() {
     QMessageBox::information(nullptr, tr("Result"),
         tr("Features: %1").arg(layer->featureCount()));
 }
+
+// ---- სავალდებულო ექსპორტირებული ფუნქციები ----
+QGISEXTERN QgisPlugin *classFactory(QgisInterface *iface) { return new MyTool(iface); }
+QGISEXTERN const QString *name() { return &sName; }
+QGISEXTERN const QString *description() { return &sDescription; }
+QGISEXTERN int type() { return sPluginType; }
+QGISEXTERN const QString *category() { return &sCategory; }
+QGISEXTERN const QString *version() { return &sPluginVersion; }
+QGISEXTERN const QString *icon() { return &sPluginIcon; }
+QGISEXTERN void unload(QgisPlugin *plugin) { delete plugin; }
 ```
 
-გამოიყენე ყველაფერი, რაც ისწავლე: `qobject_cast` + `nullptr` შემოწმება (თავები 04, 07), `connect` (თავი 10), `const` და `QString` (თავები 05, 10).
+```cmake CMakeLists.txt
+set(mytool_SRCS mytool.cpp)
 
-ხაზ-ხაზ: `class MyTool : public QObject, public QgisPlugin` — ჩვენი კლასი მემკვიდრეობს `QObject`-იდან (რომ signal/slot გვქონდეს) და `QgisPlugin`-იდან (პლაგინის ინტერფეისი). `Q_OBJECT` არის Qt-ის მაკრო, რომელიც signal/slot მექანიზმს რთავს. `initGui()` QGIS-ს ჩატვირთვისას ეძახის: აქ ვქმნით მენიუს პუნქტს (`QAction`) და ვაკავშირებთ `run()` მეთოდთან. `unload()` გამორთვისას ასუფთავებს. `run()` კი ინსტრუმენტის ლოგიკაა: იღებს აქტიურ ფენას, ამოწმებს, რომ ვექტორულია, და შეტყობინებით აჩვენებს ობიექტების რაოდენობას. `iface` (`QgisInterface`) QGIS-ის ფანჯრასთან ურთიერთობის შესასვლელია. `tr("...")` აღნიშნავს ტექსტს, რომლის თარგმნაც მომავალში იქნება შესაძლებელი.
+add_library(plugin_mytool MODULE ${mytool_SRCS})
 
-::: warn ჩონჩხი და რეალური კოდი
-ზემოთ მოცემული კოდი არის სტრუქტურის ილუსტრაცია. პლაგინის ექსპორტირებული ფუნქციები (`classFactory`, `name`, `version` და სხვა) და `QgisPlugin`-ის კონსტრუქტორის ზუსტი ხელმოწერა ვერსიიდან ვერსიამდე შეიძლება შეიცვალოს. შენი QGIS-ის ვერსიის წყარო კოდში `src/plugins/` საქაღალდეშია მოქმედი მაგალითები. დაიწყე მათი კოპირებით და მერე შეცვალე.
+include_directories(
+  ${CMAKE_SOURCE_DIR}/src/plugins
+  ${CMAKE_BINARY_DIR}/src/ui
+  ${CMAKE_CURRENT_BINARY_DIR}
+)
+
+target_link_libraries(plugin_mytool qgis_core qgis_gui)
+
+install(TARGETS plugin_mytool
+  RUNTIME DESTINATION ${QGIS_PLUGIN_DIR}
+  LIBRARY DESTINATION ${QGIS_PLUGIN_DIR})
+```
+
+ფაილები `mytool/` საქაღალდეში უნდა დაიდოს QGIS-ის წყაროში `src/plugins/mytool/`, ხოლო `src/plugins/CMakeLists.txt`-ში უნდა დაემატოს ხაზი `add_subdirectory(mytool)` (იქ ახლა წერია `add_subdirectory(topology)`, `add_subdirectory(geometry_checker)` და სხვა). შემდეგ QGIS-ის აწყობა (საფეხური 3) შენს პლაგინსაც ააგებს.
+
+ხაზ-ხაზ: `class MyTool : public QObject, public QgisPlugin` — მემკვიდრეობა `QObject`-იდან (signal/slot-ისთვის) და `QgisPlugin`-იდან (პლაგინის ინტერფეისი). `Q_OBJECT` არის Qt-ის მაკრო, რომელიც signal/slot მექანიზმს რთავს. `initGui()` QGIS-ს ჩატვირთვისას ეძახის: აქ ვქმნით მენიუს პუნქტს (`QAction`) და ვაკავშირებთ `run()` მეთოდთან. `unload()` გამორთვისას ასუფთავებს. `run()` კი ინსტრუმენტის ლოგიკაა: იღებს აქტიურ ფენას, ამოწმებს, რომ ვექტორულია, და შეტყობინებით აჩვენებს ობიექტების რაოდენობას. `iface` (`QgisInterface`) QGIS-ის ფანჯრასთან ურთიერთობის შესასვლელია. `tr("...")` აღნიშნავს ტექსტს, რომლის თარგმნაც მომავალში იქნება შესაძლებელი.
+
+::: note QGIS-ის წყაროს ჩვევები
+`#include "moc_mytool.cpp"` ბოლოს და `../qgisplugin.h` იმ კონვენციებს მიჰყვება, რომელსაც `src/plugins/topology/topol.cpp` იყენებს. თუ შენს QGIS ვერსიაში აწყობა სხვა ფორმას მოითხოვს, პირდაპირ `topology` პლაგინს შეადარე: ის ყოველთვის სწორია ამ ვერსიისთვის.
 :::
 
-## საფეხური 3: QGIS-ის აწყობა წყაროდან
+## საფეხური 3: QGIS-ის აწყობა წყაროდან (გაფართოებული)
+
+ეს საფეხური არ არის აუცილებელი წიგნის ძირითადი შედეგისთვის. QGIS-ის აწყობა სერიოზული ამოცანაა: მოითხოვს დამოკიდებულებებს (Qt, GDAL, GEOS, PROJ და სხვა), მნიშვნელოვან დროსა და ადგილს დისკზე. დაიწყე მხოლოდ მაშინ, როცა პირველი ორი საფეხური უკვე მუშაობს.
 
 ```bash
 git clone https://github.com/qgis/QGIS.git
@@ -201,29 +309,31 @@ ninja
 
 | ეტაპი | რა ხდება |
 |---|---|
-| `cmake` | ამოწმებს დამოკიდებულებებს (Qt, GDAL, GEOS, PROJ...) და ქმნის build ფაილებს |
+| `cmake` | ამოწმებს დამოკიდებულებებს და ქმნის build ფაილებს; დამოკიდებულებების სრული სია QGIS-ის `INSTALL.md`-შია |
 | `ninja` | აკომპილებს; პირველად დიდ დროს მოითხოვს |
-| ტესტი | გაუშვი აწყობილი `qgis`; შემდეგ დაამატე შენი პლაგინი `src/plugins/` ქვეშ |
+| ტესტი | გაუშვი აწყობილი `qgis`; პლაგინი ჩატვირთე „Plugin Manager“-იდან |
 
 მცირე ცვლილების შეტანის შემდეგ `ninja` მხოლოდ შეცვლილ ფაილებს აკომპილებს.
 
 ::: warn ლიცენზია
-QGIS ვრცელდება GNU GPL ლიცენზიით. თუ შენ მიერ შეცვლილ QGIS-ს ან მასში ჩაშენებულ კოდს სხვას გადასცემ, მიმღებს უფლება აქვს მოითხოვოს **წყარო კოდიც**. ამიტომ „დახურული ბინარული“ მხოლოდ საკუთარი გამოყენებისთვის მუშაობს. ბინარულ ფაილშიც კოდის აღდგენა სრულიად შეუძლებელი არ არის. საკუთარი ალგორითმის დასაცავად გააზრებულად აირჩიე არქიტექტურა და გადაამოწმე ლიცენზიის პირობები გავრცელებამდე.
+QGIS ვრცელდება GNU GPL ლიცენზიით. ამ ლიცენზიის მოთხოვნები (მათ შორის წყარო კოდის გადაცემის ვალდებულება) დამოკიდებულია იმაზე, **როგორ და ვისთვის** ავრცელებ პროგრამას, ხოლო კონკრეტული შემთხვევა შეიძლება გარემოებებზე იყოს დამოკიდებული. ეს ტექსტი იურიდიული რჩევა არ არის. თუ გეგმავ საკუთარი კოდის გავრცელებას QGIS-თან ერთად ან მასში ჩაშენებულს, წაიკითხე ლიცენზიის პირობები და საჭიროებისას მიმართე იურისტს. გაითვალისწინე ისიც, რომ კომპილირებული ბინარული კოდის დაცვა აბსოლუტური არ არის: მისი უკუინჟინერია რთულია, მაგრამ შესაძლებელია.
 :::
 
 ## სავარჯიშო და შეჯამება
 
 ::: exercise საბოლოო დავალება
-1. გააკეთე საფეხური 1 შენი მონაცემით (მაგ. რაიონების პოლიგონები) და გამოიტანე თითოეული რაიონის ფართობი.
-2. დაამატე `QgsFeatureRequest` ფილტრი და დათვალე მხოლოდ ობიექტები გარკვეული ატრიბუტით.
-3. წაიკითხე `src/plugins/`-ში არსებული ერთი მარტივი პლაგინი და შეადარე შენს ჩონჩხს.
-4. მოამზადე 5-ხაზიანი დოკუმენტი: რა ისწავლე, რა გაუგებარია, რა გინდა შემდეგ ეტაპზე.
+1. გააკეთე საფეხური 1 შენი მონაცემით (მაგ. რაიონების პოლიგონები). **მოსალოდნელი შედეგი:** პროგრამა ბეჭდავს ობიექტების რაოდენობას და ორ ფართობს; ელიფსოიდური ფართობი კვადრატულ მეტრებშია და შესამჩნევად განსხვავდება „Planar sum“-ისგან, თუ ფენა გეოგრაფიულ CRS-შია.
+2. შეამოწმე შედეგი QGIS-ის გრაფიკულ ინტერფეისში (ატრიბუტთა ცხრილის გამოსახულება `$area`) და შეადარე.
+3. დაამატე `QgsFeatureRequest` ფილტრი და დათვალე მხოლოდ ობიექტები გარკვეული ატრიბუტით. **შემოწმება:** რაოდენობა უნდა დაემთხვეს QGIS-ში ამავე პირობით არჩეულ ობიექტებს.
+4. წაიკითხე `src/plugins/topology/topol.cpp` და იპოვე იქ ყველა `QGISEXTERN` ფუნქცია. **შემოწმება:** ჩამოწერე რვავე სახელი.
+5. მოამზადე 5-ხაზიანი დოკუმენტი: რა ისწავლე, რა გაუგებარია, რა გინდა შემდეგ ეტაპზე.
 :::
 
 ::: summary კურსის შეჯამება
-- PyQGIS და C++ API ერთი სისტემაა; სახელები იგივეა, გრამატიკა — განსხვავებული.
+- PyQGIS და C++ API ერთი ბირთვის ორი ინტერფეისია; სახელები უმეტესად ერთია, ზუსტი ხელმოწერები კი ყოველთვის უნდა გადაამოწმო.
 - `*` — შეიძლება `nullptr`, `&` — აუცილებლად არსებობს, `const &` — უსაფრთხო წაკითხვა.
-- smart pointer-ები და QObject-ის ხე მეხსიერებას თავად მართავენ.
+- smart pointer-ები და QObject-ის ხე მეხსიერებას თავად მართავენ, მაგრამ QGIS-ს საკუთარი მფლობელობის წესები აქვს.
+- `QgsGeometry::area()` გეგმურია; გეოგრაფიული ფართობისთვის `QgsDistanceArea`.
 - `api.qgis.org` იკითხება: აღწერა, ტიპები, ხელმოწერა.
-- გზა: დამოუკიდებელი აპლიკაცია → პლაგინი → QGIS-ის აწყობა.
+- გზა: დამოუკიდებელი აპლიკაცია → პლაგინის სტრუქტურა → QGIS-ის აწყობა.
 :::

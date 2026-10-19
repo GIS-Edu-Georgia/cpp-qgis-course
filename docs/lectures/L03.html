@@ -2,7 +2,7 @@
 <html lang="ka"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>L03 · ფუნქციები და namespace — შესავალი QGIS-ის პროგრამირებაში</title>
 <link rel="stylesheet" href="../assets/slides.css"></head>
-<body data-total="10">
+<body data-total="11">
 <div class="bar"><i></i></div>
 <main id="deck">
   <section class="slide title" data-title="ფუნქციები და namespace">
@@ -166,18 +166,55 @@
     <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
 }</code></pre></figure>
 <figure class="code out"><figcaption><span>შედეგი</span></figcaption><pre><code>5</code></pre></figure>
-<p><code>std::hypot(a, b)</code> არის <code>√(a² + b²)</code>, ანუ პითაგორას თეორემა: მანძილი გეგმურ (დეკარტულ) კოორდინატებში. წერტილები (0,0) და (3,4) სამკუთხედის გვერდებია 3 და 4, ჰიპოტენუზა კი 5. <code>&lt;cmath&gt;</code> არის მათემატიკური ფუნქციების ბიბლიოთეკა.</p>
+<p><code>std::hypot(a, b)</code> არის <code>√(a² + b²)</code>, ანუ პითაგორას თეორემა: მანძილი გეგმურ (დეკარტულ) კოორდინატებში.</p>
+<div class="box warn"><div class="box-title">მხოლოდ ბრტყელი კოორდინატებისთვის</div><div class="box-body">
+<p>ეს ფუნქცია სწორია, როცა კოორდინატები ბრტყელ სიბრტყეზეა (მაგალითად, მეტრებში, UTM-ში). გეოგრაფიულ კოორდინატებში (განედი/გრძედი გრადუსებით) ასეთი ევკლიდური მანძილი რეალურ მანძილს არ იძლევა, რადგან გრადუსი სხვადასხვა განედზე სხვადასხვა სიგრძისაა. ასეთ შემთხვევაში QGIS-ში <code>QgsDistanceArea</code>-ს ვიყენებთ (თავი 12).
+::: წერტილები (0,0) და (3,4) სამკუთხედის გვერდებია 3 და 4, ჰიპოტენუზა კი 5. <code>&lt;cmath&gt;</code> არის მათემატიკური ფუნქციების ბიბლიოთეკა.</p>
+</div></div>
+</div>
+  </section>
+
+  <section class="slide" data-title="რამდენიმე ფუნქცია ერთ ფაილში">
+    <div class="eyebrow">03.7 · საფუძვლები</div>
+    <h2>რამდენიმე ფუნქცია ერთ ფაილში</h2>
+    <div class="content"><p>ახლა ყველაფერი ერთად: ერთი namespace, სამი ფუნქცია, რომლებიც ერთ ნაკვეთს ეხება.</p>
+<figure class="code cpp"><figcaption><span>C++</span><em>parcel_tools.cpp</em></figcaption><pre><code class="hljs"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;cmath&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;iostream&gt;</span></span>
+
+<span class="hljs-keyword">namespace</span> GIS {
+    <span class="hljs-function"><span class="hljs-type">double</span> <span class="hljs-title">area</span><span class="hljs-params">(<span class="hljs-type">double</span> width, <span class="hljs-type">double</span> height)</span> </span>{
+        <span class="hljs-keyword">return</span> width * height;
+    }
+    <span class="hljs-function"><span class="hljs-type">double</span> <span class="hljs-title">perimeter</span><span class="hljs-params">(<span class="hljs-type">double</span> width, <span class="hljs-type">double</span> height)</span> </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-number">2.0</span> * (width + height);
+    }
+    <span class="hljs-function"><span class="hljs-type">double</span> <span class="hljs-title">distance</span><span class="hljs-params">(<span class="hljs-type">double</span> x1, <span class="hljs-type">double</span> y1, <span class="hljs-type">double</span> x2, <span class="hljs-type">double</span> y2)</span> </span>{
+        <span class="hljs-keyword">return</span> std::<span class="hljs-built_in">hypot</span>(x2 - x1, y2 - y1);
+    }
+}
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
+    std::cout &lt;&lt; <span class="hljs-string">&quot;Area: &quot;</span> &lt;&lt; GIS::<span class="hljs-built_in">area</span>(<span class="hljs-number">20.0</span>, <span class="hljs-number">15.0</span>) &lt;&lt; <span class="hljs-string">&quot;\n&quot;</span>;
+    std::cout &lt;&lt; <span class="hljs-string">&quot;Perimeter: &quot;</span> &lt;&lt; GIS::<span class="hljs-built_in">perimeter</span>(<span class="hljs-number">20.0</span>, <span class="hljs-number">15.0</span>) &lt;&lt; <span class="hljs-string">&quot;\n&quot;</span>;
+    std::cout &lt;&lt; <span class="hljs-string">&quot;Diagonal: &quot;</span> &lt;&lt; GIS::<span class="hljs-built_in">distance</span>(<span class="hljs-number">0.0</span>, <span class="hljs-number">0.0</span>, <span class="hljs-number">20.0</span>, <span class="hljs-number">15.0</span>) &lt;&lt; <span class="hljs-string">&quot;\n&quot;</span>;
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}</code></pre></figure>
+<figure class="code out"><figcaption><span>შედეგი</span></figcaption><pre><code>Area: 300
+Perimeter: 70
+Diagonal: 25</code></pre></figure>
+<p>20 × 15 მ ნაკვეთის დიაგონალია √(20² + 15²) = √625 = 25 მ.</p>
 </div>
   </section>
 
   <section class="slide" data-title=".h და .cpp ფაილები">
-    <div class="eyebrow">03.7 · საფუძვლები</div>
+    <div class="eyebrow">03.8 · საფუძვლები</div>
     <h2>.h და .cpp ფაილები</h2>
     <div class="content"><p>დიდ პროექტში ფუნქციის <strong>დეკლარაცია</strong> (რა ჰქვია, რა აქვს შესასვლელში და გამოსასვლელში) და <strong>განსაზღვრება</strong> (როგორ მუშაობს) ცალკე ფაილებშია:</p>
 <ul>
-<li><strong><code>.h</code> (header) ფაილი</strong> — დეკლარაცია, ერთგვარი „სარჩევი“; მას სხვა ფაილები იყენებენ;</li>
+<li><strong><code>.h</code> (header) ფაილი</strong> — დეკლარაცია, ერთგვარი „სარჩევი“; ის კომპილატორს ეუბნება, რომ ასეთი ფუნქცია არსებობს და როგორი ტიპები აქვს; მას სხვა ფაილები იყენებენ;</li>
 <li><strong><code>.cpp</code> ფაილი</strong> — განსაზღვრება, თავად კოდი.</li>
 </ul>
+<p>ეს გაყოფა ფაილების მექანიკური დაყოფა კი არა, <strong>ინტერფეისისა და რეალიზაციის გამიჯვნაა</strong>: გამომძახებელს მხოლოდ ინტერფეისი (რა აკეთებს) სჭირდება, შიგნით როგორ მუშაობს, მისი საქმე არ არის.</p>
 <p>QGIS-ის მთელი წყარო კოდი ასეა აგებული, <code>api.qgis.org</code> კი სწორედ <code>.h</code> ფაილებიდან გენერირდება. ამიტომაც ამ ფაილებს ხშირად წაიკითხავ.</p>
 <figure class="code cpp"><figcaption><span>C++</span><em>gis_utils.h</em></figcaption><pre><code class="hljs"><span class="hljs-meta">#<span class="hljs-keyword">pragma</span> once</span>
 
@@ -205,7 +242,7 @@
   </section>
 
   <section class="slide" data-title="სავარჯიშო და შეჯამება">
-    <div class="eyebrow">03.8 · საფუძვლები</div>
+    <div class="eyebrow">03.9 · საფუძვლები</div>
     <h2>სავარჯიშო და შეჯამება</h2>
     <div class="content"><div class="box exercise"><div class="box-title">სავარჯიშო</div><div class="box-body">
 <ol>

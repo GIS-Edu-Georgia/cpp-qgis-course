@@ -131,7 +131,8 @@ DEM is raster</code></pre></figure>
 </table>
 <p>ორივე ელემენტი <code>Layer *</code>-ია, მაგრამ <code>type()</code> თითოეულისთვის საკუთარ პასუხს აბრუნებს. სწორედ ამიტომ ინახავს QGIS ყველა ფენას ერთ სიაში, როგორც <code>QgsMapLayer *</code>.</p>
 <div class="box note"><div class="box-title">შენიშვნა</div><div class="box-body">
-<p><code>override</code> არ არის სავალდებულო, მაგრამ კომპილატორს ამოწმებს: თუ მეთოდის სახელი ან პარამეტრი შეეშალა, შეცდომას დაგიბრუნებს. <code>virtual ~Layer()</code> ბაზისურ კლასში აუცილებელია, რომ წაშლისას სწორი დესტრუქტორი გამოიძახოს.</p>
+<p><code>override</code> არ არის სავალდებულო, მაგრამ კომპილატორს ამოწმებს: თუ მეთოდის სახელი ან პარამეტრი შეეშალა, შეცდომას დაგიბრუნებს.</p>
+<p><strong>ვირტუალური დესტრუქტორი.</strong> წარმოიდგინე, რომ ობიექტი შექმნილია როგორც <code>VectorLayer</code>, მაგრამ მასზე მაჩვენებელი <code>Layer *</code> ტიპისაა და ამ მაჩვენებლით ვშლით ობიექტს (<code>delete layer;</code>). თუ <code>~Layer()</code> <code>virtual</code> არ არის, გაეშვება მხოლოდ ბაზისური კლასის დესტრუქტორი და <code>VectorLayer</code>-ის ნაწილი სწორად არ გაიწმინდება (გაჟონვა ან განუსაზღვრელი ქცევა). <code>virtual ~Layer()</code> უზრუნველყოფს, რომ სწორი, ანუ მემკვიდრის დესტრუქტორიც გაეშვას. წესი: თუ კლასი ბაზისურად გამოიყენება და მასზე მაჩვენებლით ვმუშაობთ, დესტრუქტორი <code>virtual</code> უნდა იყოს.</p>
 </div></div>
 </div>
   </section>
@@ -166,6 +167,45 @@ DEM is raster</code></pre></figure>
 </div></div>
 <div class="box warn"><div class="box-title">ყურადღება</div><div class="box-body">
 <p><code>qobject_cast</code> აბრუნებს <code>nullptr</code>-ს, თუ გარდაქმნა შეუძლებელია, ანუ აქტიური ფენა რასტრულია ან საერთოდ არ არის არჩეული. ყოველთვის შეამოწმე შედეგი <code>nullptr</code>-ზე.</p>
+</div></div>
+<table>
+<thead>
+<tr>
+<th></th>
+<th><code>dynamic_cast</code></th>
+<th><code>qobject_cast</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>რომელი ტიპებისთვის</td>
+<td>ნებისმიერი პოლიმორფული კლასი (<code>virtual</code> მეთოდებით)</td>
+<td>მხოლოდ <code>QObject</code>-იდან მემკვიდრე კლასები (<code>Q_OBJECT</code> მაკროთი)</td>
+</tr>
+<tr>
+<td>საიდან არის</td>
+<td>C++-ის სტანდარტი</td>
+<td>Qt</td>
+</tr>
+<tr>
+<td>ხარჯი</td>
+<td>შედარებით მეტი</td>
+<td>ჩვეულებრივ ნაკლები</td>
+</tr>
+<tr>
+<td>რას აბრუნებს, თუ ტიპი არ ემთხვევა</td>
+<td><code>nullptr</code> (მაჩვენებლისთვის)</td>
+<td><code>nullptr</code></td>
+</tr>
+<tr>
+<td>როგორ ვამოწმებთ</td>
+<td><code>if (auto *p = dynamic_cast&lt;T *&gt;(x))</code></td>
+<td><code>if (auto *p = qobject_cast&lt;T *&gt;(x))</code></td>
+</tr>
+</tbody>
+</table>
+<div class="box note"><div class="box-title">იერარქია გადაამოწმე დოკუმენტაციაში</div><div class="box-body">
+<p>ამ თავში მოცემული <code>QgsMapLayer → QgsVectorLayer / QgsRasterLayer</code> იერარქია გამარტივებულია. ყოველთვის გადაამოწმე კონკრეტული კლასის გვერდზე (Inheritance diagram) <code>api.qgis.org</code>-ზე: იქ ზუსტად ჩანს, ვისგან მოდის კლასი და რომელ მეთოდებს იღებს მშობლისგან. ზოგ ვერსიაში ფენების დამატებითი ტიპებიცაა (მაგ., mesh, point cloud, vector tile).</p>
 </div></div>
 </div>
   </section>

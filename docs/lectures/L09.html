@@ -101,6 +101,7 @@ std::cout &lt;&lt; areas.<span class="hljs-built_in">size</span>() &lt;&lt; <spa
 Kutaisi: 147000
 Rustavi: 125000
 Tbilisi: 1200000</code></pre></figure>
+<p><code>std::map</code> გასაღებებს <strong>დალაგებულად</strong> ინახავს. თუ დალაგება არ გჭირდება და მხოლოდ სწრაფი ძებნა გაინტერესებს, არსებობს <code>std::unordered_map</code>: მისი ელემენტების თანმიმდევრობა წინასწარ განსაზღვრული არ არის.</p>
 <p>ახსნა: <code>population[&quot;Rustavi&quot;] = 125000;</code> ამატებს ახალ წყვილს. ციკლში <code>for (const auto &amp;[city, people] : population)</code> ყოველი წყვილიდან ორივე ნაწილს ცალ-ცალკე ვიღებთ (<code>city</code> და <code>people</code>); ეს ჩანაწერი C++17-ის სიახლეა და მას <strong>structured binding</strong> ჰქვია. <code>const auto &amp;</code> კი ნიშნავს „ტიპი თვითონ გამოიცანი, არ დააკოპირო და არ შეცვალო“ (თავი 05).</p>
 <div class="box note"><div class="box-title">შენიშვნა</div><div class="box-body">
 <p>მოსახლეობის რიცხვები აქ მიახლოებითი და საილუსტრაციოა, მიზანი კონტეინერის ჩვენებაა.</p>
@@ -164,7 +165,13 @@ Parcels &gt; 10 ha: 2</code></pre></figure>
 <span class="hljs-keyword">if</span> (it != areas.<span class="hljs-built_in">end</span>()) {
     std::cout &lt;&lt; <span class="hljs-string">&quot;First &gt; 20: &quot;</span> &lt;&lt; *it &lt;&lt; <span class="hljs-string">&quot;\n&quot;</span>;
 }</code></pre></figure>
-<p><code>find_if</code> აბრუნებს <strong>iterator-ს</strong>: ელემენტზე მიმთითებელს (მაჩვენებლის მსგავს ობიექტს). ბოლოს <code>end()</code> ნიშნავს „ვერ ვიპოვე“. <code>*it</code> იღებს მნიშვნელობას. QGIS-ში <code>QgsFeatureIterator</code> ამავე იდეაზეა აგებული.</p>
+<p><code>find_if</code> აბრუნებს <strong>iterator-ს</strong>: ელემენტზე მიმთითებელს (მაჩვენებლის მსგავს ობიექტს). თუ ელემენტი ვერ მოიძებნა, შედეგი უდრის <code>areas.end()</code>-ს, ამიტომ <code>*it</code>-ს გამოყენებამდე ეს ყოველთვის უნდა შევამოწმოთ (როგორც <code>nullptr</code> მაჩვენებელზე). იგივე ეხება <code>std::max_element</code>-ს: ცარიელ სიაზე ის <code>end()</code>-ს აბრუნებს. <code>*it</code> იღებს მნიშვნელობას.</p>
+<div class="box warn"><div class="box-title">ცარიელი კონტეინერი</div><div class="box-body">
+<p><code>std::accumulate</code> ცარიელ სიაზე საწყის მნიშვნელობას (<code>0.0</code>) დააბრუნებს, ხოლო საშუალოს გამოთვლისას <code>total / areas.size()</code> ნულზე გაყოფა იქნება. ამიტომ გაყოფამდე ყოველთვის შეამოწმე <code>if (!areas.empty())</code>.</p>
+</div></div>
+<div class="box note"><div class="box-title">QgsFeatureIterator STL-ის კონტეინერი არ არის</div><div class="box-body">
+<p>QGIS-ში <code>QgsFeatureIterator</code> ამავე იდეაზეა აგებული (ობიექტებს სათითაოდ გვაწვდის), მაგრამ ის STL-ის კონტეინერი არ არის: ობიექტები მეხსიერებაში წინასწარ არ ინახება, ისინი მონაცემთა პროვაიდერიდან (ფაილიდან ან ბაზიდან) წამოდის და მხოლოდ ერთხელ გავივლით. ამიტომ მას <code>begin()</code>/<code>end()</code> და STL ალგორითმები ჩვეულებრივ არ აქვს; იყენებენ <code>nextFeature(...)</code> ციკლს.</p>
+</div></div>
 </div>
   </section>
 
