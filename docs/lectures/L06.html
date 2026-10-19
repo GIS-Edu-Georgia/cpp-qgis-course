@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="ka"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>L06 · კლასები და ობიექტები — C++ PyQGIS-იდან QGIS Core-მდე</title>
+<link rel="stylesheet" href="../assets/slides.css"></head>
+<body data-total="9">
+<div class="bar"><i></i></div>
+<main id="deck">
+  <section class="slide title" data-title="კლასები და ობიექტები">
+    <div class="eyebrow">ლექცია 06 · OOP</div>
+    <h1>კლასები და ობიექტები</h1>
+    <div class="en">Classes and objects</div>
+    <p class="topics">class და struct · public/private · კონსტრუქტორი · const მეთოდები · QGIS-ის სახელდების წესი</p>
+    <div class="intro"><p>QGIS-ში თითქმის ყველაფერი კლასია: <code>QgsPointXY</code>, <code>QgsFeature</code>, <code>QgsVectorLayer</code>. კლასი აერთიანებს <strong>მონაცემს</strong> (წევრ-ცვლადებს) და <strong>ქცევას</strong> (მეთოდებს).</p>
+</div>
+    <div class="hint">← → ისრებით გადაადგილება · F — სრული ეკრანი · P — ბეჭდვა</div>
+  </section>
+  <section class="slide" data-title="კლასი და ობიექტი">
+    <div class="eyebrow">06.1 · OOP</div>
+    <h2>კლასი და ობიექტი</h2>
+    <div class="content"><div class="box analogy"><div class="box-title">ნახაზი და სახლი</div><div class="box-body">
+<p>კლასი არის ნახაზი, ობიექტი კი ამ ნახაზით აშენებული სახლი. ერთი ნახაზით შეიძლება ბევრი სახლი აშენდეს: ერთი კლასი <code>Parcel</code>, ბევრი კონკრეტული ნაკვეთი.</p>
+</div></div>
+<div class="box compare"><div class="box-body">
+<figure class="code python"><figcaption><span>Python</span></figcaption><pre><code class="hljs"><span class="hljs-keyword">class</span> <span class="hljs-title class_">Parcel</span>:
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, owner, w, h</span>):
+        <span class="hljs-variable language_">self</span>.owner = owner
+        <span class="hljs-variable language_">self</span>.w = w
+        <span class="hljs-variable language_">self</span>.h = h
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">area</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">self</span>.w * <span class="hljs-variable language_">self</span>.h</code></pre></figure>
+<figure class="code cpp"><figcaption><span>C++</span></figcaption><pre><code class="hljs"><span class="hljs-keyword">class</span> <span class="hljs-title class_">Parcel</span> {
+<span class="hljs-keyword">public</span>:
+  <span class="hljs-built_in">Parcel</span>(std::string owner, <span class="hljs-type">double</span> w, <span class="hljs-type">double</span> h);
+  <span class="hljs-function"><span class="hljs-type">double</span> <span class="hljs-title">area</span><span class="hljs-params">()</span> <span class="hljs-type">const</span></span>;
+<span class="hljs-keyword">private</span>:
+  std::string mOwner;
+  <span class="hljs-type">double</span> mW, mH;
+};</code></pre></figure>
+</div></div>
+</div>
+  </section>
+
+  <section class="slide" data-title="public და private">
+    <div class="eyebrow">06.2 · OOP</div>
+    <h2>public და private</h2>
+    <div class="content"><p><code>private</code> წევრებს მხოლოდ თავად კლასის მეთოდები ხედავენ. გარედან მათზე წვდომა კომპილაციის შეცდომაა. ასე ობიექტი საკუთარ მდგომარეობას იცავს და გარე კოდი მას არასწორ მდგომარეობაში ვერ ჩააგდებს.</p>
+<div class="box tip"><div class="box-title">QGIS-ის წესი</div><div class="box-body">
+<p>წევრ-ცვლადებს აქვთ <code>m</code> პრეფიქსი (<code>mOwner</code>, <code>mWidth</code>), მეთოდები კი <code>get</code>-ის გარეშეა: <code>feature.id()</code>, არა <code>feature.getId()</code>. შეცვლისთვის გამოიყენება <code>set</code>: <code>feature.setGeometry(...)</code>.</p>
+</div></div>
+</div>
+  </section>
+
+  <section class="slide" data-title="სრული მაგალითი">
+    <div class="eyebrow">06.3 · OOP</div>
+    <h2>სრული მაგალითი</h2>
+    <div class="content"><figure class="code cpp"><figcaption><span>C++</span><em>parcel.cpp</em></figcaption><pre><code class="hljs"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;iostream&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;string&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;utility&gt;</span></span>
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Parcel</span> {
+<span class="hljs-keyword">public</span>:
+    <span class="hljs-built_in">Parcel</span>(std::string owner, <span class="hljs-type">double</span> width, <span class="hljs-type">double</span> height)
+        : <span class="hljs-built_in">mOwner</span>(std::<span class="hljs-built_in">move</span>(owner)), <span class="hljs-built_in">mWidth</span>(width), <span class="hljs-built_in">mHeight</span>(height) {}
+
+    <span class="hljs-function"><span class="hljs-type">double</span> <span class="hljs-title">area</span><span class="hljs-params">()</span> <span class="hljs-type">const</span> </span>{ <span class="hljs-keyword">return</span> mWidth * mHeight; }
+    <span class="hljs-function"><span class="hljs-type">const</span> std::string &amp;<span class="hljs-title">owner</span><span class="hljs-params">()</span> <span class="hljs-type">const</span> </span>{ <span class="hljs-keyword">return</span> mOwner; }
+
+    <span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">resize</span><span class="hljs-params">(<span class="hljs-type">double</span> width, <span class="hljs-type">double</span> height)</span> </span>{
+        mWidth = width;
+        mHeight = height;
+    }
+
+<span class="hljs-keyword">private</span>:
+    std::string mOwner;
+    <span class="hljs-type">double</span> mWidth;
+    <span class="hljs-type">double</span> mHeight;
+};
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
+    <span class="hljs-function">Parcel <span class="hljs-title">p</span><span class="hljs-params">(<span class="hljs-string">&quot;Nino&quot;</span>, <span class="hljs-number">20.0</span>, <span class="hljs-number">15.0</span>)</span></span>;
+    std::cout &lt;&lt; p.<span class="hljs-built_in">owner</span>() &lt;&lt; <span class="hljs-string">&quot;: &quot;</span> &lt;&lt; p.<span class="hljs-built_in">area</span>() &lt;&lt; <span class="hljs-string">&quot; m2\n&quot;</span>;
+
+    p.<span class="hljs-built_in">resize</span>(<span class="hljs-number">25.0</span>, <span class="hljs-number">20.0</span>);
+    std::cout &lt;&lt; p.<span class="hljs-built_in">owner</span>() &lt;&lt; <span class="hljs-string">&quot;: &quot;</span> &lt;&lt; p.<span class="hljs-built_in">area</span>() &lt;&lt; <span class="hljs-string">&quot; m2\n&quot;</span>;
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}</code></pre></figure>
+<figure class="code out"><figcaption><span>შედეგი</span></figcaption><pre><code>Nino: 300 m2
+Nino: 500 m2</code></pre></figure>
+</div>
+  </section>
+
+  <section class="slide" data-title="კონსტრუქტორი">
+    <div class="eyebrow">06.4 · OOP</div>
+    <h2>კონსტრუქტორი</h2>
+    <div class="content"><p>კონსტრუქტორი არის სპეციალური მეთოდი, რომელიც ობიექტის შექმნისას სრულდება. მას სახელი კლასის სახელი აქვს და დაბრუნების ტიპი არა. წევრებს ვიწყებთ ე.წ. <strong>ინიციალიზაციის სიით</strong> (<code>: mOwner(...), mWidth(width)</code>), ეს მიღებული წესია.</p>
+<figure class="code cpp"><figcaption><span>C++</span></figcaption><pre><code class="hljs"><span class="hljs-function">Parcel <span class="hljs-title">p</span><span class="hljs-params">(<span class="hljs-string">&quot;Nino&quot;</span>, <span class="hljs-number">20.0</span>, <span class="hljs-number">15.0</span>)</span></span>;          <span class="hljs-comment">// ობიექტი შეიქმნა</span></code></pre></figure>
+<p>QGIS-ის მაგალითი:</p>
+<figure class="code cpp"><figcaption><span>C++</span></figcaption><pre><code class="hljs"><span class="hljs-function">QgsPointXY <span class="hljs-title">tbilisi</span><span class="hljs-params">(<span class="hljs-number">44.8271</span>, <span class="hljs-number">41.7151</span>)</span></span>;   <span class="hljs-comment">// x = გრძედი(lon), y = განედი(lat)</span>
+<span class="hljs-type">double</span> x = tbilisi.<span class="hljs-built_in">x</span>();</code></pre></figure>
+<div class="box warn"><div class="box-title">გაითვალისწინე</div><div class="box-body">
+<p>QGIS-ში წერტილი <code>(x, y)</code> = <code>(გრძედი, განედი)</code>, ანუ <code>(lon, lat)</code>. ბევრ რუკის API-ში პირიქითაა. შეცდომა ძალიან გავრცელებულია.</p>
+</div></div>
+</div>
+  </section>
+
+  <section class="slide" data-title="const მეთოდი">
+    <div class="eyebrow">06.5 · OOP</div>
+    <h2>const მეთოდი</h2>
+    <div class="content"><p><code>double area() const</code> — ბოლოს <code>const</code> ნიშნავს, რომ მეთოდი ობიექტს არ ცვლის. ამიტომ ის <code>const Parcel &amp;</code>-ზეც გამოიძახება. გახსოვდეს <code>const QgsFeature &amp;feature</code>: მასზე მხოლოდ <code>const</code> მეთოდები გამოიძახება.</p>
+<table>
+<thead>
+<tr>
+<th>მეთოდი</th>
+<th><code>const</code>?</th>
+<th>რატომ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>area()</code></td>
+<td>დიახ</td>
+<td>მხოლოდ კითხულობს</td>
+</tr>
+<tr>
+<td><code>owner()</code></td>
+<td>დიახ</td>
+<td>მხოლოდ კითხულობს</td>
+</tr>
+<tr>
+<td><code>resize(...)</code></td>
+<td>არა</td>
+<td>ცვლის ობიექტს</td>
+</tr>
+</tbody>
+</table>
+</div>
+  </section>
+
+  <section class="slide" data-title="struct და class">
+    <div class="eyebrow">06.6 · OOP</div>
+    <h2>struct და class</h2>
+    <div class="content"><p>C++-ში <code>struct</code> და <code>class</code> თითქმის ერთია. ერთადერთი განსხვავება: <code>struct</code>-ში წევრები ნაგულისხმევად <code>public</code>-ია, <code>class</code>-ში <code>private</code>. პრაქტიკაში <code>struct</code> მარტივ მონაცემებს (<code>Point</code>) ვიყენებთ, <code>class</code> — ქცევიან ობიექტებს.</p>
+</div>
+  </section>
+
+  <section class="slide" data-title="სავარჯიშო და შეჯამება">
+    <div class="eyebrow">06.7 · OOP</div>
+    <h2>სავარჯიშო და შეჯამება</h2>
+    <div class="content"><div class="box exercise"><div class="box-title">სავარჯიშო</div><div class="box-body">
+<ol>
+<li>დაამატე <code>Parcel</code>-ს მეთოდი <code>double perimeter() const</code>.</li>
+<li>დაამატე <code>bool isLargerThan(const Parcel &amp;other) const</code>.</li>
+<li>შექმენი კლასი <code>Region</code>, რომელსაც აქვს სახელი და მოსახლეობა, და მეთოდი <code>density(double areaKm2) const</code>.</li>
+<li>შეეცადე <code>p.mWidth = 5;</code>-ს <code>main</code>-ში და წაიკითხე კომპილატორის შეტყობინება.</li>
+</ol>
+</div></div>
+<div class="box summary"><div class="box-title">შეჯამება</div><div class="box-body">
+<ul>
+<li>კლასი = მონაცემი + მეთოდები; ობიექტი = კლასის კონკრეტული ეგზემპლარი.</li>
+<li><code>private</code> იცავს მდგომარეობას, <code>public</code> არის ინტერფეისი.</li>
+<li>QGIS: <code>mMember</code>, <code>name()</code>, <code>setName()</code>.</li>
+<li><code>const</code> მეთოდი ობიექტს არ ცვლის.</li>
+</ul>
+</div></div>
+</div>
+  </section>
+  <section class="slide end" data-title="შემდეგ ლექციაში">
+    <div class="eyebrow">შემდეგ ლექციაში</div>
+    <h2>07 · მემკვიდრეობა და პოლიმორფიზმი</h2><p class="topics">ბაზისური და მემკვიდრე კლასი · virtual / override · dynamic_cast · qobject_cast</p>
+    <a class="btn" href="L07.html">გახსნა →</a>
+    <a class="btn ghost" href="../index.html">სარჩევი</a>
+    <a class="btn ghost" href="L05.html">← წინა ლექცია</a>
+  </section></main>
+<nav class="ctl"><button id="prev" aria-label="წინა">←</button><span id="count"></span><button id="next" aria-label="შემდეგი">→</button></nav>
+<script src="../assets/slides.js"></script>
+</body></html>

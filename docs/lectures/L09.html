@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="ka"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>L09 · STL: კონტეინერები და ალგორითმები — C++ PyQGIS-იდან QGIS Core-მდე</title>
+<link rel="stylesheet" href="../assets/slides.css"></head>
+<body data-total="8">
+<div class="bar"><i></i></div>
+<main id="deck">
+  <section class="slide title" data-title="STL: კონტეინერები და ალგორითმები">
+    <div class="eyebrow">ლექცია 09 · მონაცემთა სტრუქტურები</div>
+    <h1>STL: კონტეინერები და ალგორითმები</h1>
+    <div class="en">The Standard Template Library</div>
+    <p class="topics">vector · map · range-for · lambda · sort · count_if · accumulate</p>
+    <div class="intro"><p>STL არის C++-ის სტანდარტული ბიბლიოთეკა კონტეინერებისა და ალგორითმებისთვის. QGIS ძირითადად Qt-ის კონტეინერებს იყენებს (თავი 10), მაგრამ STL-ის ცოდნა მაინც აუცილებელია: ორივეს ლოგიკა ერთია და ბევრი QGIS ფუნქცია STL ტიპებს აბრუნებს.</p>
+</div>
+    <div class="hint">← → ისრებით გადაადგილება · F — სრული ეკრანი · P — ბეჭდვა</div>
+  </section>
+  <section class="slide" data-title="vector — დინამიური მასივი">
+    <div class="eyebrow">09.1 · მონაცემთა სტრუქტურები</div>
+    <h2>vector — დინამიური მასივი</h2>
+    <div class="content"><p><code>std::vector&lt;T&gt;</code> არის Python-ის <code>list</code>-ის ანალოგი, ოღონდ ყველა ელემენტი ერთი ტიპისაა.</p>
+<div class="box compare"><div class="box-body">
+<figure class="code python"><figcaption><span>Python</span></figcaption><pre><code class="hljs">areas = [<span class="hljs-number">12.5</span>, <span class="hljs-number">7.0</span>, <span class="hljs-number">30.5</span>, <span class="hljs-number">4.0</span>]
+areas.append(<span class="hljs-number">9.0</span>)
+<span class="hljs-built_in">print</span>(<span class="hljs-built_in">len</span>(areas))
+<span class="hljs-keyword">for</span> a <span class="hljs-keyword">in</span> areas:
+    <span class="hljs-built_in">print</span>(a)</code></pre></figure>
+<figure class="code cpp"><figcaption><span>C++</span></figcaption><pre><code class="hljs">std::vector&lt;<span class="hljs-type">double</span>&gt; areas = {<span class="hljs-number">12.5</span>, <span class="hljs-number">7.0</span>, <span class="hljs-number">30.5</span>, <span class="hljs-number">4.0</span>};
+areas.<span class="hljs-built_in">push_back</span>(<span class="hljs-number">9.0</span>);
+std::cout &lt;&lt; areas.<span class="hljs-built_in">size</span>() &lt;&lt; <span class="hljs-string">&quot;\n&quot;</span>;
+<span class="hljs-keyword">for</span> (<span class="hljs-type">double</span> a : areas) {
+  std::cout &lt;&lt; a &lt;&lt; <span class="hljs-string">&quot;\n&quot;</span>;
+}</code></pre></figure>
+</div></div>
+<table>
+<thead>
+<tr>
+<th>ოპერაცია</th>
+<th>Python</th>
+<th>C++</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>დამატება</td>
+<td><code>append(x)</code></td>
+<td><code>push_back(x)</code></td>
+</tr>
+<tr>
+<td>ზომა</td>
+<td><code>len(a)</code></td>
+<td><code>a.size()</code></td>
+</tr>
+<tr>
+<td>ელემენტი</td>
+<td><code>a[0]</code></td>
+<td><code>a[0]</code></td>
+</tr>
+<tr>
+<td>ბოლო</td>
+<td><code>a[-1]</code></td>
+<td><code>a.back()</code></td>
+</tr>
+<tr>
+<td>გასუფთავება</td>
+<td><code>a.clear()</code></td>
+<td><code>a.clear()</code></td>
+</tr>
+</tbody>
+</table>
+<div class="box tip"><div class="box-title">წესი</div><div class="box-body">
+<p>დიდი ელემენტების ციკლში გამოიყენე <code>const auto &amp;</code>: <code>for (const auto &amp;feature : features)</code>. ასე ელემენტი არ დაკოპირდება (თავი 05).</p>
+</div></div>
+</div>
+  </section>
+
+  <section class="slide" data-title="map — გასაღები → მნიშვნელობა">
+    <div class="eyebrow">09.2 · მონაცემთა სტრუქტურები</div>
+    <h2>map — გასაღები → მნიშვნელობა</h2>
+    <div class="content"><p><code>std::map&lt;K, V&gt;</code> არის <code>dict</code>-ის ანალოგი. გასაღებებს ავტომატურად ალაგებს ზრდადობით.</p>
+<figure class="code cpp"><figcaption><span>C++</span><em>map.cpp</em></figcaption><pre><code class="hljs"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;iostream&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;map&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;string&gt;</span></span>
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
+    std::map&lt;std::string, <span class="hljs-type">int</span>&gt; population = {
+        {<span class="hljs-string">&quot;Tbilisi&quot;</span>, <span class="hljs-number">1200000</span>},
+        {<span class="hljs-string">&quot;Batumi&quot;</span>, <span class="hljs-number">170000</span>},
+        {<span class="hljs-string">&quot;Kutaisi&quot;</span>, <span class="hljs-number">147000</span>},
+    };
+
+    population[<span class="hljs-string">&quot;Rustavi&quot;</span>] = <span class="hljs-number">125000</span>;
+
+    <span class="hljs-keyword">for</span> (<span class="hljs-type">const</span> <span class="hljs-keyword">auto</span> &amp;[city, people] : population) {
+        std::cout &lt;&lt; city &lt;&lt; <span class="hljs-string">&quot;: &quot;</span> &lt;&lt; people &lt;&lt; <span class="hljs-string">&quot;\n&quot;</span>;
+    }
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}</code></pre></figure>
+<figure class="code out"><figcaption><span>შედეგი</span></figcaption><pre><code>Batumi: 170000
+Kutaisi: 147000
+Rustavi: 125000
+Tbilisi: 1200000</code></pre></figure>
+<div class="box note"><div class="box-title">შენიშვნა</div><div class="box-body">
+<p>მოსახლეობის რიცხვები აქ მიახლოებითი და საილუსტრაციოა, მიზანი კონტეინერის ჩვენებაა. <code>const auto &amp;[city, people]</code> (structured binding, C++17) ერთდროულად ორივეს ამოიღებს.</p>
+</div></div>
+<div class="box warn"><div class="box-title">ყურადღება</div><div class="box-body">
+<p><code>population[&quot;Poti&quot;]</code> — თუ გასაღები არ არსებობს, <code>map</code> ჩუმად შექმნის ახალ ჩანაწერს ნულოვანი მნიშვნელობით. არსებობის შესამოწმებლად გამოიყენე <code>population.find(&quot;Poti&quot;) != population.end()</code> ან <code>population.count(&quot;Poti&quot;)</code>.</p>
+</div></div>
+</div>
+  </section>
+
+  <section class="slide" data-title="ალგორითმები">
+    <div class="eyebrow">09.3 · მონაცემთა სტრუქტურები</div>
+    <h2>ალგორითმები</h2>
+    <div class="content"><p><code>&lt;algorithm&gt;</code> და <code>&lt;numeric&gt;</code> გვაძლევს მზა ოპერაციებს: დალაგება, დათვლა, ჯამი.</p>
+<figure class="code cpp"><figcaption><span>C++</span><em>algo.cpp</em></figcaption><pre><code class="hljs"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;algorithm&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;iostream&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;numeric&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;vector&gt;</span></span>
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
+    std::vector&lt;<span class="hljs-type">double</span>&gt; areas = {<span class="hljs-number">12.5</span>, <span class="hljs-number">7.0</span>, <span class="hljs-number">30.5</span>, <span class="hljs-number">4.0</span>};
+
+    std::<span class="hljs-built_in">sort</span>(areas.<span class="hljs-built_in">begin</span>(), areas.<span class="hljs-built_in">end</span>(),
+              [](<span class="hljs-type">double</span> a, <span class="hljs-type">double</span> b) { <span class="hljs-keyword">return</span> a &gt; b; });
+
+    <span class="hljs-keyword">for</span> (<span class="hljs-type">double</span> a : areas) std::cout &lt;&lt; a &lt;&lt; <span class="hljs-string">&quot; &quot;</span>;
+    std::cout &lt;&lt; <span class="hljs-string">&quot;\n&quot;</span>;
+
+    <span class="hljs-type">double</span> total = std::<span class="hljs-built_in">accumulate</span>(areas.<span class="hljs-built_in">begin</span>(), areas.<span class="hljs-built_in">end</span>(), <span class="hljs-number">0.0</span>);
+    std::cout &lt;&lt; <span class="hljs-string">&quot;Total: &quot;</span> &lt;&lt; total &lt;&lt; <span class="hljs-string">&quot;\n&quot;</span>;
+    std::cout &lt;&lt; <span class="hljs-string">&quot;Average: &quot;</span> &lt;&lt; total / areas.<span class="hljs-built_in">size</span>() &lt;&lt; <span class="hljs-string">&quot;\n&quot;</span>;
+
+    <span class="hljs-type">long</span> big = std::<span class="hljs-built_in">count_if</span>(areas.<span class="hljs-built_in">begin</span>(), areas.<span class="hljs-built_in">end</span>(),
+                             [](<span class="hljs-type">double</span> a) { <span class="hljs-keyword">return</span> a &gt; <span class="hljs-number">10.0</span>; });
+    std::cout &lt;&lt; <span class="hljs-string">&quot;Parcels &gt; 10 ha: &quot;</span> &lt;&lt; big &lt;&lt; <span class="hljs-string">&quot;\n&quot;</span>;
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}</code></pre></figure>
+<figure class="code out"><figcaption><span>შედეგი</span></figcaption><pre><code>30.5 12.5 7 4 
+Total: 54
+Average: 13.5
+Parcels &gt; 10 ha: 2</code></pre></figure>
+</div>
+  </section>
+
+  <section class="slide" data-title="lambda — უსახელო ფუნქცია">
+    <div class="eyebrow">09.4 · მონაცემთა სტრუქტურები</div>
+    <h2>lambda — უსახელო ფუნქცია</h2>
+    <div class="content"><p><code>[](double a, double b) { return a &gt; b; }</code> არის lambda: ფუნქცია, რომელიც ადგილზევე იწერება. Python-ში ეს <code>lambda a, b: a &gt; b</code>-ს ჰგავს. <code>[]</code> კვადრატულ ფრჩხილებში შეიძლება გარე ცვლადების „დაჭერა“:</p>
+<figure class="code cpp"><figcaption><span>C++</span></figcaption><pre><code class="hljs"><span class="hljs-type">double</span> limit = <span class="hljs-number">10.0</span>;
+<span class="hljs-keyword">auto</span> isBig = [limit](<span class="hljs-type">double</span> a) { <span class="hljs-keyword">return</span> a &gt; limit; };</code></pre></figure>
+<p>QGIS-ში lambda-ებს ხშირად გამოიყენებენ signal-ებთან დასაკავშირებლად (თავი 10).</p>
+</div>
+  </section>
+
+  <section class="slide" data-title="ძებნა">
+    <div class="eyebrow">09.5 · მონაცემთა სტრუქტურები</div>
+    <h2>ძებნა</h2>
+    <div class="content"><figure class="code cpp"><figcaption><span>C++</span></figcaption><pre><code class="hljs"><span class="hljs-keyword">auto</span> it = std::<span class="hljs-built_in">find_if</span>(areas.<span class="hljs-built_in">begin</span>(), areas.<span class="hljs-built_in">end</span>(),
+                       [](<span class="hljs-type">double</span> a) { <span class="hljs-keyword">return</span> a &gt; <span class="hljs-number">20.0</span>; });
+<span class="hljs-keyword">if</span> (it != areas.<span class="hljs-built_in">end</span>()) {
+    std::cout &lt;&lt; <span class="hljs-string">&quot;First &gt; 20: &quot;</span> &lt;&lt; *it &lt;&lt; <span class="hljs-string">&quot;\n&quot;</span>;
+}</code></pre></figure>
+<p><code>find_if</code> აბრუნებს <strong>iterator-ს</strong>: ელემენტზე მიმთითებელს (მაჩვენებლის მსგავს ობიექტს). ბოლოს <code>end()</code> ნიშნავს „ვერ ვიპოვე“. <code>*it</code> იღებს მნიშვნელობას. QGIS-ში <code>QgsFeatureIterator</code> ამავე იდეაზეა აგებული.</p>
+</div>
+  </section>
+
+  <section class="slide" data-title="სავარჯიშო და შეჯამება">
+    <div class="eyebrow">09.6 · მონაცემთა სტრუქტურები</div>
+    <h2>სავარჯიშო და შეჯამება</h2>
+    <div class="content"><div class="box exercise"><div class="box-title">სავარჯიშო</div><div class="box-body">
+<ol>
+<li>დაწერე <code>std::vector&lt;Point&gt;</code> ხუთი წერტილით და <code>std::sort</code>-ით დაალაგე x-ის მიხედვით.</li>
+<li>შექმენი <code>std::map&lt;std::string, double&gt;</code>: მდინარე → სიგრძე კმ-ში (<code>{&quot;Mtkvari&quot;, 1364}</code>, <code>{&quot;Rioni&quot;, 327}</code>, <code>{&quot;Alazani&quot;, 407}</code>). იპოვე ყველაზე გრძელი (<code>std::max_element</code> მიმართე დოკუმენტაციას).</li>
+<li><code>count_if</code>-ით დათვალე მდინარეები, რომლებიც 400 კმ-ზე გრძელია.</li>
+</ol>
+</div></div>
+<div class="box summary"><div class="box-title">შეჯამება</div><div class="box-body">
+<ul>
+<li><code>vector</code> = list, <code>map</code> = dict, ორივე ტიპიზებულია.</li>
+<li>ალგორითმები იღებენ დიაპაზონს <code>begin()</code>–<code>end()</code> და lambda-ს.</li>
+<li>iterator — მაჩვენებლის მსგავსი ობიექტი კონტეინერში გადასაადგილებლად.</li>
+</ul>
+</div></div>
+</div>
+  </section>
+  <section class="slide end" data-title="შემდეგ ლექციაში">
+    <div class="eyebrow">შემდეგ ლექციაში</div>
+    <h2>10 · Qt: QString, QVariant, signals და slots</h2><p class="topics">QString · QList · QVariant · QgsAttributes · QObject-ის ხე · signal/slot · lambda connect</p>
+    <a class="btn" href="L10.html">გახსნა →</a>
+    <a class="btn ghost" href="../index.html">სარჩევი</a>
+    <a class="btn ghost" href="L08.html">← წინა ლექცია</a>
+  </section></main>
+<nav class="ctl"><button id="prev" aria-label="წინა">←</button><span id="count"></span><button id="next" aria-label="შემდეგი">→</button></nav>
+<script src="../assets/slides.js"></script>
+</body></html>

@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="ka"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>L03 · ფუნქციები და namespace — C++ PyQGIS-იდან QGIS Core-მდე</title>
+<link rel="stylesheet" href="../assets/slides.css"></head>
+<body data-total="9">
+<div class="bar"><i></i></div>
+<main id="deck">
+  <section class="slide title" data-title="ფუნქციები და namespace">
+    <div class="eyebrow">ლექცია 03 · საფუძვლები</div>
+    <h1>ფუნქციები და namespace</h1>
+    <div class="en">Functions and namespaces</div>
+    <p class="topics">ფუნქციის ხელმოწერა · overload · default არგუმენტი · .h/.cpp დაყოფა · namespace და ::</p>
+    <div class="intro"><p>QGIS-ის კოდში ყველაფერი კლასებშია, მაგრამ კლასის მეთოდიც ფუნქციაა. ფუნქციის ხელმოწერის კითხვა დოკუმენტაციის გასაგებად პირველი აუცილებელი უნარია.</p>
+</div>
+    <div class="hint">← → ისრებით გადაადგილება · F — სრული ეკრანი · P — ბეჭდვა</div>
+  </section>
+  <section class="slide" data-title="ფუნქციის ანატომია">
+    <div class="eyebrow">03.1 · საფუძვლები</div>
+    <h2>ფუნქციის ანატომია</h2>
+    <div class="content"><figure class="code cpp"><figcaption><span>C++</span></figcaption><pre><code class="hljs"><span class="hljs-function"><span class="hljs-type">double</span> <span class="hljs-title">calculateArea</span><span class="hljs-params">(<span class="hljs-type">double</span> width, <span class="hljs-type">double</span> height)</span> </span>{
+    <span class="hljs-keyword">return</span> width * height;
+}</code></pre></figure>
+<table>
+<thead>
+<tr>
+<th>ნაწილი</th>
+<th>მაგალითში</th>
+<th>მნიშვნელობა</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>დაბრუნების ტიპი</td>
+<td><code>double</code></td>
+<td>რას დაგიბრუნებს</td>
+</tr>
+<tr>
+<td>სახელი</td>
+<td><code>calculateArea</code></td>
+<td>როგორ გამოვიძახოთ</td>
+</tr>
+<tr>
+<td>პარამეტრები</td>
+<td><code>double width, double height</code></td>
+<td>რა უნდა გადავცეთ (თითოეულს ტიპი აქვს)</td>
+</tr>
+<tr>
+<td>სხეული</td>
+<td><code>{ ... }</code></td>
+<td>რას აკეთებს</td>
+</tr>
+</tbody>
+</table>
+<p>თუ ფუნქცია არაფერს აბრუნებს, დაბრუნების ტიპია <code>void</code>.</p>
+<div class="box warn"><div class="box-title">გავრცელებული შეცდომა</div><div class="box-body">
+<p>ფუნქციის განსაზღვრისას ფრჩხილების შემდეგ <code>;</code> არ დაიდება: <code>double f(double a); { ... }</code> არასწორია, რადგან <code>;</code> აქ ფუნქციას „დეკლარაციად“ აქცევს და ფიგურული ფრჩხილები ფუნქციას აღარ ეკუთვნის.</p>
+</div></div>
+</div>
+  </section>
+
+  <section class="slide" data-title="namespace — სახელების საქაღალდე">
+    <div class="eyebrow">03.2 · საფუძვლები</div>
+    <h2>namespace — სახელების საქაღალდე</h2>
+    <div class="content"><div class="box analogy"><div class="box-title">საქაღალდეები კომპიუტერში</div><div class="box-body">
+<p>ორ საქაღალდეში (<code>ProjectA</code>, <code>ProjectB</code>) შეიძლება ერთი სახელის ფაილი გვქონდეს, <code>data.txt</code>. კონფლიქტი არ იქნება, რადგან მისამართი განსხვავებულია. <code>namespace</code> სწორედ ასეთი საქაღალდეა კოდისთვის.</p>
+</div></div>
+<figure class="code cpp"><figcaption><span>C++</span><em>area.cpp</em></figcaption><pre><code class="hljs"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;iostream&gt;</span></span>
+
+<span class="hljs-keyword">namespace</span> GIS {
+    <span class="hljs-function"><span class="hljs-type">double</span> <span class="hljs-title">calculateArea</span><span class="hljs-params">(<span class="hljs-type">double</span> width, <span class="hljs-type">double</span> height)</span> </span>{
+        <span class="hljs-keyword">return</span> width * height;
+    }
+}
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
+    <span class="hljs-type">double</span> area = GIS::<span class="hljs-built_in">calculateArea</span>(<span class="hljs-number">5.0</span>, <span class="hljs-number">10.0</span>);
+    std::cout &lt;&lt; <span class="hljs-string">&quot;Area: &quot;</span> &lt;&lt; area &lt;&lt; std::endl;
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}</code></pre></figure>
+<figure class="code out"><figcaption><span>შედეგი</span></figcaption><pre><code>Area: 50</code></pre></figure>
+<p><code>::</code> არის scope resolution operator: „შედი <code>GIS</code>-ში და იქიდან აიღე <code>calculateArea</code>“. ანალოგიურად <code>std::cout</code> ნიშნავს „სტანდარტული ბიბლიოთეკის <code>cout</code>“.</p>
+<div class="box tip"><div class="box-title">QGIS-ში</div><div class="box-body">
+<p><code>Qgis::WkbType</code>, <code>Qgis::DistanceUnit</code> — ეს <code>Qgis</code> სახელების სივრცეა. კლასებს კი <code>Qgs</code> პრეფიქსი აქვთ: <code>QgsFeature</code>, <code>QgsProject</code>. პრეფიქსიც ერთგვარი namespace-ია ძველი სტილით.</p>
+</div></div>
+</div>
+  </section>
+
+  <section class="slide" data-title="overload — ერთი სახელი, სხვადასხვა პარამეტრები">
+    <div class="eyebrow">03.3 · საფუძვლები</div>
+    <h2>overload — ერთი სახელი, სხვადასხვა პარამეტრები</h2>
+    <div class="content"><p>C++-ში ერთსა და იმავე სახელზე რამდენიმე ფუნქცია შეიძლება არსებობდეს, თუ პარამეტრები განსხვავდება.</p>
+<figure class="code cpp"><figcaption><span>C++</span><em>overload.cpp</em></figcaption><pre><code class="hljs"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;iostream&gt;</span></span>
+
+<span class="hljs-keyword">namespace</span> GIS {
+    <span class="hljs-function"><span class="hljs-type">double</span> <span class="hljs-title">calculateArea</span><span class="hljs-params">(<span class="hljs-type">double</span> width, <span class="hljs-type">double</span> height)</span> </span>{
+        <span class="hljs-keyword">return</span> width * height;                 <span class="hljs-comment">// მართკუთხედი</span>
+    }
+    <span class="hljs-function"><span class="hljs-type">double</span> <span class="hljs-title">calculateArea</span><span class="hljs-params">(<span class="hljs-type">double</span> radius)</span> </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-number">3.14159</span> * radius * radius;      <span class="hljs-comment">// წრე</span>
+    }
+}
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
+    std::cout &lt;&lt; GIS::<span class="hljs-built_in">calculateArea</span>(<span class="hljs-number">5.0</span>, <span class="hljs-number">10.0</span>) &lt;&lt; <span class="hljs-string">&quot;\n&quot;</span>;
+    std::cout &lt;&lt; GIS::<span class="hljs-built_in">calculateArea</span>(<span class="hljs-number">10.0</span>) &lt;&lt; <span class="hljs-string">&quot;\n&quot;</span>;
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}</code></pre></figure>
+<figure class="code out"><figcaption><span>შედეგი</span></figcaption><pre><code>50
+314.159</code></pre></figure>
+<p>QGIS-ის API სავსეა ასეთი overload-ებით: მაგალითად, <code>QgsPointXY</code> რამდენიმე კონსტრუქტორით იქმნება.</p>
+</div>
+  </section>
+
+  <section class="slide" data-title="default პარამეტრი">
+    <div class="eyebrow">03.4 · საფუძვლები</div>
+    <h2>default პარამეტრი</h2>
+    <div class="content"><figure class="code cpp"><figcaption><span>C++</span><em>units.cpp</em></figcaption><pre><code class="hljs"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;iostream&gt;</span></span>
+
+<span class="hljs-function"><span class="hljs-type">double</span> <span class="hljs-title">toMeters</span><span class="hljs-params">(<span class="hljs-type">double</span> value, <span class="hljs-type">double</span> factor = <span class="hljs-number">1.0</span>)</span> </span>{
+    <span class="hljs-keyword">return</span> value * factor;
+}
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
+    std::cout &lt;&lt; <span class="hljs-built_in">toMeters</span>(<span class="hljs-number">2.5</span>, <span class="hljs-number">1000.0</span>) &lt;&lt; <span class="hljs-string">&quot;\n&quot;</span>;   <span class="hljs-comment">// კილომეტრი -&gt; მეტრი</span>
+    std::cout &lt;&lt; <span class="hljs-built_in">toMeters</span>(<span class="hljs-number">7.0</span>) &lt;&lt; <span class="hljs-string">&quot;\n&quot;</span>;            <span class="hljs-comment">// უკვე მეტრებშია</span>
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}</code></pre></figure>
+<figure class="code out"><figcaption><span>შედეგი</span></figcaption><pre><code>2500
+7</code></pre></figure>
+<p>default მნიშვნელობა მხოლოდ ბოლო პარამეტრებს შეიძლება ჰქონდეთ.</p>
+</div>
+  </section>
+
+  <section class="slide" data-title="მანძილი ორ წერტილს შორის">
+    <div class="eyebrow">03.5 · საფუძვლები</div>
+    <h2>მანძილი ორ წერტილს შორის</h2>
+    <div class="content"><figure class="code cpp"><figcaption><span>C++</span><em>distance.cpp</em></figcaption><pre><code class="hljs"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;iostream&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;cmath&gt;</span></span>
+
+<span class="hljs-keyword">namespace</span> GIS {
+    <span class="hljs-function"><span class="hljs-type">double</span> <span class="hljs-title">distance</span><span class="hljs-params">(<span class="hljs-type">double</span> x1, <span class="hljs-type">double</span> y1, <span class="hljs-type">double</span> x2, <span class="hljs-type">double</span> y2)</span> </span>{
+        <span class="hljs-keyword">return</span> std::<span class="hljs-built_in">hypot</span>(x2 - x1, y2 - y1);
+    }
+}
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
+    std::cout &lt;&lt; GIS::<span class="hljs-built_in">distance</span>(<span class="hljs-number">0.0</span>, <span class="hljs-number">0.0</span>, <span class="hljs-number">3.0</span>, <span class="hljs-number">4.0</span>) &lt;&lt; <span class="hljs-string">&quot;\n&quot;</span>;
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}</code></pre></figure>
+<figure class="code out"><figcaption><span>შედეგი</span></figcaption><pre><code>5</code></pre></figure>
+<p><code>std::hypot(a, b)</code> არის <code>sqrt(a*a + b*b)</code>, ანუ პითაგორას თეორემა: მანძილი დეკარტულ (გეგმურ) კოორდინატებში.</p>
+</div>
+  </section>
+
+  <section class="slide" data-title=".h და .cpp ფაილები">
+    <div class="eyebrow">03.6 · საფუძვლები</div>
+    <h2>.h და .cpp ფაილები</h2>
+    <div class="content"><p>დიდ პროექტში ფუნქციის <strong>დეკლარაცია</strong> (რას აკეთებს) და <strong>განსაზღვრება</strong> (როგორ აკეთებს) ცალკე ფაილებშია. QGIS-ის მთელი წყარო კოდი ასეა აგებული, <code>api.qgis.org</code> კი სწორედ <code>.h</code> ფაილებიდან გენერირდება.</p>
+<figure class="code cpp"><figcaption><span>C++</span><em>gis_utils.h</em></figcaption><pre><code class="hljs"><span class="hljs-meta">#<span class="hljs-keyword">pragma</span> once</span>
+
+<span class="hljs-keyword">namespace</span> GIS {
+    <span class="hljs-function"><span class="hljs-type">double</span> <span class="hljs-title">distance</span><span class="hljs-params">(<span class="hljs-type">double</span> x1, <span class="hljs-type">double</span> y1, <span class="hljs-type">double</span> x2, <span class="hljs-type">double</span> y2)</span></span>;
+}</code></pre></figure>
+<figure class="code cpp"><figcaption><span>C++</span><em>gis_utils.cpp</em></figcaption><pre><code class="hljs"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;gis_utils.h&quot;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;cmath&gt;</span></span>
+
+<span class="hljs-function"><span class="hljs-type">double</span> <span class="hljs-title">GIS::distance</span><span class="hljs-params">(<span class="hljs-type">double</span> x1, <span class="hljs-type">double</span> y1, <span class="hljs-type">double</span> x2, <span class="hljs-type">double</span> y2)</span> </span>{
+    <span class="hljs-keyword">return</span> std::<span class="hljs-built_in">hypot</span>(x2 - x1, y2 - y1);
+}</code></pre></figure>
+<figure class="code cpp"><figcaption><span>C++</span><em>main.cpp</em></figcaption><pre><code class="hljs"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;iostream&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;gis_utils.h&quot;</span></span>
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
+    std::cout &lt;&lt; GIS::<span class="hljs-built_in">distance</span>(<span class="hljs-number">0.0</span>, <span class="hljs-number">0.0</span>, <span class="hljs-number">3.0</span>, <span class="hljs-number">4.0</span>) &lt;&lt; <span class="hljs-string">&quot;\n&quot;</span>;
+}</code></pre></figure>
+<figure class="code bash"><figcaption><span>Shell</span></figcaption><pre><code class="hljs">g++ main.cpp gis_utils.cpp -o gis</code></pre></figure>
+<div class="box note"><div class="box-title">შენიშვნა</div><div class="box-body">
+<p><code>#include &lt;...&gt;</code> — სისტემური ბიბლიოთეკა, <code>#include &quot;...&quot;</code> — შენი საკუთარი ფაილი. <code>#pragma once</code> იცავს ფაილს ორჯერ ჩართვისგან.</p>
+</div></div>
+</div>
+  </section>
+
+  <section class="slide" data-title="სავარჯიშო და შეჯამება">
+    <div class="eyebrow">03.7 · საფუძვლები</div>
+    <h2>სავარჯიშო და შეჯამება</h2>
+    <div class="content"><div class="box exercise"><div class="box-title">სავარჯიშო</div><div class="box-body">
+<ol>
+<li>დაწერე <code>GIS::perimeter(double width, double height)</code> (მართკუთხა ნაკვეთის პერიმეტრი) და შეამოწმე 5 × 10 ზომაზე.</li>
+<li>დაამატე overload კვადრატისთვის: <code>perimeter(double side)</code>.</li>
+<li>გამოთვალე მანძილი წერტილებს შორის (2, 3) და (6, 6).</li>
+<li>გადაიტანე ფუნქციები <code>gis_utils.h</code> / <code>gis_utils.cpp</code> ფაილებში.</li>
+</ol>
+</div></div>
+<div class="box summary"><div class="box-title">შეჯამება</div><div class="box-body">
+<ul>
+<li>ფუნქცია = დაბრუნების ტიპი + სახელი + ტიპიზებული პარამეტრები.</li>
+<li><code>namespace</code> იცავს სახელებს კონფლიქტისგან, <code>::</code> მასში შედის.</li>
+<li>overload და default პარამეტრები QGIS API-ში ყველგანაა.</li>
+<li><code>.h</code> — დეკლარაცია, <code>.cpp</code> — განსაზღვრება.</li>
+</ul>
+</div></div>
+</div>
+  </section>
+  <section class="slide end" data-title="შემდეგ ლექციაში">
+    <div class="eyebrow">შემდეგ ლექციაში</div>
+    <h2>04 · მაჩვენებლები (Pointers)</h2><p class="topics">მისამართი და მნიშვნელობა · &amp; და * · -&gt; · nullptr · ჩამოკიდებული მაჩვენებელი</p>
+    <a class="btn" href="L04.html">გახსნა →</a>
+    <a class="btn ghost" href="../index.html">სარჩევი</a>
+    <a class="btn ghost" href="L02.html">← წინა ლექცია</a>
+  </section></main>
+<nav class="ctl"><button id="prev" aria-label="წინა">←</button><span id="count"></span><button id="next" aria-label="შემდეგი">→</button></nav>
+<script src="../assets/slides.js"></script>
+</body></html>

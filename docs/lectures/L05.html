@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="ka"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>L05 · მითითებები (References) და const — C++ PyQGIS-იდან QGIS Core-მდე</title>
+<link rel="stylesheet" href="../assets/slides.css"></head>
+<body data-total="8">
+<div class="bar"><i></i></div>
+<main id="deck">
+  <section class="slide title" data-title="მითითებები (References) და const">
+    <div class="eyebrow">ლექცია 05 · მეხსიერება</div>
+    <h1>მითითებები (References) და const</h1>
+    <div class="en">References and const</div>
+    <p class="topics">&amp; როგორც მეტსახელი · გადაცემა მნიშვნელობით და მითითებით · const &amp; · QGIS ხელმოწერების კითხვა</p>
+    <div class="intro"><p>წინა თავში მაჩვენებელი გავიგეთ. QGIS-ის API-ში მასთან ერთად ყველგან გვხვდება <code>&amp;</code>: <code>const QgsFeature &amp;feature</code>. ამ თავის შემდეგ ამ ჩანაწერს დაუფიქრებლად წაიკითხავ.</p>
+</div>
+    <div class="hint">← → ისრებით გადაადგილება · F — სრული ეკრანი · P — ბეჭდვა</div>
+  </section>
+  <section class="slide" data-title="მეტსახელი">
+    <div class="eyebrow">05.1 · მეხსიერება</div>
+    <h2>მეტსახელი</h2>
+    <div class="content"><p>მითითება (reference) არის ცვლადის <strong>მეტსახელი</strong>: ერთი ობიექტი, ორი სახელი.</p>
+<figure class="code cpp"><figcaption><span>C++</span><em>alias.cpp</em></figcaption><pre><code class="hljs"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;iostream&gt;</span></span>
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
+    <span class="hljs-type">int</span> featureCount = <span class="hljs-number">100</span>;
+    <span class="hljs-type">int</span> &amp;ref = featureCount;     <span class="hljs-comment">// ref არის featureCount-ის მეტსახელი</span>
+
+    ref = <span class="hljs-number">300</span>;
+    std::cout &lt;&lt; featureCount &lt;&lt; <span class="hljs-string">&quot;\n&quot;</span>;
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}</code></pre></figure>
+<figure class="code out"><figcaption><span>შედეგი</span></figcaption><pre><code>300</code></pre></figure>
+<div class="box analogy"><div class="box-title">ბანკის პერსონალური ასისტენტი</div><div class="box-body">
+<p>სოლო მომსახურების ასისტენტი ერთხელ და სამუდამოდ გიმაგრდება. ის არ იცვლება ყოველ ვიზიტზე და ცარიელი არ არის. მითითება ზუსტად ასეა: იბადება კონკრეტულ ობიექტზე მიბმული, ვეღარ გადაიბმება სხვაზე და <code>nullptr</code> ვერ იქნება.</p>
+</div></div>
+</div>
+  </section>
+
+  <section class="slide" data-title="მაჩვენებელი თუ მითითება?">
+    <div class="eyebrow">05.2 · მეხსიერება</div>
+    <h2>მაჩვენებელი თუ მითითება?</h2>
+    <div class="content"><table>
+<thead>
+<tr>
+<th></th>
+<th>მაჩვენებელი <code>*</code></th>
+<th>მითითება <code>&amp;</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>შეიძლება ცარიელი იყოს</td>
+<td>დიახ, <code>nullptr</code></td>
+<td>არა</td>
+</tr>
+<tr>
+<td>შეიძლება სხვაზე გადაიბას</td>
+<td>დიახ</td>
+<td>არა</td>
+</tr>
+<tr>
+<td>წევრთან მისვლა</td>
+<td><code>p-&gt;name</code></td>
+<td><code>r.name</code></td>
+</tr>
+<tr>
+<td>როდის</td>
+<td>ობიექტი შეიძლება არ არსებობდეს</td>
+<td>ობიექტი აუცილებლად არსებობს</td>
+</tr>
+</tbody>
+</table>
+<div class="box tip"><div class="box-title">მოკლედ</div><div class="box-body">
+<p>მაჩვენებელი — როცა ობიექტი შეიძლება არ არსებობდეს ან შეიცვალოს. მითითება — როცა ობიექტი უეჭველად არსებობს.</p>
+</div></div>
+</div>
+  </section>
+
+  <section class="slide" data-title="ფუნქციაში გადაცემა: კოპირება თუ ორიგინალი">
+    <div class="eyebrow">05.3 · მეხსიერება</div>
+    <h2>ფუნქციაში გადაცემა: კოპირება თუ ორიგინალი</h2>
+    <div class="content"><figure class="code cpp"><figcaption><span>C++</span><em>byref.cpp</em></figcaption><pre><code class="hljs"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;iostream&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;string&gt;</span></span>
+
+<span class="hljs-keyword">struct</span> <span class="hljs-title class_">Layer</span> {
+    std::string name;
+    <span class="hljs-type">int</span> featureCount;
+};
+
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">addByValue</span><span class="hljs-params">(Layer layer, <span class="hljs-type">int</span> n)</span> </span>{
+    layer.featureCount += n;          <span class="hljs-comment">// ცვლის ასლს</span>
+}
+
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">addByRef</span><span class="hljs-params">(Layer &amp;layer, <span class="hljs-type">int</span> n)</span> </span>{
+    layer.featureCount += n;          <span class="hljs-comment">// ცვლის ორიგინალს</span>
+}
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
+    Layer roads{<span class="hljs-string">&quot;Roads&quot;</span>, <span class="hljs-number">100</span>};
+
+    <span class="hljs-built_in">addByValue</span>(roads, <span class="hljs-number">25</span>);
+    std::cout &lt;&lt; <span class="hljs-string">&quot;After value: &quot;</span> &lt;&lt; roads.featureCount &lt;&lt; <span class="hljs-string">&quot;\n&quot;</span>;
+
+    <span class="hljs-built_in">addByRef</span>(roads, <span class="hljs-number">25</span>);
+    std::cout &lt;&lt; <span class="hljs-string">&quot;After ref: &quot;</span> &lt;&lt; roads.featureCount &lt;&lt; <span class="hljs-string">&quot;\n&quot;</span>;
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}</code></pre></figure>
+<figure class="code out"><figcaption><span>შედეგი</span></figcaption><pre><code>After value: 100
+After ref: 125</code></pre></figure>
+<p>პირველ შემთხვევაში ფუნქციამ ობიექტის <strong>ასლი</strong> მიიღო და ორიგინალი არ შეცვლილა. მეორეში <code>&amp;</code>-ის გამო იმუშავა თავად ორიგინალზე.</p>
+</div>
+  </section>
+
+  <section class="slide" data-title="const &amp; — უსაფრთხო დათვალიერება">
+    <div class="eyebrow">05.4 · მეხსიერება</div>
+    <h2>const &amp; — უსაფრთხო დათვალიერება</h2>
+    <div class="content"><p>თუ ფუნქციას მხოლოდ წასაკითხად სჭირდება ობიექტი, ვწერთ <code>const T &amp;</code>. კოპირება არ ხდება და ფუნქციას ცვლილების უფლებაც არ აქვს.</p>
+<figure class="code cpp"><figcaption><span>C++</span><em>perimeter.cpp</em></figcaption><pre><code class="hljs"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;iostream&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;vector&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;cmath&gt;</span></span>
+
+<span class="hljs-keyword">struct</span> <span class="hljs-title class_">Point</span> {
+    <span class="hljs-type">double</span> x;
+    <span class="hljs-type">double</span> y;
+};
+
+<span class="hljs-function"><span class="hljs-type">double</span> <span class="hljs-title">perimeter</span><span class="hljs-params">(<span class="hljs-type">const</span> std::vector&lt;Point&gt; &amp;ring)</span> </span>{
+    <span class="hljs-type">double</span> total = <span class="hljs-number">0.0</span>;
+    <span class="hljs-keyword">for</span> (<span class="hljs-type">size_t</span> i = <span class="hljs-number">0</span>; i &lt; ring.<span class="hljs-built_in">size</span>(); ++i) {
+        <span class="hljs-type">const</span> Point &amp;a = ring[i];
+        <span class="hljs-type">const</span> Point &amp;b = ring[(i + <span class="hljs-number">1</span>) % ring.<span class="hljs-built_in">size</span>()];
+        total += std::<span class="hljs-built_in">hypot</span>(b.x - a.x, b.y - a.y);
+    }
+    <span class="hljs-keyword">return</span> total;
+}
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
+    std::vector&lt;Point&gt; parcel = {{<span class="hljs-number">0</span>, <span class="hljs-number">0</span>}, {<span class="hljs-number">10</span>, <span class="hljs-number">0</span>}, {<span class="hljs-number">10</span>, <span class="hljs-number">10</span>}, {<span class="hljs-number">0</span>, <span class="hljs-number">10</span>}};
+    std::cout &lt;&lt; <span class="hljs-string">&quot;Perimeter: &quot;</span> &lt;&lt; <span class="hljs-built_in">perimeter</span>(parcel) &lt;&lt; <span class="hljs-string">&quot;\n&quot;</span>;
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}</code></pre></figure>
+<figure class="code out"><figcaption><span>შედეგი</span></figcaption><pre><code>Perimeter: 40</code></pre></figure>
+<div class="box note"><div class="box-title">შენიშვნა</div><div class="box-body">
+<p><code>(i + 1) % ring.size()</code> ბოლო წერტილიდან პირველს უკავშირებს ანუ კონტურს ხურავს. თუ გადაიცემოდა <code>std::vector&lt;Point&gt; ring</code> (&amp;-ის გარეშე), ყოველ გამოძახებაზე მთელი წერტილების სია დაკოპირდებოდა.</p>
+</div></div>
+<div class="box warn"><div class="box-title">ყურადღება</div><div class="box-body">
+<p><code>const</code>-ის დარღვევა კომპილაციის შეცდომაა. <code>ring[0].x = 5;</code> ამ ფუნქციაში კომპილაციას ვერ გაივლის.</p>
+</div></div>
+</div>
+  </section>
+
+  <section class="slide" data-title="QGIS-ის ხელმოწერების კითხვა">
+    <div class="eyebrow">05.5 · მეხსიერება</div>
+    <h2>QGIS-ის ხელმოწერების კითხვა</h2>
+    <div class="content"><p>ახლა <code>api.qgis.org</code>-ის გვერდებიდან ეს ჩანაწერები ადვილად იკითხება:</p>
+<table>
+<thead>
+<tr>
+<th>ჩანაწერი</th>
+<th>როგორ წავიკითხო</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>QgsVectorLayer *layer</code></td>
+<td>ფენის მისამართი; შეიძლება <code>nullptr</code> იყოს, შეამოწმე</td>
+</tr>
+<tr>
+<td><code>const QgsFeature &amp;feature</code></td>
+<td>ობიექტი აუცილებლად არსებობს, ვკითხულობ და არ ვცვლი, არ ვაკოპირებ</td>
+</tr>
+<tr>
+<td><code>QgsGeometry &amp;geometry</code></td>
+<td>ობიექტი არსებობს და ფუნქციას უფლება აქვს, ის შეცვალოს</td>
+</tr>
+<tr>
+<td><code>const QString &amp;name</code></td>
+<td>ტექსტი კოპირების გარეშე, მხოლოდ საკითხავად</td>
+</tr>
+<tr>
+<td><code>QgsFeature feature</code></td>
+<td>მიიღება ასლი</td>
+</tr>
+</tbody>
+</table>
+<div class="box compare"><div class="box-body">
+<figure class="code python"><figcaption><span>Python</span></figcaption><pre><code class="hljs"><span class="hljs-keyword">def</span> <span class="hljs-title function_">count_features</span>(<span class="hljs-params">layer</span>):
+    <span class="hljs-keyword">return</span> layer.featureCount()</code></pre></figure>
+<figure class="code cpp"><figcaption><span>C++</span></figcaption><pre><code class="hljs"><span class="hljs-function">qint64 <span class="hljs-title">countFeatures</span><span class="hljs-params">(<span class="hljs-type">const</span> QgsVectorLayer *layer)</span> </span>{
+  <span class="hljs-keyword">return</span> layer-&gt;<span class="hljs-built_in">featureCount</span>();
+}</code></pre></figure>
+</div></div>
+</div>
+  </section>
+
+  <section class="slide" data-title="სავარჯიშო და შეჯამება">
+    <div class="eyebrow">05.6 · მეხსიერება</div>
+    <h2>სავარჯიშო და შეჯამება</h2>
+    <div class="content"><div class="box exercise"><div class="box-title">სავარჯიშო</div><div class="box-body">
+<ol>
+<li>დაწერე <code>void expand(Parcel &amp;p, double extra)</code>, რომელიც ნაკვეთის ფართობს გაზრდის. შეამოწმე <code>main</code>-ში.</li>
+<li>დაწერე <code>void printParcel(const Parcel &amp;p)</code>. შეეცადე მასში ფართობის შეცვლას და ნახე კომპილატორის შეცდომა.</li>
+<li>დაწერე <code>double area(const std::vector&lt;Point&gt; &amp;ring)</code> (შუსტერის ფორმულა: <code>0.5 * |Σ (xᵢ·yᵢ₊₁ − xᵢ₊₁·yᵢ)|</code>). კვადრატული ნაკვეთისთვის (0,0), (10,0), (10,10), (0,10) უნდა მიიღო 100.</li>
+</ol>
+</div></div>
+<div class="box summary"><div class="box-title">შეჯამება</div><div class="box-body">
+<ul>
+<li><code>T &amp;</code> — მეტსახელი, ობიექტი აუცილებლად არსებობს.</li>
+<li>ფუნქციაში ობიექტს ორიგინალად გადავცემთ <code>&amp;</code>-ით, წასაკითხად — <code>const &amp;</code>-ით.</li>
+<li><code>T *</code> — მაჩვენებელი, <code>nullptr</code>-ს შემოწმებით.</li>
+<li>ახლა <code>const QgsFeature &amp;feature</code> სრულად გესმის.</li>
+</ul>
+</div></div>
+</div>
+  </section>
+  <section class="slide end" data-title="შემდეგ ლექციაში">
+    <div class="eyebrow">შემდეგ ლექციაში</div>
+    <h2>06 · კლასები და ობიექტები</h2><p class="topics">class და struct · public/private · კონსტრუქტორი · const მეთოდები · QGIS-ის სახელდების წესი</p>
+    <a class="btn" href="L06.html">გახსნა →</a>
+    <a class="btn ghost" href="../index.html">სარჩევი</a>
+    <a class="btn ghost" href="L04.html">← წინა ლექცია</a>
+  </section></main>
+<nav class="ctl"><button id="prev" aria-label="წინა">←</button><span id="count"></span><button id="next" aria-label="შემდეგი">→</button></nav>
+<script src="../assets/slides.js"></script>
+</body></html>

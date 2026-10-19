@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="ka"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>L12 · პროექტი: საკუთარი ინსტრუმენტი QGIS-ში — C++ PyQGIS-იდან QGIS Core-მდე</title>
+<link rel="stylesheet" href="../assets/slides.css"></head>
+<body data-total="8">
+<div class="bar"><i></i></div>
+<main id="deck">
+  <section class="slide title" data-title="პროექტი: საკუთარი ინსტრუმენტი QGIS-ში">
+    <div class="eyebrow">ლექცია 12 · პრაქტიკა</div>
+    <h1>პროექტი: საკუთარი ინსტრუმენტი QGIS-ში</h1>
+    <div class="en">Capstone — your own tool inside QGIS</div>
+    <p class="topics">QGIS-ის აწყობა წყაროდან · დამოუკიდებელი C++ აპლიკაცია · C++ პლაგინის ჩონჩხი · CMake · ლიცენზია</p>
+    <div class="intro"><p>საბოლოო მიზანი: საკუთარი C++ კოდი QGIS-თან ერთად გაუშვა. გზა სამ საფეხურად ვაგებთ: ჯერ ვმუშაობთ QGIS-ის ბიბლიოთეკასთან დამოუკიდებელ აპლიკაციაში, შემდეგ ვაკეთებთ პლაგინს, ბოლოს ვაწყობთ QGIS-ს წყაროდან.</p>
+</div>
+    <div class="hint">← → ისრებით გადაადგილება · F — სრული ეკრანი · P — ბეჭდვა</div>
+  </section>
+  <section class="slide" data-title="გეგმა">
+    <div class="eyebrow">12.1 · პრაქტიკა</div>
+    <h2>გეგმა</h2>
+    <div class="content"><table>
+<thead>
+<tr>
+<th>საფეხური</th>
+<th>შედეგი</th>
+<th>სირთულე</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>კონსოლური პროგრამა, რომელიც <code>qgis_core</code>-ს იყენებს</td>
+<td>დაბალი</td>
+</tr>
+<tr>
+<td>2</td>
+<td>C++ პლაგინი, რომელიც QGIS-ის მენიუში ჩნდება</td>
+<td>საშუალო</td>
+</tr>
+<tr>
+<td>3</td>
+<td>QGIS-ის აწყობა წყარო კოდიდან (შენი კოდით ან მის გარეშე)</td>
+<td>მაღალი</td>
+</tr>
+</tbody>
+</table>
+<div class="box tip"><div class="box-title">რჩევა</div><div class="box-body">
+<p>ბევრი ადამიანი პირდაპირ მესამე საფეხურზე ხტება და იჭედება აწყობის დეტალებში. პირველი ორი უკვე გასაგებ შედეგს იძლევა და გასწავლის ბიბლიოთეკების ერთად მუშაობას.</p>
+</div></div>
+</div>
+  </section>
+
+  <section class="slide" data-title="საფეხური 1: პირველი პროგრამა qgis_core-ზე">
+    <div class="eyebrow">12.2 · პრაქტიკა</div>
+    <h2>საფეხური 1: პირველი პროგრამა qgis_core-ზე</h2>
+    <div class="content"><p>ამოცანა: ფენის ობიექტების დათვლა და ფართობების ჯამი.</p>
+<figure class="code cpp"><figcaption><span>C++</span><em>main.cpp</em></figcaption><pre><code class="hljs"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;iostream&gt;</span></span>
+
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;qgsapplication.h&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;qgsfeature.h&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;qgsgeometry.h&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;qgsvectorlayer.h&gt;</span></span>
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">(<span class="hljs-type">int</span> argc, <span class="hljs-type">char</span> *argv[])</span> </span>{
+    <span class="hljs-function">QgsApplication <span class="hljs-title">app</span><span class="hljs-params">(argc, argv, <span class="hljs-literal">false</span>)</span></span>;     <span class="hljs-comment">// false = GUI არ გვჭირდება</span>
+    QgsApplication::<span class="hljs-built_in">initQgis</span>();
+
+    <span class="hljs-function">QgsVectorLayer <span class="hljs-title">layer</span><span class="hljs-params">(<span class="hljs-string">&quot;rivers.geojson&quot;</span>, <span class="hljs-string">&quot;rivers&quot;</span>, <span class="hljs-string">&quot;ogr&quot;</span>)</span></span>;
+    <span class="hljs-keyword">if</span> (!layer.<span class="hljs-built_in">isValid</span>()) {
+        std::cerr &lt;&lt; <span class="hljs-string">&quot;Layer failed to load\n&quot;</span>;
+        <span class="hljs-keyword">return</span> <span class="hljs-number">1</span>;
+    }
+
+    std::cout &lt;&lt; <span class="hljs-string">&quot;Features: &quot;</span> &lt;&lt; layer.<span class="hljs-built_in">featureCount</span>() &lt;&lt; <span class="hljs-string">&quot;\n&quot;</span>;
+
+    <span class="hljs-type">double</span> totalArea = <span class="hljs-number">0.0</span>;
+    QgsFeature feature;
+    QgsFeatureIterator it = layer.<span class="hljs-built_in">getFeatures</span>();
+    <span class="hljs-keyword">while</span> (it.<span class="hljs-built_in">nextFeature</span>(feature)) {
+        totalArea += feature.<span class="hljs-built_in">geometry</span>().<span class="hljs-built_in">area</span>();
+    }
+    std::cout &lt;&lt; <span class="hljs-string">&quot;Total area: &quot;</span> &lt;&lt; totalArea &lt;&lt; <span class="hljs-string">&quot;\n&quot;</span>;
+
+    QgsApplication::<span class="hljs-built_in">exitQgis</span>();
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}</code></pre></figure>
+<figure class="code out"><figcaption><span>შედეგი</span></figcaption><pre><code>Features: 42
+Total area: 0.183762</code></pre></figure>
+<p>რიცხვები საილუსტრაციოა: ისინი შენი მონაცემის მიხედვით განსხვავდება. ყურადღება მიაქციე <code>layer.isValid()</code> შემოწმებას: ფენის ჩატვირთვა შეიძლება ჩაიშალოს.</p>
+</div>
+  </section>
+
+  <section class="slide" data-title="CMake">
+    <div class="eyebrow">12.3 · პრაქტიკა</div>
+    <h2>CMake</h2>
+    <div class="content"><p><code>CMakeLists.txt</code> უთხრის კომპილატორს, სად არის QGIS-ის header-ები და ბიბლიოთეკები.</p>
+<figure class="code cmake"><figcaption><span>CMake</span><em>CMakeLists.txt</em></figcaption><pre><code class="hljs"><span class="hljs-keyword">cmake_minimum_required</span>(VERSION <span class="hljs-number">3.16</span>)
+<span class="hljs-keyword">project</span>(feature_counter LANGUAGES CXX)
+<span class="hljs-keyword">set</span>(CMAKE_CXX_STANDARD <span class="hljs-number">17</span>)
+
+<span class="hljs-comment"># QGIS 4 = Qt6, QGIS 3 = Qt5. აირჩიე შენი QGIS-ის შესაბამისი.</span>
+<span class="hljs-keyword">find_package</span>(Qt6 REQUIRED COMPONENTS Core Gui Xml Widgets)
+
+<span class="hljs-keyword">find_path</span>(QGIS_INCLUDE_DIR qgsapplication.h PATH_SUFFIXES qgis)
+<span class="hljs-keyword">find_library</span>(QGIS_CORE_LIBRARY qgis_core)
+
+<span class="hljs-keyword">add_executable</span>(feature_counter main.cpp)
+<span class="hljs-keyword">target_include_directories</span>(feature_counter PRIVATE <span class="hljs-variable">${QGIS_INCLUDE_DIR}</span>)
+<span class="hljs-keyword">target_link_libraries</span>(feature_counter PRIVATE
+    <span class="hljs-variable">${QGIS_CORE_LIBRARY}</span> Qt6::Core Qt6::Gui Qt6::Xml Qt6::Widgets)</code></pre></figure>
+<figure class="code bash"><figcaption><span>Shell</span></figcaption><pre><code class="hljs">cmake -S . -B build
+cmake --build build
+./build/feature_counter</code></pre></figure>
+<div class="box warn"><div class="box-title">გაითვალისწინე</div><div class="box-body">
+<p><code>qgis_core</code> და Qt-ის ვერსიები უნდა ემთხვეოდეს იმას, რითაც თავად QGIS არის აწყობილი. პაკეტები (<code>qgis-dev</code> Linux-ზე, OSGeo4W Windows-ზე) ამ ჯგუფს ერთად გაძლევს. ზუსტი სახელები და ბილიკები სისტემაზეა დამოკიდებული.</p>
+</div></div>
+</div>
+  </section>
+
+  <section class="slide" data-title="საფეხური 2: C++ პლაგინის ჩონჩხი">
+    <div class="eyebrow">12.4 · პრაქტიკა</div>
+    <h2>საფეხური 2: C++ პლაგინის ჩონჩხი</h2>
+    <div class="content"><p>C++ პლაგინი არის დინამიური ბიბლიოთეკა, რომელსაც QGIS გაშვებისას ტვირთავს. მას აქვს <code>QgisPlugin</code> ინტერფეისი და ექსპორტირებული ფუნქციები.</p>
+<figure class="code cpp"><figcaption><span>C++</span><em>mytool.h</em></figcaption><pre><code class="hljs"><span class="hljs-meta">#<span class="hljs-keyword">pragma</span> once</span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;QAction&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;QObject&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;qgisplugin.h&gt;</span></span>
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">QgisInterface</span>;
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">MyTool</span> : <span class="hljs-keyword">public</span> QObject, <span class="hljs-keyword">public</span> QgisPlugin {
+    Q_OBJECT
+<span class="hljs-keyword">public</span>:
+    <span class="hljs-function"><span class="hljs-keyword">explicit</span> <span class="hljs-title">MyTool</span><span class="hljs-params">(QgisInterface *iface)</span></span>;
+
+    <span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">initGui</span><span class="hljs-params">()</span> <span class="hljs-keyword">override</span></span>;      <span class="hljs-comment">// QGIS გვიძახებს ჩატვირთვისას</span>
+    <span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">unload</span><span class="hljs-params">()</span> <span class="hljs-keyword">override</span></span>;       <span class="hljs-comment">// და გამორთვისას</span>
+
+<span class="hljs-keyword">private</span> slots:
+    <span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">run</span><span class="hljs-params">()</span></span>;
+
+<span class="hljs-keyword">private</span>:
+    QgisInterface *mIface = <span class="hljs-literal">nullptr</span>;
+    QAction *mAction = <span class="hljs-literal">nullptr</span>;
+};</code></pre></figure>
+<figure class="code cpp"><figcaption><span>C++</span><em>mytool.cpp</em></figcaption><pre><code class="hljs"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;mytool.h&quot;</span></span>
+
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;QMessageBox&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;qgisinterface.h&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;qgsvectorlayer.h&gt;</span></span>
+
+MyTool::<span class="hljs-built_in">MyTool</span>(QgisInterface *iface)
+    : <span class="hljs-built_in">QgisPlugin</span>(<span class="hljs-built_in">QStringLiteral</span>(<span class="hljs-string">&quot;Feature Counter&quot;</span>),
+                 <span class="hljs-built_in">QStringLiteral</span>(<span class="hljs-string">&quot;Counts features of the active layer&quot;</span>),
+                 <span class="hljs-built_in">QStringLiteral</span>(<span class="hljs-string">&quot;Analysis&quot;</span>), <span class="hljs-built_in">QStringLiteral</span>(<span class="hljs-string">&quot;0.1&quot;</span>),
+                 QgisPlugin::UI),
+      <span class="hljs-built_in">mIface</span>(iface) {}
+
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">MyTool::initGui</span><span class="hljs-params">()</span> </span>{
+    mAction = <span class="hljs-keyword">new</span> <span class="hljs-built_in">QAction</span>(<span class="hljs-built_in">tr</span>(<span class="hljs-string">&quot;Count features&quot;</span>), <span class="hljs-keyword">this</span>);
+    <span class="hljs-built_in">connect</span>(mAction, &amp;QAction::triggered, <span class="hljs-keyword">this</span>, &amp;MyTool::run);
+    mIface-&gt;<span class="hljs-built_in">addPluginToMenu</span>(<span class="hljs-built_in">tr</span>(<span class="hljs-string">&quot;&amp;My Tools&quot;</span>), mAction);
+}
+
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">MyTool::unload</span><span class="hljs-params">()</span> </span>{
+    mIface-&gt;<span class="hljs-built_in">removePluginMenu</span>(<span class="hljs-built_in">tr</span>(<span class="hljs-string">&quot;&amp;My Tools&quot;</span>), mAction);
+    <span class="hljs-keyword">delete</span> mAction;
+    mAction = <span class="hljs-literal">nullptr</span>;
+}
+
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">MyTool::run</span><span class="hljs-params">()</span> </span>{
+    <span class="hljs-keyword">auto</span> *layer = <span class="hljs-built_in">qobject_cast</span>&lt;QgsVectorLayer *&gt;(mIface-&gt;<span class="hljs-built_in">activeLayer</span>());
+    <span class="hljs-keyword">if</span> (!layer) {
+        QMessageBox::<span class="hljs-built_in">warning</span>(<span class="hljs-literal">nullptr</span>, <span class="hljs-built_in">tr</span>(<span class="hljs-string">&quot;Error&quot;</span>), <span class="hljs-built_in">tr</span>(<span class="hljs-string">&quot;Select a vector layer.&quot;</span>));
+        <span class="hljs-keyword">return</span>;
+    }
+    QMessageBox::<span class="hljs-built_in">information</span>(<span class="hljs-literal">nullptr</span>, <span class="hljs-built_in">tr</span>(<span class="hljs-string">&quot;Result&quot;</span>),
+        <span class="hljs-built_in">tr</span>(<span class="hljs-string">&quot;Features: %1&quot;</span>).<span class="hljs-built_in">arg</span>(layer-&gt;<span class="hljs-built_in">featureCount</span>()));
+}</code></pre></figure>
+<p>გამოიყენე ყველაფერი, რაც ისწავლე: <code>qobject_cast</code> + <code>nullptr</code> შემოწმება (თავები 04, 07), <code>connect</code> (თავი 10), <code>const</code> და <code>QString</code> (თავები 05, 10).</p>
+<div class="box warn"><div class="box-title">ჩონჩხი და რეალური კოდი</div><div class="box-body">
+<p>ზემოთ მოცემული კოდი არის სტრუქტურის ილუსტრაცია. პლაგინის ექსპორტირებული ფუნქციები (<code>classFactory</code>, <code>name</code>, <code>version</code> და სხვა) და <code>QgisPlugin</code>-ის კონსტრუქტორის ზუსტი ხელმოწერა ვერსიიდან ვერსიამდე შეიძლება შეიცვალოს. შენი QGIS-ის ვერსიის წყარო კოდში <code>src/plugins/</code> საქაღალდეშია მოქმედი მაგალითები. დაიწყე მათი კოპირებით და მერე შეცვალე.</p>
+</div></div>
+</div>
+  </section>
+
+  <section class="slide" data-title="საფეხური 3: QGIS-ის აწყობა წყაროდან">
+    <div class="eyebrow">12.5 · პრაქტიკა</div>
+    <h2>საფეხური 3: QGIS-ის აწყობა წყაროდან</h2>
+    <div class="content"><figure class="code bash"><figcaption><span>Shell</span></figcaption><pre><code class="hljs">git <span class="hljs-built_in">clone</span> https://github.com/qgis/QGIS.git
+<span class="hljs-built_in">cd</span> QGIS
+<span class="hljs-built_in">mkdir</span> build &amp;&amp; <span class="hljs-built_in">cd</span> build
+cmake -G Ninja -DCMAKE_BUILD_TYPE=Debug ..
+ninja</code></pre></figure>
+<table>
+<thead>
+<tr>
+<th>ეტაპი</th>
+<th>რა ხდება</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>cmake</code></td>
+<td>ამოწმებს დამოკიდებულებებს (Qt, GDAL, GEOS, PROJ...) და ქმნის build ფაილებს</td>
+</tr>
+<tr>
+<td><code>ninja</code></td>
+<td>აკომპილებს; პირველად დიდ დროს მოითხოვს</td>
+</tr>
+<tr>
+<td>ტესტი</td>
+<td>გაუშვი აწყობილი <code>qgis</code>; შემდეგ დაამატე შენი პლაგინი <code>src/plugins/</code> ქვეშ</td>
+</tr>
+</tbody>
+</table>
+<p>მცირე ცვლილების შეტანის შემდეგ <code>ninja</code> მხოლოდ შეცვლილ ფაილებს აკომპილებს.</p>
+<div class="box warn"><div class="box-title">ლიცენზია</div><div class="box-body">
+<p>QGIS ვრცელდება GNU GPL ლიცენზიით. თუ შენ მიერ შეცვლილ QGIS-ს ან მასში ჩაშენებულ კოდს სხვას გადასცემ, მიმღებს უფლება აქვს მოითხოვოს <strong>წყარო კოდიც</strong>. ამიტომ „დახურული ბინარული“ მხოლოდ საკუთარი გამოყენებისთვის მუშაობს. ბინარულ ფაილშიც კოდის აღდგენა სრულიად შეუძლებელი არ არის. საკუთარი ალგორითმის დასაცავად გააზრებულად აირჩიე არქიტექტურა და გადაამოწმე ლიცენზიის პირობები გავრცელებამდე.</p>
+</div></div>
+</div>
+  </section>
+
+  <section class="slide" data-title="სავარჯიშო და შეჯამება">
+    <div class="eyebrow">12.6 · პრაქტიკა</div>
+    <h2>სავარჯიშო და შეჯამება</h2>
+    <div class="content"><div class="box exercise"><div class="box-title">საბოლოო დავალება</div><div class="box-body">
+<ol>
+<li>გააკეთე საფეხური 1 შენი მონაცემით (მაგ. რაიონების პოლიგონები) და გამოიტანე თითოეული რაიონის ფართობი.</li>
+<li>დაამატე <code>QgsFeatureRequest</code> ფილტრი და დათვალე მხოლოდ ობიექტები გარკვეული ატრიბუტით.</li>
+<li>წაიკითხე <code>src/plugins/</code>-ში არსებული ერთი მარტივი პლაგინი და შეადარე შენს ჩონჩხს.</li>
+<li>მოამზადე 5-ხაზიანი დოკუმენტი: რა ისწავლე, რა გაუგებარია, რა გინდა შემდეგ ეტაპზე.</li>
+</ol>
+</div></div>
+<div class="box summary"><div class="box-title">კურსის შეჯამება</div><div class="box-body">
+<ul>
+<li>PyQGIS და C++ API ერთი სისტემაა; სახელები იგივეა, გრამატიკა — განსხვავებული.</li>
+<li><code>*</code> — შეიძლება <code>nullptr</code>, <code>&amp;</code> — აუცილებლად არსებობს, <code>const &amp;</code> — უსაფრთხო წაკითხვა.</li>
+<li>smart pointer-ები და QObject-ის ხე მეხსიერებას თავად მართავენ.</li>
+<li><code>api.qgis.org</code> იკითხება: აღწერა, ტიპები, ხელმოწერა.</li>
+<li>გზა: დამოუკიდებელი აპლიკაცია → პლაგინი → QGIS-ის აწყობა.</li>
+</ul>
+</div></div>
+</div>
+  </section>
+  <section class="slide end" data-title="შემდეგ ლექციაში">
+    <div class="eyebrow">შემდეგ ლექციაში</div>
+    <h2>გაგრძელება იქნება…</h2>
+    <a class="btn ghost" href="../index.html">სარჩევი</a>
+    <a class="btn ghost" href="L11.html">← წინა ლექცია</a>
+  </section></main>
+<nav class="ctl"><button id="prev" aria-label="წინა">←</button><span id="count"></span><button id="next" aria-label="შემდეგი">→</button></nav>
+<script src="../assets/slides.js"></script>
+</body></html>

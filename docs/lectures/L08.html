@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="ka"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>L08 · მეხსიერების მართვა და smart pointers — C++ PyQGIS-იდან QGIS Core-მდე</title>
+<link rel="stylesheet" href="../assets/slides.css"></head>
+<body data-total="9">
+<div class="bar"><i></i></div>
+<main id="deck">
+  <section class="slide title" data-title="მეხსიერების მართვა და smart pointers">
+    <div class="eyebrow">ლექცია 08 · მეხსიერება</div>
+    <h1>მეხსიერების მართვა და smart pointers</h1>
+    <div class="en">Memory management and smart pointers</div>
+    <p class="topics">stack და heap · new/delete · memory leak · unique_ptr · shared_ptr · QGIS-ის მფლობელობის წესები</p>
+    <div class="intro"><p>Python-ში მეხსიერებას ნაგვის შემგროვებელი (garbage collector) ასუფთავებს. C++-ში ეს შენი საქმეა. კარგი ამბავი ისაა, რომ თანამედროვე C++-ში ამას smart pointer-ები აკეთებენ.</p>
+</div>
+    <div class="hint">← → ისრებით გადაადგილება · F — სრული ეკრანი · P — ბეჭდვა</div>
+  </section>
+  <section class="slide" data-title="stack და heap">
+    <div class="eyebrow">08.1 · მეხსიერება</div>
+    <h2>stack და heap</h2>
+    <div class="content"><table>
+<thead>
+<tr>
+<th></th>
+<th>stack</th>
+<th>heap</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>რა ინახება</td>
+<td>ლოკალური ცვლადები</td>
+<td><code>new</code>-ით შექმნილი ობიექტები</td>
+</tr>
+<tr>
+<td>ვინ ასუფთავებს</td>
+<td>ავტომატურად, scope-ის დასრულებისას</td>
+<td>პროგრამისტი (ან smart pointer)</td>
+</tr>
+<tr>
+<td>სიჩქარე</td>
+<td>ძალიან სწრაფი</td>
+<td>ნელი</td>
+</tr>
+<tr>
+<td>ზომა</td>
+<td>შეზღუდული</td>
+<td>დიდი</td>
+</tr>
+</tbody>
+</table>
+<div class="box analogy"><div class="box-title">სასტუმრო და საკუთარი სახლი</div><div class="box-body">
+<p>stack სასტუმროა: ოთახი ავტომატურად გათავისუფლდება, როცა წახვალ. heap — საკუთარი ბინაა: შენ ვალდებული ხარ, დროზე დააბრუნო ან გაყიდო, თორემ სამუდამოდ დაკავებული დარჩება (memory leak).</p>
+</div></div>
+</div>
+  </section>
+
+  <section class="slide" data-title="new და delete">
+    <div class="eyebrow">08.2 · მეხსიერება</div>
+    <h2>new და delete</h2>
+    <div class="content"><figure class="code cpp"><figcaption><span>C++</span></figcaption><pre><code class="hljs">Polygon *p = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Polygon</span>(<span class="hljs-string">&quot;Parcel-1&quot;</span>);   <span class="hljs-comment">// heap-ზე შეიქმნა</span>
+<span class="hljs-comment">// ... ვიყენებთ ...</span>
+<span class="hljs-keyword">delete</span> p;                                <span class="hljs-comment">// ხელით უნდა წავშალოთ</span></code></pre></figure>
+<p>თუ <code>delete</code> დაგავიწყდა, მეხსიერება გაჟონავს (leak). თუ ორჯერ წაშალე ან წაშლის შემდეგ გამოიყენე, პროგრამა დაიმსხვრევა. ხელით <code>new</code>/<code>delete</code> თანამედროვე კოდში თითქმის აღარ იწერება.</p>
+</div>
+  </section>
+
+  <section class="slide" data-title="unique_ptr: ერთადერთი მფლობელი">
+    <div class="eyebrow">08.3 · მეხსიერება</div>
+    <h2>unique_ptr: ერთადერთი მფლობელი</h2>
+    <div class="content"><p><code>std::unique_ptr</code> ობიექტს ფლობს და scope-ის დასრულებისას ავტომატურად წაშლის.</p>
+<figure class="code cpp"><figcaption><span>C++</span><em>unique.cpp</em></figcaption><pre><code class="hljs"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;iostream&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;memory&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;string&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;utility&gt;</span></span>
+
+<span class="hljs-keyword">struct</span> <span class="hljs-title class_">Polygon</span> {
+    std::string name;
+    <span class="hljs-function"><span class="hljs-keyword">explicit</span> <span class="hljs-title">Polygon</span><span class="hljs-params">(std::string n)</span> : name(std::move(n)) {</span>
+        std::cout &lt;&lt; <span class="hljs-string">&quot;created &quot;</span> &lt;&lt; name &lt;&lt; <span class="hljs-string">&quot;\n&quot;</span>;
+    }
+    ~<span class="hljs-built_in">Polygon</span>() { std::cout &lt;&lt; <span class="hljs-string">&quot;destroyed &quot;</span> &lt;&lt; name &lt;&lt; <span class="hljs-string">&quot;\n&quot;</span>; }
+};
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
+    {
+        <span class="hljs-keyword">auto</span> p = std::<span class="hljs-built_in">make_unique</span>&lt;Polygon&gt;(<span class="hljs-string">&quot;Parcel-1&quot;</span>);
+        std::cout &lt;&lt; <span class="hljs-string">&quot;using &quot;</span> &lt;&lt; p-&gt;name &lt;&lt; <span class="hljs-string">&quot;\n&quot;</span>;
+    }
+    std::cout &lt;&lt; <span class="hljs-string">&quot;after scope\n&quot;</span>;
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}</code></pre></figure>
+<figure class="code out"><figcaption><span>შედეგი</span></figcaption><pre><code>created Parcel-1
+using Parcel-1
+destroyed Parcel-1
+after scope</code></pre></figure>
+<p><code>delete</code> არსად დაგვიწერია, მაგრამ ობიექტი ზუსტად ბლოკის ბოლოს განადგურდა. ამ პრინციპს RAII ჰქვია: რესურსი ობიექტის სიცოცხლეს ებმება.</p>
+</div>
+  </section>
+
+  <section class="slide" data-title="მფლობელობის გადაცემა: std::move">
+    <div class="eyebrow">08.4 · მეხსიერება</div>
+    <h2>მფლობელობის გადაცემა: std::move</h2>
+    <div class="content"><p><code>unique_ptr</code>-ის კოპირება შეუძლებელია, რადგან მფლობელი ერთია. შეიძლება მხოლოდ გადაცემა.</p>
+<figure class="code cpp"><figcaption><span>C++</span></figcaption><pre><code class="hljs"><span class="hljs-keyword">auto</span> a = std::<span class="hljs-built_in">make_unique</span>&lt;Polygon&gt;(<span class="hljs-string">&quot;Parcel-2&quot;</span>);
+<span class="hljs-keyword">auto</span> b = std::<span class="hljs-built_in">move</span>(a);          <span class="hljs-comment">// ახლა b ფლობს, a ცარიელია</span>
+
+<span class="hljs-keyword">if</span> (a == <span class="hljs-literal">nullptr</span>) {
+    std::cout &lt;&lt; <span class="hljs-string">&quot;a is empty\n&quot;</span>;
+}</code></pre></figure>
+<figure class="code out"><figcaption><span>შედეგი</span></figcaption><pre><code>created Parcel-2
+a is empty
+destroyed Parcel-2</code></pre></figure>
+<p>ბოლო ხაზი პროგრამის დასრულებისას ჩნდება, როცა <code>b</code> იშლება.</p>
+<div class="box tip"><div class="box-title">QGIS-ში</div><div class="box-body">
+<p><code>std::unique_ptr&lt;QgsAbstractGeometry&gt;</code> ხშირად გვხვდება: ფუნქცია, რომელიც ახალ გეომეტრიას ქმნის, მის მფლობელობას გვიბრუნებს. ჩანაწერი <code>std::unique_ptr&lt;...&gt;</code> ხელმოწერაში ნიშნავს „ეს შენია, შენ უნდა მართო“.</p>
+</div></div>
+</div>
+  </section>
+
+  <section class="slide" data-title="shared_ptr: ბევრი მფლობელი">
+    <div class="eyebrow">08.5 · მეხსიერება</div>
+    <h2>shared_ptr: ბევრი მფლობელი</h2>
+    <div class="content"><p>როცა ერთ ობიექტს რამდენიმე ადგილი იყენებს, გამოიყენება <code>std::shared_ptr</code>. ობიექტი წაიშლება მაშინ, როცა ბოლო მფლობელიც გაქრება (reference counting).</p>
+<figure class="code cpp"><figcaption><span>C++</span><em>shared.cpp</em></figcaption><pre><code class="hljs"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;iostream&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;memory&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;string&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;utility&gt;</span></span>
+
+<span class="hljs-keyword">struct</span> <span class="hljs-title class_">Polygon</span> {
+    std::string name;
+    <span class="hljs-function"><span class="hljs-keyword">explicit</span> <span class="hljs-title">Polygon</span><span class="hljs-params">(std::string n)</span> : name(std::move(n)) {</span>
+        std::cout &lt;&lt; <span class="hljs-string">&quot;created &quot;</span> &lt;&lt; name &lt;&lt; <span class="hljs-string">&quot;\n&quot;</span>;
+    }
+    ~<span class="hljs-built_in">Polygon</span>() { std::cout &lt;&lt; <span class="hljs-string">&quot;destroyed &quot;</span> &lt;&lt; name &lt;&lt; <span class="hljs-string">&quot;\n&quot;</span>; }
+};
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
+    <span class="hljs-keyword">auto</span> a = std::<span class="hljs-built_in">make_shared</span>&lt;Polygon&gt;(<span class="hljs-string">&quot;Shared&quot;</span>);
+    std::cout &lt;&lt; a.<span class="hljs-built_in">use_count</span>() &lt;&lt; <span class="hljs-string">&quot;\n&quot;</span>;
+    {
+        <span class="hljs-keyword">auto</span> b = a;
+        std::cout &lt;&lt; a.<span class="hljs-built_in">use_count</span>() &lt;&lt; <span class="hljs-string">&quot;\n&quot;</span>;
+    }
+    std::cout &lt;&lt; a.<span class="hljs-built_in">use_count</span>() &lt;&lt; <span class="hljs-string">&quot;\n&quot;</span>;
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}</code></pre></figure>
+<figure class="code out"><figcaption><span>შედეგი</span></figcaption><pre><code>created Shared
+1
+2
+1
+destroyed Shared</code></pre></figure>
+</div>
+  </section>
+
+  <section class="slide" data-title="რა ხდება QGIS-ში">
+    <div class="eyebrow">08.6 · მეხსიერება</div>
+    <h2>რა ხდება QGIS-ში</h2>
+    <div class="content"><p>QGIS-ს საკუთარი მფლობელობის წესები აქვს და დოკუმენტაცია მათ განმარტავს:</p>
+<table>
+<thead>
+<tr>
+<th>სიტუაცია</th>
+<th>წესი</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>QgsProject::addMapLayer(layer)</code></td>
+<td>პროექტი იღებს ფენის მფლობელობას და თვითონ წაშლის</td>
+</tr>
+<tr>
+<td>Qt-ის <code>QObject</code> ხე</td>
+<td>მშობელი შვილებს თავად წაშლის (იხ. თავი 10)</td>
+</tr>
+<tr>
+<td><code>std::unique_ptr&lt;T&gt;</code> დაბრუნება</td>
+<td>მიმღები მფლობელია</td>
+</tr>
+<tr>
+<td>მაჩვენებელი <code>T *</code> ხელმოწერაში</td>
+<td>ჩვეულებრივ მფლობელობა არ გადადის</td>
+</tr>
+</tbody>
+</table>
+<div class="box warn"><div class="box-title">ყურადღება</div><div class="box-body">
+<p>თუ ფენას <code>new QgsVectorLayer(...)</code>-ით ქმნი და პროექტს აძლევ, თავად <code>delete</code> აღარ დაწერო. ფენა პროექტის საკუთრებაა და ორმაგი წაშლა პროგრამას დაამსხვრევს.</p>
+</div></div>
+</div>
+  </section>
+
+  <section class="slide" data-title="სავარჯიშო და შეჯამება">
+    <div class="eyebrow">08.7 · მეხსიერება</div>
+    <h2>სავარჯიშო და შეჯამება</h2>
+    <div class="content"><div class="box exercise"><div class="box-title">სავარჯიშო</div><div class="box-body">
+<ol>
+<li>გადააკეთე თავი 04-ის <code>Layer rivers{...}</code> მაგალითი <code>std::make_unique&lt;Layer&gt;(...)</code>-ზე.</li>
+<li>შექმენი <code>std::vector&lt;std::unique_ptr&lt;Polygon&gt;&gt;</code> და ჩაამატე სამი მრავალკუთხედი (<code>push_back(std::make_unique&lt;...&gt;(...))</code>). რა თანმიმდევრობით წაიშლებიან?</li>
+<li>შეეცადე <code>unique_ptr</code>-ის კოპირებას (<code>auto b = a;</code>) და წაიკითხე შეცდომა.</li>
+</ol>
+</div></div>
+<div class="box summary"><div class="box-title">შეჯამება</div><div class="box-body">
+<ul>
+<li>stack ავტომატურია, heap — მფლობელის პასუხისმგებლობა.</li>
+<li>ხელით <code>new</code>/<code>delete</code> თავიდან აიცილე, გამოიყენე <code>make_unique</code> / <code>make_shared</code>.</li>
+<li><code>unique_ptr</code> = ერთი მფლობელი, <code>shared_ptr</code> = ბევრი.</li>
+<li>QGIS-ში ყოველთვის გაარკვიე, ვინ ფლობს ობიექტს.</li>
+</ul>
+</div></div>
+</div>
+  </section>
+  <section class="slide end" data-title="შემდეგ ლექციაში">
+    <div class="eyebrow">შემდეგ ლექციაში</div>
+    <h2>09 · STL: კონტეინერები და ალგორითმები</h2><p class="topics">vector · map · range-for · lambda · sort · count_if · accumulate</p>
+    <a class="btn" href="L09.html">გახსნა →</a>
+    <a class="btn ghost" href="../index.html">სარჩევი</a>
+    <a class="btn ghost" href="L07.html">← წინა ლექცია</a>
+  </section></main>
+<nav class="ctl"><button id="prev" aria-label="წინა">←</button><span id="count"></span><button id="next" aria-label="შემდეგი">→</button></nav>
+<script src="../assets/slides.js"></script>
+</body></html>

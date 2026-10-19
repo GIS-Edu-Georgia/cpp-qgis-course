@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="ka"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>L07 · მემკვიდრეობა და პოლიმორფიზმი — C++ PyQGIS-იდან QGIS Core-მდე</title>
+<link rel="stylesheet" href="../assets/slides.css"></head>
+<body data-total="7">
+<div class="bar"><i></i></div>
+<main id="deck">
+  <section class="slide title" data-title="მემკვიდრეობა და პოლიმორფიზმი">
+    <div class="eyebrow">ლექცია 07 · OOP</div>
+    <h1>მემკვიდრეობა და პოლიმორფიზმი</h1>
+    <div class="en">Inheritance and polymorphism</div>
+    <p class="topics">ბაზისური და მემკვიდრე კლასი · virtual / override · dynamic_cast · qobject_cast</p>
+    <div class="intro"><p>ფენების იერარქია QGIS-ის ხერხემალია: <code>QgsMapLayer</code> ზოგადი ფენაა, <code>QgsVectorLayer</code> და <code>QgsRasterLayer</code> მისი კონკრეტული სახეები. ეს თავი ხსნის, როგორ მუშაობს ასეთი სტრუქტურა.</p>
+</div>
+    <div class="hint">← → ისრებით გადაადგილება · F — სრული ეკრანი · P — ბეჭდვა</div>
+  </section>
+  <section class="slide" data-title="მემკვიდრეობა">
+    <div class="eyebrow">07.1 · OOP</div>
+    <h2>მემკვიდრეობა</h2>
+    <div class="content"><div class="box analogy"><div class="box-title">ზოგადი და კონკრეტული</div><div class="box-body">
+<p>„ტრანსპორტი“ ზოგადი ცნებაა, „ავტობუსი“ და „მატარებელი“ მისი სახეებია. ორივეს აქვს სიჩქარე და მარშრუტი, მაგრამ თითოეულს თავისი თვისებაც აქვს. ფენებიც ასეა: ყველას აქვს სახელი და CRS, ვექტორულს დამატებით ობიექტები, რასტრულს — არხები (band).</p>
+</div></div>
+<figure class="code "><figcaption><span></span></figcaption><pre><code class="hljs">QgsMapLayer
+ ├─ QgsVectorLayer   (ობიექტები, ატრიბუტები)
+ └─ QgsRasterLayer   (პიქსელები, არხები)</code></pre></figure>
+<p>C++-ში მემკვიდრეობა იწერება <code>: public Base</code>.</p>
+</div>
+  </section>
+
+  <section class="slide" data-title="virtual და override">
+    <div class="eyebrow">07.2 · OOP</div>
+    <h2>virtual და override</h2>
+    <div class="content"><p>თუ მეთოდი <code>virtual</code>-ია, გამოძახებისას ირჩევა <strong>რეალური</strong> ობიექტის ვერსია და არა მაჩვენებლის ტიპისა. ამას პოლიმორფიზმი ჰქვია.</p>
+<figure class="code cpp"><figcaption><span>C++</span><em>layers.cpp</em></figcaption><pre><code class="hljs"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;iostream&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;string&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;utility&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;vector&gt;</span></span>
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Layer</span> {
+<span class="hljs-keyword">public</span>:
+    <span class="hljs-function"><span class="hljs-keyword">explicit</span> <span class="hljs-title">Layer</span><span class="hljs-params">(std::string name)</span> : mName(std::move(name)) {</span>}
+    <span class="hljs-keyword">virtual</span> ~<span class="hljs-built_in">Layer</span>() = <span class="hljs-keyword">default</span>;
+
+    <span class="hljs-function"><span class="hljs-type">const</span> std::string &amp;<span class="hljs-title">name</span><span class="hljs-params">()</span> <span class="hljs-type">const</span> </span>{ <span class="hljs-keyword">return</span> mName; }
+    <span class="hljs-function"><span class="hljs-keyword">virtual</span> std::string <span class="hljs-title">type</span><span class="hljs-params">()</span> <span class="hljs-type">const</span> </span>{ <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;generic&quot;</span>; }
+
+<span class="hljs-keyword">private</span>:
+    std::string mName;
+};
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">VectorLayer</span> : <span class="hljs-keyword">public</span> Layer {
+<span class="hljs-keyword">public</span>:
+    <span class="hljs-built_in">VectorLayer</span>(std::string name, <span class="hljs-type">int</span> count)
+        : <span class="hljs-built_in">Layer</span>(std::<span class="hljs-built_in">move</span>(name)), <span class="hljs-built_in">mCount</span>(count) {}
+
+    <span class="hljs-function">std::string <span class="hljs-title">type</span><span class="hljs-params">()</span> <span class="hljs-type">const</span> <span class="hljs-keyword">override</span> </span>{ <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;vector&quot;</span>; }
+    <span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">featureCount</span><span class="hljs-params">()</span> <span class="hljs-type">const</span> </span>{ <span class="hljs-keyword">return</span> mCount; }
+
+<span class="hljs-keyword">private</span>:
+    <span class="hljs-type">int</span> mCount;
+};
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">RasterLayer</span> : <span class="hljs-keyword">public</span> Layer {
+<span class="hljs-keyword">public</span>:
+    <span class="hljs-function"><span class="hljs-keyword">explicit</span> <span class="hljs-title">RasterLayer</span><span class="hljs-params">(std::string name)</span> : Layer(std::move(name)) {</span>}
+    <span class="hljs-function">std::string <span class="hljs-title">type</span><span class="hljs-params">()</span> <span class="hljs-type">const</span> <span class="hljs-keyword">override</span> </span>{ <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;raster&quot;</span>; }
+};
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
+    <span class="hljs-function">VectorLayer <span class="hljs-title">rivers</span><span class="hljs-params">(<span class="hljs-string">&quot;Rivers&quot;</span>, <span class="hljs-number">42</span>)</span></span>;
+    <span class="hljs-function">RasterLayer <span class="hljs-title">dem</span><span class="hljs-params">(<span class="hljs-string">&quot;DEM&quot;</span>)</span></span>;
+
+    std::vector&lt;Layer *&gt; layers = {&amp;rivers, &amp;dem};
+    <span class="hljs-keyword">for</span> (Layer *layer : layers) {
+        std::cout &lt;&lt; layer-&gt;<span class="hljs-built_in">name</span>() &lt;&lt; <span class="hljs-string">&quot; is &quot;</span> &lt;&lt; layer-&gt;<span class="hljs-built_in">type</span>() &lt;&lt; <span class="hljs-string">&quot;\n&quot;</span>;
+    }
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}</code></pre></figure>
+<figure class="code out"><figcaption><span>შედეგი</span></figcaption><pre><code>Rivers is vector
+DEM is raster</code></pre></figure>
+<p>ორივე ელემენტი <code>Layer *</code>-ია, მაგრამ <code>type()</code> თითოეულისთვის საკუთარ პასუხს აბრუნებს. სწორედ ამიტომ ინახავს QGIS ყველა ფენას ერთ სიაში, როგორც <code>QgsMapLayer *</code>.</p>
+<div class="box note"><div class="box-title">შენიშვნა</div><div class="box-body">
+<p><code>override</code> არ არის სავალდებულო, მაგრამ კომპილატორს ამოწმებს: თუ მეთოდის სახელი ან პარამეტრი შეეშალა, შეცდომას დაგიბრუნებს. <code>virtual ~Layer()</code> ბაზისურ კლასში აუცილებელია, რომ წაშლისას სწორი დესტრუქტორი გამოიძახოს.</p>
+</div></div>
+</div>
+  </section>
+
+  <section class="slide" data-title="ტიპის გარდაქმნა: dynamic_cast">
+    <div class="eyebrow">07.3 · OOP</div>
+    <h2>ტიპის გარდაქმნა: dynamic_cast</h2>
+    <div class="content"><p>სიაში <code>Layer *</code> გვაქვს. <code>featureCount()</code> კი მხოლოდ <code>VectorLayer</code>-ს აქვს. როგორ მივწვდეთ? <code>dynamic_cast</code> ამოწმებს რეალურ ტიპს გაშვების დროს.</p>
+<figure class="code cpp"><figcaption><span>C++</span></figcaption><pre><code class="hljs"><span class="hljs-keyword">for</span> (Layer *layer : layers) {
+    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">auto</span> *vec = <span class="hljs-keyword">dynamic_cast</span>&lt;VectorLayer *&gt;(layer)) {
+        std::cout &lt;&lt; vec-&gt;<span class="hljs-built_in">name</span>() &lt;&lt; <span class="hljs-string">&quot;: &quot;</span> &lt;&lt; vec-&gt;<span class="hljs-built_in">featureCount</span>() &lt;&lt; <span class="hljs-string">&quot; features\n&quot;</span>;
+    }
+}</code></pre></figure>
+<figure class="code out"><figcaption><span>შედეგი</span></figcaption><pre><code>Rivers: 42 features</code></pre></figure>
+<p>თუ ობიექტი ვექტორული ფენა არ არის, <code>dynamic_cast</code> აბრუნებს <code>nullptr</code>-ს. ზუსტად ამიტომ ვამოწმებთ <code>if</code>-ში.</p>
+</div>
+  </section>
+
+  <section class="slide" data-title="qobject_cast QGIS-ში">
+    <div class="eyebrow">07.4 · OOP</div>
+    <h2>qobject_cast QGIS-ში</h2>
+    <div class="content"><p>QGIS-ის კლასები <code>QObject</code>-იდან მოდის, ამიტომ იქ <code>dynamic_cast</code>-ის უფრო სწრაფი ვერსია გამოიყენება:</p>
+<div class="box compare"><div class="box-body">
+<figure class="code python"><figcaption><span>Python</span></figcaption><pre><code class="hljs">layer = iface.activeLayer()
+<span class="hljs-keyword">if</span> <span class="hljs-built_in">isinstance</span>(layer, QgsVectorLayer):
+    <span class="hljs-built_in">print</span>(layer.featureCount())</code></pre></figure>
+<figure class="code cpp"><figcaption><span>C++</span></figcaption><pre><code class="hljs"><span class="hljs-keyword">auto</span> *vec = <span class="hljs-built_in">qobject_cast</span>&lt;QgsVectorLayer *&gt;(
+              iface-&gt;<span class="hljs-built_in">activeLayer</span>());
+<span class="hljs-keyword">if</span> (vec) {
+  <span class="hljs-built_in">qDebug</span>() &lt;&lt; vec-&gt;<span class="hljs-built_in">featureCount</span>();
+}</code></pre></figure>
+</div></div>
+<div class="box warn"><div class="box-title">ყურადღება</div><div class="box-body">
+<p><code>qobject_cast</code> აბრუნებს <code>nullptr</code>-ს, თუ გარდაქმნა შეუძლებელია, ანუ აქტიური ფენა რასტრულია ან საერთოდ არ არის არჩეული. ყოველთვის შეამოწმე შედეგი <code>nullptr</code>-ზე.</p>
+</div></div>
+</div>
+  </section>
+
+  <section class="slide" data-title="სავარჯიშო და შეჯამება">
+    <div class="eyebrow">07.5 · OOP</div>
+    <h2>სავარჯიშო და შეჯამება</h2>
+    <div class="content"><div class="box exercise"><div class="box-title">სავარჯიშო</div><div class="box-body">
+<ol>
+<li>დაამატე <code>RasterLayer</code>-ს <code>bandCount()</code> და გამოიტანე <code>dynamic_cast</code>-ით.</li>
+<li>შექმენი მესამე სახე <code>MeshLayer</code> და <code>type()</code> მიანიჭე <code>&quot;mesh&quot;</code>.</li>
+<li>დაწერე ფუნქცია <code>int totalFeatures(const std::vector&lt;Layer *&gt; &amp;layers)</code>, რომელიც მხოლოდ ვექტორული ფენების ობიექტებს დაითვლის.</li>
+</ol>
+</div></div>
+<div class="box summary"><div class="box-title">შეჯამება</div><div class="box-body">
+<ul>
+<li>მემკვიდრე კლასი იღებს ბაზისური კლასის ყველაფერს და ამატებს საკუთარს.</li>
+<li><code>virtual</code> + <code>override</code> = პოლიმორფიზმი.</li>
+<li>ბაზისური ტიპიდან მემკვიდრეზე: <code>dynamic_cast</code> (QGIS-ში <code>qobject_cast</code>), შედეგი უნდა შემოწმდეს.</li>
+</ul>
+</div></div>
+</div>
+  </section>
+  <section class="slide end" data-title="შემდეგ ლექციაში">
+    <div class="eyebrow">შემდეგ ლექციაში</div>
+    <h2>08 · მეხსიერების მართვა და smart pointers</h2><p class="topics">stack და heap · new/delete · memory leak · unique_ptr · shared_ptr · QGIS-ის მფლობელობის წესები</p>
+    <a class="btn" href="L08.html">გახსნა →</a>
+    <a class="btn ghost" href="../index.html">სარჩევი</a>
+    <a class="btn ghost" href="L06.html">← წინა ლექცია</a>
+  </section></main>
+<nav class="ctl"><button id="prev" aria-label="წინა">←</button><span id="count"></span><button id="next" aria-label="შემდეგი">→</button></nav>
+<script src="../assets/slides.js"></script>
+</body></html>

@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="ka"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>L04 · მაჩვენებლები (Pointers) — C++ PyQGIS-იდან QGIS Core-მდე</title>
+<link rel="stylesheet" href="../assets/slides.css"></head>
+<body data-total="8">
+<div class="bar"><i></i></div>
+<main id="deck">
+  <section class="slide title" data-title="მაჩვენებლები (Pointers)">
+    <div class="eyebrow">ლექცია 04 · მეხსიერება</div>
+    <h1>მაჩვენებლები (Pointers)</h1>
+    <div class="en">Pointers</div>
+    <p class="topics">მისამართი და მნიშვნელობა · &amp; და * · -&gt; · nullptr · ჩამოკიდებული მაჩვენებელი</p>
+    <div class="intro"><p>ეს ყველაზე მნიშვნელოვანი თემაა. QGIS-ის API-ში ყოველ მეორე ფუნქციას აქვს <code>*</code> ან <code>-&gt;</code>: <code>QgsMapLayer *layer</code>, <code>layer-&gt;name()</code>.</p>
+</div>
+    <div class="hint">← → ისრებით გადაადგილება · F — სრული ეკრანი · P — ბეჭდვა</div>
+  </section>
+  <section class="slide" data-title="კურიერი და მისამართი">
+    <div class="eyebrow">04.1 · მეხსიერება</div>
+    <h2>კურიერი და მისამართი</h2>
+    <div class="content"><div class="box analogy"><div class="box-title">კურიერი</div><div class="box-body">
+<p>კურიერს მძიმე ამანათი მოუვიდა. ის მას ადრესატთან კი არ მიაქვს, არამედ ეუბნება: „ამანათი ამ საწყობის ამ მისამართზეა“. მაჩვენებელი არის სწორედ <strong>მისამართი</strong>, არა თავად ამანათი. ბევრად იაფია მისამართის გადაცემა, ვიდრე მილიონობით წერტილიანი ფენის კოპირება.</p>
+</div></div>
+<p>ორი სიმბოლო:</p>
+<table>
+<thead>
+<tr>
+<th>სიმბოლო</th>
+<th>სახელი</th>
+<th>რას აკეთებს</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>&amp;x</code></td>
+<td>address-of</td>
+<td>აბრუნებს <code>x</code>-ის მისამართს</td>
+</tr>
+<tr>
+<td><code>*p</code></td>
+<td>dereference</td>
+<td>გადადის მისამართზე და კითხულობს მნიშვნელობას</td>
+</tr>
+</tbody>
+</table>
+</div>
+  </section>
+
+  <section class="slide" data-title="პირველი მაჩვენებელი">
+    <div class="eyebrow">04.2 · მეხსიერება</div>
+    <h2>პირველი მაჩვენებელი</h2>
+    <div class="content"><figure class="code cpp"><figcaption><span>C++</span><em>ptr.cpp</em></figcaption><pre><code class="hljs"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;iostream&gt;</span></span>
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
+    <span class="hljs-type">int</span> layerCount = <span class="hljs-number">5</span>;
+    <span class="hljs-type">int</span> *ptr = &amp;layerCount;
+
+    std::cout &lt;&lt; <span class="hljs-string">&quot;Layer count: &quot;</span> &lt;&lt; layerCount &lt;&lt; <span class="hljs-string">&quot;\n&quot;</span>;
+    std::cout &lt;&lt; <span class="hljs-string">&quot;Address: &quot;</span> &lt;&lt; ptr &lt;&lt; <span class="hljs-string">&quot;\n&quot;</span>;
+    std::cout &lt;&lt; <span class="hljs-string">&quot;Value at address: &quot;</span> &lt;&lt; *ptr &lt;&lt; <span class="hljs-string">&quot;\n&quot;</span>;
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}</code></pre></figure>
+<figure class="code out"><figcaption><span>შედეგი</span></figcaption><pre><code>Layer count: 5
+Address: 0x7ffd5c3a1a24
+Value at address: 5</code></pre></figure>
+<div class="box note"><div class="box-title">შენიშვნა</div><div class="box-body">
+<p>მისამართი ყოველ გაშვებაზე და ყოველ კომპიუტერზე განსხვავებულია (Windows-ზე ის ასე გამოიყურება: <code>000000BF7C3BF970</code>). მნიშვნელობა კი ერთი და იგივეა.</p>
+</div></div>
+<p>სამი ხაზი = სამი ფაქტი: <strong>რა ძევს</strong> (<code>5</code>), <strong>სად ძევს</strong> (მისამართი), <strong>რას ვპოულობთ იქ</strong> (<code>*ptr</code>).</p>
+</div>
+  </section>
+
+  <section class="slide" data-title="მაჩვენებელი ობიექტზე: ისარი">
+    <div class="eyebrow">04.3 · მეხსიერება</div>
+    <h2>მაჩვენებელი ობიექტზე: ისარი</h2>
+    <div class="content"><p>მაჩვენებელი ხშირად მიუთითებს მთელ ობიექტზე. წევრთან მისასვლელად წერტილის ნაცვლად <code>-&gt;</code> გამოიყენება.</p>
+<figure class="code cpp"><figcaption><span>C++</span><em>layer_ptr.cpp</em></figcaption><pre><code class="hljs"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;iostream&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;string&gt;</span></span>
+
+<span class="hljs-keyword">struct</span> <span class="hljs-title class_">Layer</span> {
+    std::string name;
+    <span class="hljs-type">int</span> featureCount;
+};
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
+    Layer rivers{<span class="hljs-string">&quot;Rivers&quot;</span>, <span class="hljs-number">42</span>};
+    Layer *ptr = &amp;rivers;
+
+    std::cout &lt;&lt; ptr-&gt;name &lt;&lt; <span class="hljs-string">&quot;: &quot;</span> &lt;&lt; ptr-&gt;featureCount &lt;&lt; <span class="hljs-string">&quot;\n&quot;</span>;
+
+    ptr-&gt;featureCount += <span class="hljs-number">8</span>;                       <span class="hljs-comment">// იგივეა, რაც (*ptr).featureCount += 8</span>
+    std::cout &lt;&lt; rivers.featureCount &lt;&lt; <span class="hljs-string">&quot;\n&quot;</span>;
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}</code></pre></figure>
+<figure class="code out"><figcaption><span>შედეგი</span></figcaption><pre><code>Rivers: 42
+50</code></pre></figure>
+<p>ხედავ? <code>ptr</code>-ით ცვლილება პირდაპირ <code>rivers</code>-ს შეეხო, რადგან ორივე ერთსა და იმავე ობიექტზე მიუთითებს, კოპირება არ მომხდარა.</p>
+<div class="box tip"><div class="box-title">წესი</div><div class="box-body">
+<p>ობიექტზე — <code>.</code> (<code>rivers.name</code>), მაჩვენებლით — <code>-&gt;</code> (<code>ptr-&gt;name</code>). ზუსტად ამიტომ გვაქვს QGIS-ში <code>layer-&gt;featureCount()</code>.</p>
+</div></div>
+</div>
+  </section>
+
+  <section class="slide" data-title="nullptr — „ფენა არ არის არჩეული“">
+    <div class="eyebrow">04.4 · მეხსიერება</div>
+    <h2>nullptr — „ფენა არ არის არჩეული“</h2>
+    <div class="content"><p>მაჩვენებელი შეიძლება არაფერზე მიუთითებდეს. ამას <code>nullptr</code> ჰქვია.</p>
+<figure class="code cpp"><figcaption><span>C++</span><em>nullptr.cpp</em></figcaption><pre><code class="hljs"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;iostream&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;string&gt;</span></span>
+
+<span class="hljs-keyword">struct</span> <span class="hljs-title class_">Layer</span> {
+    std::string name;
+    <span class="hljs-type">int</span> featureCount;
+};
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
+    Layer *activeLayer = <span class="hljs-literal">nullptr</span>;
+
+    <span class="hljs-keyword">if</span> (activeLayer == <span class="hljs-literal">nullptr</span>) {
+        std::cout &lt;&lt; <span class="hljs-string">&quot;No active layer\n&quot;</span>;
+    } <span class="hljs-keyword">else</span> {
+        std::cout &lt;&lt; activeLayer-&gt;name &lt;&lt; <span class="hljs-string">&quot;\n&quot;</span>;
+    }
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}</code></pre></figure>
+<figure class="code out"><figcaption><span>შედეგი</span></figcaption><pre><code>No active layer</code></pre></figure>
+<p>ეს QGIS-ის ყოველდღიური სიტუაციაა: <code>iface-&gt;activeLayer()</code> აბრუნებს <code>nullptr</code>-ს, თუ ფენა არ არის მონიშნული. PyQGIS-ში ეს <code>None</code> იყო.</p>
+<div class="box compare"><div class="box-body">
+<figure class="code python"><figcaption><span>Python</span></figcaption><pre><code class="hljs">layer = iface.activeLayer()
+<span class="hljs-keyword">if</span> layer <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>:
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;No active layer&quot;</span>)</code></pre></figure>
+<figure class="code cpp"><figcaption><span>C++</span></figcaption><pre><code class="hljs">QgsMapLayer *layer = iface-&gt;<span class="hljs-built_in">activeLayer</span>();
+<span class="hljs-keyword">if</span> (layer == <span class="hljs-literal">nullptr</span>) {
+  <span class="hljs-built_in">qDebug</span>() &lt;&lt; <span class="hljs-string">&quot;No active layer&quot;</span>;
+}</code></pre></figure>
+</div></div>
+<div class="box warn"><div class="box-title">ხშირი შეცდომა</div><div class="box-body">
+<p><code>nullptr</code>-ზე <code>-&gt;</code> გამოძახება პროგრამას ამსხვრევს (segmentation fault / crash). მაჩვენებელი ყოველთვის უნდა შეამოწმო <code>nullptr</code>-ზე, სანამ მას გამოიყენებ.</p>
+</div></div>
+</div>
+  </section>
+
+  <section class="slide" data-title="ჩამოკიდებული მაჩვენებელი">
+    <div class="eyebrow">04.5 · მეხსიერება</div>
+    <h2>ჩამოკიდებული მაჩვენებელი</h2>
+    <div class="content"><div class="box warn"><div class="box-title">საშიში ადგილი</div><div class="box-body">
+<p>თუ ობიექტი აღარ არსებობს, მაჩვენებელი მაინც ინახავს ძველ მისამართს. ეს ჰგავს კურიერს, რომელიც მისამართზე მიდის, სადაც სახლი უკვე დაანგრიეს.</p>
+</div></div>
+<figure class="code cpp"><figcaption><span>C++</span><em>dangling.cpp</em></figcaption><pre><code class="hljs"><span class="hljs-function"><span class="hljs-type">int</span> *<span class="hljs-title">makeCounter</span><span class="hljs-params">()</span> </span>{
+    <span class="hljs-type">int</span> count = <span class="hljs-number">10</span>;
+    <span class="hljs-keyword">return</span> &amp;count;      <span class="hljs-comment">// შეცდომა: count ფუნქციის დასრულებისას იშლება</span>
+}</code></pre></figure>
+<p><code>count</code> ლოკალური ცვლადია და ფუნქციის დასრულებისას იშლება. დაბრუნებული მისამართი უკვე არავის ეკუთვნის. ამის თავიდან ასაცილებლად არსებობს smart pointer-ები (თავი 08).</p>
+</div>
+  </section>
+
+  <section class="slide" data-title="სავარჯიშო და შეჯამება">
+    <div class="eyebrow">04.6 · მეხსიერება</div>
+    <h2>სავარჯიშო და შეჯამება</h2>
+    <div class="content"><div class="box exercise"><div class="box-title">სავარჯიშო</div><div class="box-body">
+<ol>
+<li>შექმენი <code>struct Parcel { std::string owner; double area; };</code>. გააკეთე მაჩვენებელი და <code>-&gt;</code>-ით გამოიტანე მფლობელი და ფართობი.</li>
+<li>ფართობი გაზარდე 100 კვ.მ-ით მაჩვენებლის საშუალებით და შეამოწმე თავდაპირველ ობიექტში.</li>
+<li>შექმენი <code>Parcel *p = nullptr;</code> და დაამატე შემოწმება, რომ პროგრამა არ დაიმსხვრეს.</li>
+</ol>
+</div></div>
+<div class="box summary"><div class="box-title">შეჯამება</div><div class="box-body">
+<ul>
+<li>მაჩვენებელი ინახავს <strong>მისამართს</strong>; <code>&amp;</code> მისამართს იღებს, <code>*</code> მნიშვნელობას კითხულობს.</li>
+<li>ობიექტზე მაჩვენებლით ვიყენებთ <code>-&gt;</code>-ს.</li>
+<li><code>nullptr</code> = „არაფერზე მიუთითებს“; ყოველთვის შეამოწმე გამოყენებამდე.</li>
+<li>ლოკალური ცვლადის მისამართს ფუნქციიდან არ აბრუნებენ.</li>
+</ul>
+</div></div>
+</div>
+  </section>
+  <section class="slide end" data-title="შემდეგ ლექციაში">
+    <div class="eyebrow">შემდეგ ლექციაში</div>
+    <h2>05 · მითითებები (References) და const</h2><p class="topics">&amp; როგორც მეტსახელი · გადაცემა მნიშვნელობით და მითითებით · const &amp; · QGIS ხელმოწერების კითხვა</p>
+    <a class="btn" href="L05.html">გახსნა →</a>
+    <a class="btn ghost" href="../index.html">სარჩევი</a>
+    <a class="btn ghost" href="L03.html">← წინა ლექცია</a>
+  </section></main>
+<nav class="ctl"><button id="prev" aria-label="წინა">←</button><span id="count"></span><button id="next" aria-label="შემდეგი">→</button></nav>
+<script src="../assets/slides.js"></script>
+</body></html>

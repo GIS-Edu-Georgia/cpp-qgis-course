@@ -1,0 +1,131 @@
+---
+n: 11
+title: api.qgis.org-ის კითხვა
+en: Reading the QGIS C++ API documentation
+eyebrow: ორიენტაცია
+topics: კლასის გვერდის სტრუქტურა · ხელმოწერების გაშიფვრა · სასარგებლო კლასები · სტრატეგია
+---
+
+თავიდან ეს გვერდები გაუგებარი იყო. ახლა უკვე გაქვს ყველა ინსტრუმენტი: ტიპები, მაჩვენებლები, მითითებები, კლასები, `QVariant`. ამ თავში სისტემატურად ვისწავლით დოკუმენტაციის „კითხვას“.
+
+## კლასის გვერდის სქემა
+
+`api.qgis.org/api/<ვერსია>/class<სახელი>.html` გვერდს ერთი და იგივე სტრუქტურა აქვს:
+
+| ნაწილი | რას ეძებ იქ |
+|---|---|
+| **Detailed Description** | რისთვისაა კლასი, მაგალითები; ყოველთვის ჯერ ეს წაიკითხე |
+| **Inheritance diagram** | ვისგან მოდის (იხ. თავი 07); მემკვიდრეობით მიღებული მეთოდები მშობლის გვერდზეა |
+| **Public Types** | enum-ები და typedef-ები; აქ ჩანს, რას ნიშნავს კლასის სახელი |
+| **Public Member Functions** | მეთოდები; ძირითადი სამუშაო |
+| **Static Public Member Functions** | გამოიძახება კლასზე, ობიექტის გარეშე: `QgsProject::instance()` |
+| **Signals / Slots** | რა მოვლენებს აგზავნის |
+| **Member Function Documentation** | თითოეული მეთოდის დეტალები, `Since QGIS 3.x` ნიშნები |
+
+::: tip წესი
+პირველად გვერდის ბოლოს ნუ იწყებ. წაიკითხე **Detailed Description**, შემდეგ მეთოდების სია, შემდეგ კონკრეტული მეთოდი.
+:::
+
+## ხელმოწერის გაშიფვრა
+
+ავიღოთ რამდენიმე რეალური ჩანაწერი და წავიკითხოთ ისინი ისე, როგორც კომპილატორი კითხულობს.
+
+| ჩანაწერი | კლასი | როგორ იკითხება |
+|---|---|---|
+| `QgsGeometry geometry() const` | `QgsFeature` | ობიექტის გეომეტრია, ასლად; მეთოდი ობიექტს არ ცვლის |
+| `void setGeometry(const QgsGeometry &geometry)` | `QgsFeature` | გეომეტრიას ვუთითებ; კოპირება არ ხდება, ორიგინალს არ შეცვლის |
+| `QVariant attribute(const QString &name) const` | `QgsFeature` | ველის მნიშვნელობა სახელით; `QVariant`-ად |
+| `QgsFeatureId id() const` | `QgsFeature` | ობიექტის უნიკალური ნომერი |
+| `bool isValid() const` | `QgsFeature` | ობიექტი ვალიდურია თუ არა |
+| `QgsFeatureIterator getFeatures(const QgsFeatureRequest &request = QgsFeatureRequest()) const` | `QgsVectorLayer` | ობიექტების iterator; პარამეტრი არასავალდებულოა (default) |
+| `double area() const` | `QgsGeometry` | გეომეტრიის ფართობი |
+| `static QgsGeometry fromPointXY(const QgsPointXY &point)` | `QgsGeometry` | `static`: გამოიძახება `QgsGeometry::fromPointXY(...)`-ით |
+| `QList<QgsMapLayer *> mapLayersByName(const QString &name) const` | `QgsProject` | ფენების სია სახელით; ელემენტები მაჩვენებლებია, შეამოწმე ცარიელია თუ არა |
+
+## მაკროები, რომლებიც შეგხვდება
+
+| ჩანაწერი | აზრი |
+|---|---|
+| `SIP_SKIP`, `SIP_OUT`, `SIP_FACTORY` | მითითებები Python-ის დამაკავშირებელი გენერატორისთვის (SIP); C++-ში შეგიძლია უგულებელყო |
+| `Q_INVOKABLE` | მეთოდი Qt-ის მეტა-სისტემიდან გამოიძახება |
+| `Q_DECL_DEPRECATED` | მოძველებულია, ნუ გამოიყენებ |
+| `CORE_EXPORT` | კლასი ბიბლიოთეკიდან გამოდის; ტექნიკური დეტალია |
+| `Since QGIS 3.xx` | მეთოდი ამ ვერსიიდან არსებობს |
+
+## ცოცხალი მაგალითი: ამოცანიდან მეთოდამდე
+
+ამოცანა: ფენაში თითოეული ობიექტის ფართობი გამოვთვალოთ.
+
+1. იპოვე ფენის კლასი: `QgsVectorLayer`.
+2. იქ ნახე `getFeatures()` → აბრუნებს `QgsFeatureIterator`-ს.
+3. იტერატორიდან მიიღებ `QgsFeature`-ს.
+4. `QgsFeature::geometry()` → `QgsGeometry`.
+5. `QgsGeometry::area()` → `double`.
+
+```cpp
+QgsFeatureIterator it = layer->getFeatures();
+QgsFeature feature;
+while (it.nextFeature(feature)) {
+    double area = feature.geometry().area();
+    qDebug() << feature.id() << area;
+}
+```
+
+::: compare
+```python
+for f in layer.getFeatures():
+    print(f.id(), f.geometry().area())
+```
+
+```cpp
+QgsFeature f;
+QgsFeatureIterator it = layer->getFeatures();
+while (it.nextFeature(f)) {
+  qDebug() << f.id() << f.geometry().area();
+}
+```
+:::
+
+::: note
+`area()` ფენის CRS ერთეულებში აბრუნებს ფართობს (გეოგრაფიულ CRS-ში ეს გრადუსია). მეტრებში ზუსტი გამოთვლისთვის `QgsDistanceArea` გამოიყენება. ასეთი ნიუანსები ხშირად **Detailed Description**-შია.
+:::
+
+## ძირითადი კლასები ერთ ცხრილში
+
+| კლასი | რას აკეთებს | PyQGIS-ის ანალოგი |
+|---|---|---|
+| `QgsProject` | პროექტი, ფენების მფლობელი | `QgsProject.instance()` |
+| `QgsVectorLayer` | ვექტორული ფენა | იგივე |
+| `QgsRasterLayer` | რასტრული ფენა | იგივე |
+| `QgsFeature` | ობიექტი: ID, გეომეტრია, ატრიბუტები | იგივე |
+| `QgsGeometry` | გეომეტრია და ოპერაციები | იგივე |
+| `QgsPointXY` | 2D წერტილი | იგივე |
+| `QgsCoordinateReferenceSystem` | CRS | იგივე |
+| `QgsCoordinateTransform` | გადაყვანა CRS-ებს შორის | იგივე |
+| `QgsFeatureRequest` | ფილტრი ობიექტების არჩევისას | იგივე |
+
+## შეცდომის კითხვა
+
+კომპილატორის შეცდომა პირველად საშიშად გამოიყურება, მაგრამ ხშირად ერთი ხაზი გვეუბნება მთავარს:
+
+| შეცდომა | ჩვეულებრივი მიზეზი |
+|---|---|
+| `'QgsFeature' was not declared` | ჩასართავი `#include <qgsfeature.h>` გაგრჩა |
+| `undefined reference to ...` | ბიბლიოთეკა არ არის მიბმული (`target_link_libraries`) |
+| `passing 'const X' as 'this' discards qualifiers` | `const` ობიექტზე არა-`const` მეთოდი გამოიძახე |
+| `cannot convert 'QString' to 'std::string'` | გამოიყენე `.toStdString()` |
+
+## სავარჯიშო და შეჯამება
+
+::: exercise სავარჯიშო
+1. გახსენი `QgsAttributes` გვერდი. იპოვე მშობელი კლასი და ჩამოწერე სამი მეთოდი.
+2. იპოვე `QgsGeometry::buffer` ხელმოწერა. რა პარამეტრები აქვს? რას აბრუნებს? რომელი პარამეტრია `const`?
+3. იპოვე, რა მეთოდი უნდა გამოიყენო ფენაში არჩეული ობიექტების დასათვლელად (`QgsVectorLayer`-ის გვერდზე ეძებე „selected“).
+4. გადააკეთე წინა მაგალითი ისე, რომ მხოლოდ ისეთი ობიექტები დაითვალოს, რომელთა ფართობი 1000-ზე მეტია.
+:::
+
+::: summary შეჯამება
+- ჯერ **Detailed Description**, მერე მეთოდების სია.
+- ხელმოწერა იკითხება მარცხნიდან: დაბრუნების ტიპი, სახელი, პარამეტრები (`*`/`&`/`const`), მეთოდის `const`.
+- PyQGIS-ის ცოდნა = დოკუმენტაციის ცოდნა: სახელები ერთია.
+:::

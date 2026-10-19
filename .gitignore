@@ -1,0 +1,6 @@
+﻿node_modules/
+dist/book.html
+dist/cover.html
+dist/cover.pdf
+__pycache__/
+dist/book.pdf

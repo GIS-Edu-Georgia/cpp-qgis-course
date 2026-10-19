@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="ka"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>L11 · api.qgis.org-ის კითხვა — C++ PyQGIS-იდან QGIS Core-მდე</title>
+<link rel="stylesheet" href="../assets/slides.css"></head>
+<body data-total="9">
+<div class="bar"><i></i></div>
+<main id="deck">
+  <section class="slide title" data-title="api.qgis.org-ის კითხვა">
+    <div class="eyebrow">ლექცია 11 · ორიენტაცია</div>
+    <h1>api.qgis.org-ის კითხვა</h1>
+    <div class="en">Reading the QGIS C++ API documentation</div>
+    <p class="topics">კლასის გვერდის სტრუქტურა · ხელმოწერების გაშიფვრა · სასარგებლო კლასები · სტრატეგია</p>
+    <div class="intro"><p>თავიდან ეს გვერდები გაუგებარი იყო. ახლა უკვე გაქვს ყველა ინსტრუმენტი: ტიპები, მაჩვენებლები, მითითებები, კლასები, <code>QVariant</code>. ამ თავში სისტემატურად ვისწავლით დოკუმენტაციის „კითხვას“.</p>
+</div>
+    <div class="hint">← → ისრებით გადაადგილება · F — სრული ეკრანი · P — ბეჭდვა</div>
+  </section>
+  <section class="slide" data-title="კლასის გვერდის სქემა">
+    <div class="eyebrow">11.1 · ორიენტაცია</div>
+    <h2>კლასის გვერდის სქემა</h2>
+    <div class="content"><p><code>api.qgis.org/api/&lt;ვერსია&gt;/class&lt;სახელი&gt;.html</code> გვერდს ერთი და იგივე სტრუქტურა აქვს:</p>
+<table>
+<thead>
+<tr>
+<th>ნაწილი</th>
+<th>რას ეძებ იქ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Detailed Description</strong></td>
+<td>რისთვისაა კლასი, მაგალითები; ყოველთვის ჯერ ეს წაიკითხე</td>
+</tr>
+<tr>
+<td><strong>Inheritance diagram</strong></td>
+<td>ვისგან მოდის (იხ. თავი 07); მემკვიდრეობით მიღებული მეთოდები მშობლის გვერდზეა</td>
+</tr>
+<tr>
+<td><strong>Public Types</strong></td>
+<td>enum-ები და typedef-ები; აქ ჩანს, რას ნიშნავს კლასის სახელი</td>
+</tr>
+<tr>
+<td><strong>Public Member Functions</strong></td>
+<td>მეთოდები; ძირითადი სამუშაო</td>
+</tr>
+<tr>
+<td><strong>Static Public Member Functions</strong></td>
+<td>გამოიძახება კლასზე, ობიექტის გარეშე: <code>QgsProject::instance()</code></td>
+</tr>
+<tr>
+<td><strong>Signals / Slots</strong></td>
+<td>რა მოვლენებს აგზავნის</td>
+</tr>
+<tr>
+<td><strong>Member Function Documentation</strong></td>
+<td>თითოეული მეთოდის დეტალები, <code>Since QGIS 3.x</code> ნიშნები</td>
+</tr>
+</tbody>
+</table>
+<div class="box tip"><div class="box-title">წესი</div><div class="box-body">
+<p>პირველად გვერდის ბოლოს ნუ იწყებ. წაიკითხე <strong>Detailed Description</strong>, შემდეგ მეთოდების სია, შემდეგ კონკრეტული მეთოდი.</p>
+</div></div>
+</div>
+  </section>
+
+  <section class="slide" data-title="ხელმოწერის გაშიფვრა">
+    <div class="eyebrow">11.2 · ორიენტაცია</div>
+    <h2>ხელმოწერის გაშიფვრა</h2>
+    <div class="content"><p>ავიღოთ რამდენიმე რეალური ჩანაწერი და წავიკითხოთ ისინი ისე, როგორც კომპილატორი კითხულობს.</p>
+<table>
+<thead>
+<tr>
+<th>ჩანაწერი</th>
+<th>კლასი</th>
+<th>როგორ იკითხება</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>QgsGeometry geometry() const</code></td>
+<td><code>QgsFeature</code></td>
+<td>ობიექტის გეომეტრია, ასლად; მეთოდი ობიექტს არ ცვლის</td>
+</tr>
+<tr>
+<td><code>void setGeometry(const QgsGeometry &amp;geometry)</code></td>
+<td><code>QgsFeature</code></td>
+<td>გეომეტრიას ვუთითებ; კოპირება არ ხდება, ორიგინალს არ შეცვლის</td>
+</tr>
+<tr>
+<td><code>QVariant attribute(const QString &amp;name) const</code></td>
+<td><code>QgsFeature</code></td>
+<td>ველის მნიშვნელობა სახელით; <code>QVariant</code>-ად</td>
+</tr>
+<tr>
+<td><code>QgsFeatureId id() const</code></td>
+<td><code>QgsFeature</code></td>
+<td>ობიექტის უნიკალური ნომერი</td>
+</tr>
+<tr>
+<td><code>bool isValid() const</code></td>
+<td><code>QgsFeature</code></td>
+<td>ობიექტი ვალიდურია თუ არა</td>
+</tr>
+<tr>
+<td><code>QgsFeatureIterator getFeatures(const QgsFeatureRequest &amp;request = QgsFeatureRequest()) const</code></td>
+<td><code>QgsVectorLayer</code></td>
+<td>ობიექტების iterator; პარამეტრი არასავალდებულოა (default)</td>
+</tr>
+<tr>
+<td><code>double area() const</code></td>
+<td><code>QgsGeometry</code></td>
+<td>გეომეტრიის ფართობი</td>
+</tr>
+<tr>
+<td><code>static QgsGeometry fromPointXY(const QgsPointXY &amp;point)</code></td>
+<td><code>QgsGeometry</code></td>
+<td><code>static</code>: გამოიძახება <code>QgsGeometry::fromPointXY(...)</code>-ით</td>
+</tr>
+<tr>
+<td><code>QList&lt;QgsMapLayer *&gt; mapLayersByName(const QString &amp;name) const</code></td>
+<td><code>QgsProject</code></td>
+<td>ფენების სია სახელით; ელემენტები მაჩვენებლებია, შეამოწმე ცარიელია თუ არა</td>
+</tr>
+</tbody>
+</table>
+</div>
+  </section>
+
+  <section class="slide" data-title="მაკროები, რომლებიც შეგხვდება">
+    <div class="eyebrow">11.3 · ორიენტაცია</div>
+    <h2>მაკროები, რომლებიც შეგხვდება</h2>
+    <div class="content"><table>
+<thead>
+<tr>
+<th>ჩანაწერი</th>
+<th>აზრი</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>SIP_SKIP</code>, <code>SIP_OUT</code>, <code>SIP_FACTORY</code></td>
+<td>მითითებები Python-ის დამაკავშირებელი გენერატორისთვის (SIP); C++-ში შეგიძლია უგულებელყო</td>
+</tr>
+<tr>
+<td><code>Q_INVOKABLE</code></td>
+<td>მეთოდი Qt-ის მეტა-სისტემიდან გამოიძახება</td>
+</tr>
+<tr>
+<td><code>Q_DECL_DEPRECATED</code></td>
+<td>მოძველებულია, ნუ გამოიყენებ</td>
+</tr>
+<tr>
+<td><code>CORE_EXPORT</code></td>
+<td>კლასი ბიბლიოთეკიდან გამოდის; ტექნიკური დეტალია</td>
+</tr>
+<tr>
+<td><code>Since QGIS 3.xx</code></td>
+<td>მეთოდი ამ ვერსიიდან არსებობს</td>
+</tr>
+</tbody>
+</table>
+</div>
+  </section>
+
+  <section class="slide" data-title="ცოცხალი მაგალითი: ამოცანიდან მეთოდამდე">
+    <div class="eyebrow">11.4 · ორიენტაცია</div>
+    <h2>ცოცხალი მაგალითი: ამოცანიდან მეთოდამდე</h2>
+    <div class="content"><p>ამოცანა: ფენაში თითოეული ობიექტის ფართობი გამოვთვალოთ.</p>
+<ol>
+<li>იპოვე ფენის კლასი: <code>QgsVectorLayer</code>.</li>
+<li>იქ ნახე <code>getFeatures()</code> → აბრუნებს <code>QgsFeatureIterator</code>-ს.</li>
+<li>იტერატორიდან მიიღებ <code>QgsFeature</code>-ს.</li>
+<li><code>QgsFeature::geometry()</code> → <code>QgsGeometry</code>.</li>
+<li><code>QgsGeometry::area()</code> → <code>double</code>.</li>
+</ol>
+<figure class="code cpp"><figcaption><span>C++</span></figcaption><pre><code class="hljs">QgsFeatureIterator it = layer-&gt;<span class="hljs-built_in">getFeatures</span>();
+QgsFeature feature;
+<span class="hljs-keyword">while</span> (it.<span class="hljs-built_in">nextFeature</span>(feature)) {
+    <span class="hljs-type">double</span> area = feature.<span class="hljs-built_in">geometry</span>().<span class="hljs-built_in">area</span>();
+    <span class="hljs-built_in">qDebug</span>() &lt;&lt; feature.<span class="hljs-built_in">id</span>() &lt;&lt; area;
+}</code></pre></figure>
+<div class="box compare"><div class="box-body">
+<figure class="code python"><figcaption><span>Python</span></figcaption><pre><code class="hljs"><span class="hljs-keyword">for</span> f <span class="hljs-keyword">in</span> layer.getFeatures():
+    <span class="hljs-built_in">print</span>(f.<span class="hljs-built_in">id</span>(), f.geometry().area())</code></pre></figure>
+<figure class="code cpp"><figcaption><span>C++</span></figcaption><pre><code class="hljs">QgsFeature f;
+QgsFeatureIterator it = layer-&gt;<span class="hljs-built_in">getFeatures</span>();
+<span class="hljs-keyword">while</span> (it.<span class="hljs-built_in">nextFeature</span>(f)) {
+  <span class="hljs-built_in">qDebug</span>() &lt;&lt; f.<span class="hljs-built_in">id</span>() &lt;&lt; f.<span class="hljs-built_in">geometry</span>().<span class="hljs-built_in">area</span>();
+}</code></pre></figure>
+</div></div>
+<div class="box note"><div class="box-title">შენიშვნა</div><div class="box-body">
+<p><code>area()</code> ფენის CRS ერთეულებში აბრუნებს ფართობს (გეოგრაფიულ CRS-ში ეს გრადუსია). მეტრებში ზუსტი გამოთვლისთვის <code>QgsDistanceArea</code> გამოიყენება. ასეთი ნიუანსები ხშირად <strong>Detailed Description</strong>-შია.</p>
+</div></div>
+</div>
+  </section>
+
+  <section class="slide" data-title="ძირითადი კლასები ერთ ცხრილში">
+    <div class="eyebrow">11.5 · ორიენტაცია</div>
+    <h2>ძირითადი კლასები ერთ ცხრილში</h2>
+    <div class="content"><table>
+<thead>
+<tr>
+<th>კლასი</th>
+<th>რას აკეთებს</th>
+<th>PyQGIS-ის ანალოგი</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>QgsProject</code></td>
+<td>პროექტი, ფენების მფლობელი</td>
+<td><code>QgsProject.instance()</code></td>
+</tr>
+<tr>
+<td><code>QgsVectorLayer</code></td>
+<td>ვექტორული ფენა</td>
+<td>იგივე</td>
+</tr>
+<tr>
+<td><code>QgsRasterLayer</code></td>
+<td>რასტრული ფენა</td>
+<td>იგივე</td>
+</tr>
+<tr>
+<td><code>QgsFeature</code></td>
+<td>ობიექტი: ID, გეომეტრია, ატრიბუტები</td>
+<td>იგივე</td>
+</tr>
+<tr>
+<td><code>QgsGeometry</code></td>
+<td>გეომეტრია და ოპერაციები</td>
+<td>იგივე</td>
+</tr>
+<tr>
+<td><code>QgsPointXY</code></td>
+<td>2D წერტილი</td>
+<td>იგივე</td>
+</tr>
+<tr>
+<td><code>QgsCoordinateReferenceSystem</code></td>
+<td>CRS</td>
+<td>იგივე</td>
+</tr>
+<tr>
+<td><code>QgsCoordinateTransform</code></td>
+<td>გადაყვანა CRS-ებს შორის</td>
+<td>იგივე</td>
+</tr>
+<tr>
+<td><code>QgsFeatureRequest</code></td>
+<td>ფილტრი ობიექტების არჩევისას</td>
+<td>იგივე</td>
+</tr>
+</tbody>
+</table>
+</div>
+  </section>
+
+  <section class="slide" data-title="შეცდომის კითხვა">
+    <div class="eyebrow">11.6 · ორიენტაცია</div>
+    <h2>შეცდომის კითხვა</h2>
+    <div class="content"><p>კომპილატორის შეცდომა პირველად საშიშად გამოიყურება, მაგრამ ხშირად ერთი ხაზი გვეუბნება მთავარს:</p>
+<table>
+<thead>
+<tr>
+<th>შეცდომა</th>
+<th>ჩვეულებრივი მიზეზი</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>'QgsFeature' was not declared</code></td>
+<td>ჩასართავი <code>#include &lt;qgsfeature.h&gt;</code> გაგრჩა</td>
+</tr>
+<tr>
+<td><code>undefined reference to ...</code></td>
+<td>ბიბლიოთეკა არ არის მიბმული (<code>target_link_libraries</code>)</td>
+</tr>
+<tr>
+<td><code>passing 'const X' as 'this' discards qualifiers</code></td>
+<td><code>const</code> ობიექტზე არა-<code>const</code> მეთოდი გამოიძახე</td>
+</tr>
+<tr>
+<td><code>cannot convert 'QString' to 'std::string'</code></td>
+<td>გამოიყენე <code>.toStdString()</code></td>
+</tr>
+</tbody>
+</table>
+</div>
+  </section>
+
+  <section class="slide" data-title="სავარჯიშო და შეჯამება">
+    <div class="eyebrow">11.7 · ორიენტაცია</div>
+    <h2>სავარჯიშო და შეჯამება</h2>
+    <div class="content"><div class="box exercise"><div class="box-title">სავარჯიშო</div><div class="box-body">
+<ol>
+<li>გახსენი <code>QgsAttributes</code> გვერდი. იპოვე მშობელი კლასი და ჩამოწერე სამი მეთოდი.</li>
+<li>იპოვე <code>QgsGeometry::buffer</code> ხელმოწერა. რა პარამეტრები აქვს? რას აბრუნებს? რომელი პარამეტრია <code>const</code>?</li>
+<li>იპოვე, რა მეთოდი უნდა გამოიყენო ფენაში არჩეული ობიექტების დასათვლელად (<code>QgsVectorLayer</code>-ის გვერდზე ეძებე „selected“).</li>
+<li>გადააკეთე წინა მაგალითი ისე, რომ მხოლოდ ისეთი ობიექტები დაითვალოს, რომელთა ფართობი 1000-ზე მეტია.</li>
+</ol>
+</div></div>
+<div class="box summary"><div class="box-title">შეჯამება</div><div class="box-body">
+<ul>
+<li>ჯერ <strong>Detailed Description</strong>, მერე მეთოდების სია.</li>
+<li>ხელმოწერა იკითხება მარცხნიდან: დაბრუნების ტიპი, სახელი, პარამეტრები (<code>*</code>/<code>&amp;</code>/<code>const</code>), მეთოდის <code>const</code>.</li>
+<li>PyQGIS-ის ცოდნა = დოკუმენტაციის ცოდნა: სახელები ერთია.</li>
+</ul>
+</div></div>
+</div>
+  </section>
+  <section class="slide end" data-title="შემდეგ ლექციაში">
+    <div class="eyebrow">შემდეგ ლექციაში</div>
+    <h2>12 · პროექტი: საკუთარი ინსტრუმენტი QGIS-ში</h2><p class="topics">QGIS-ის აწყობა წყაროდან · დამოუკიდებელი C++ აპლიკაცია · C++ პლაგინის ჩონჩხი · CMake · ლიცენზია</p>
+    <a class="btn" href="L12.html">გახსნა →</a>
+    <a class="btn ghost" href="../index.html">სარჩევი</a>
+    <a class="btn ghost" href="L10.html">← წინა ლექცია</a>
+  </section></main>
+<nav class="ctl"><button id="prev" aria-label="წინა">←</button><span id="count"></span><button id="next" aria-label="შემდეგი">→</button></nav>
+<script src="../assets/slides.js"></script>
+</body></html>
