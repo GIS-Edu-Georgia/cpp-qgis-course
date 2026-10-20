@@ -134,7 +134,7 @@ Tbilisi: 1200000</code></pre></figure>
     std::cout &lt;&lt; <span class="hljs-string">&quot;Total: &quot;</span> &lt;&lt; total &lt;&lt; <span class="hljs-string">&quot;\n&quot;</span>;
     std::cout &lt;&lt; <span class="hljs-string">&quot;Average: &quot;</span> &lt;&lt; total / areas.<span class="hljs-built_in">size</span>() &lt;&lt; <span class="hljs-string">&quot;\n&quot;</span>;
 
-    <span class="hljs-type">long</span> big = std::<span class="hljs-built_in">count_if</span>(areas.<span class="hljs-built_in">begin</span>(), areas.<span class="hljs-built_in">end</span>(),
+    <span class="hljs-keyword">auto</span> big = std::<span class="hljs-built_in">count_if</span>(areas.<span class="hljs-built_in">begin</span>(), areas.<span class="hljs-built_in">end</span>(),
                              [](<span class="hljs-type">double</span> a) { <span class="hljs-keyword">return</span> a &gt; <span class="hljs-number">10.0</span>; });
     std::cout &lt;&lt; <span class="hljs-string">&quot;Parcels &gt; 10 ha: &quot;</span> &lt;&lt; big &lt;&lt; <span class="hljs-string">&quot;\n&quot;</span>;
     <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;

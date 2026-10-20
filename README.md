@@ -5,3 +5,7 @@
 - შინაარსი: content/*.md
 - აწყობა: `npm install` და `node build.mjs` (საჭიროა Google Chrome და Python + pypdf)
 - შედეგი: `docs/` (სლაიდები და `docs/book.pdf`)
+
+## მონაცემები
+
+`data/imereti_sample.gpkg` — OpenStreetMap-ის იმერეთის ამონარიდი (ODbL 1.0), იხ. `data/NOTICE`.

@@ -2,7 +2,7 @@
 <html lang="ka"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>L12 · პროექტი: საკუთარი ინსტრუმენტი QGIS-ში — შესავალი QGIS-ის პროგრამირებაში</title>
 <link rel="stylesheet" href="../assets/slides.css"><script src="../assets/theme.js"></script></head>
-<body data-total="10">
+<body data-total="11">
 <div class="bar"><i></i></div>
 <main id="deck">
   <section class="slide title" data-title="პროექტი: საკუთარი ინსტრუმენტი QGIS-ში">
@@ -89,11 +89,58 @@
 </div>
   </section>
 
-  <section class="slide" data-title="საფეხური 1: პოლიგონების ფართობი qgis_core-ზე">
+  <section class="slide" data-title="მონაცემები: იმერეთის ნიმუში (OpenStreetMap)">
     <div class="eyebrow">12.3 · პრაქტიკა</div>
+    <h2>მონაცემები: იმერეთის ნიმუში (OpenStreetMap)</h2>
+    <div class="content"><p>წიგნის მაგალითებისთვის მზა ღია მონაცემია <code>data/imereti_sample.gpkg</code> (დაახლოებით 2 MB) რეპოზიტორიაში. ეს OpenStreetMap-ის იმერეთის ამონარიდია Geofabrik-ის საქართველოს ნაკრებიდან (2026-10-19), EPSG:4326 კოორდინატებში.</p>
+<table>
+<thead>
+<tr>
+<th>ფენა</th>
+<th>გეომეტრია</th>
+<th>ობიექტები</th>
+<th>შინაარსი</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>municipalities</code></td>
+<td>პოლიგონი</td>
+<td>12</td>
+<td>იმერეთის მუნიციპალიტეტები და ქუთაისი (<code>name</code>, <code>osm_id</code>)</td>
+</tr>
+<tr>
+<td><code>places</code></td>
+<td>წერტილი</td>
+<td>518</td>
+<td>ქალაქები და სოფლები (<code>fclass</code>: <code>city</code>, <code>town</code>, <code>village</code>)</td>
+</tr>
+<tr>
+<td><code>roads</code></td>
+<td>ხაზი</td>
+<td>1956</td>
+<td>მთავარი გზები (<code>fclass</code>: <code>motorway</code>, <code>trunk</code>, <code>primary</code>, <code>secondary</code>)</td>
+</tr>
+<tr>
+<td><code>rivers</code></td>
+<td>ხაზი</td>
+<td>380</td>
+<td>მდინარეები</td>
+</tr>
+</tbody>
+</table>
+<div class="box note"><div class="box-title">მონაცემთა წყარო და ლიცენზია</div><div class="box-body">
+<p>მონაცემები: © OpenStreetMap contributors, ლიცენზია <strong>ODbL 1.0</strong> (<code>openstreetmap.org/copyright</code>). დამუშავება: Geofabrik GmbH, ამონარიდი: ამ წიგნის ავტორი. ODbL მოითხოვს წყაროს მითითებას და იმავე ლიცენზიით გავრცელებას ამ მონაცემებზე დაფუძნებული ბაზებისა; ამიტომ <code>data/</code> საქაღალდე ცალკე <code>NOTICE</code> ფაილითაა და წიგნის ტექსტის ლიცენზიისგან გამოყოფილია. სრული, ყოველდღე განახლებადი ნაკრები: <code>download.geofabrik.de/europe/georgia.html</code> (<code>georgia-latest-free.shp.zip</code>). მისი რიცხვები ჩვენი ნიმუშისგან განსხვავდება.</p>
+</div></div>
+</div>
+  </section>
+
+  <section class="slide" data-title="საფეხური 1: პოლიგონების ფართობი qgis_core-ზე">
+    <div class="eyebrow">12.4 · პრაქტიკა</div>
     <h2>საფეხური 1: პოლიგონების ფართობი qgis_core-ზე</h2>
-    <div class="content"><p>ამოცანა: რაიონების (პოლიგონების) ფენის ჩატვირთვა, ობიექტების დათვლა და ფართობების ჯამის გამოთვლა ელიფსოიდურად.</p>
-<figure class="code cpp"><figcaption><span>C++</span><em>main.cpp</em></figcaption><pre><code class="hljs"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;iostream&gt;</span></span>
+    <div class="content"><p>ამოცანა: იმერეთის მუნიციპალიტეტების ფენის ჩატვირთვა, ობიექტების დათვლა და ფართობების ჯამის გამოთვლა ორი გზით: გეგმურად და ელიფსოიდურად.</p>
+<figure class="code cpp"><figcaption><span>C++</span><em>main.cpp</em></figcaption><pre><code class="hljs"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;iomanip&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;iostream&gt;</span></span>
 
 <span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;qgsapplication.h&gt;</span></span>
 <span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;qgsdistancearea.h&gt;</span></span>
@@ -107,7 +154,8 @@
     QgsApplication::<span class="hljs-built_in">setPrefixPath</span>(<span class="hljs-string">&quot;/usr&quot;</span>, <span class="hljs-literal">true</span>); <span class="hljs-comment">// QGIS-ის ინსტალაციის საქაღალდე</span>
     QgsApplication::<span class="hljs-built_in">initQgis</span>();
 
-    <span class="hljs-function">QgsVectorLayer <span class="hljs-title">layer</span><span class="hljs-params">(<span class="hljs-string">&quot;districts.geojson&quot;</span>, <span class="hljs-string">&quot;districts&quot;</span>, <span class="hljs-string">&quot;ogr&quot;</span>)</span></span>;
+    <span class="hljs-function">QgsVectorLayer <span class="hljs-title">layer</span><span class="hljs-params">(<span class="hljs-string">&quot;data/imereti_sample.gpkg|layername=municipalities&quot;</span>,
+                         <span class="hljs-string">&quot;municipalities&quot;</span>, <span class="hljs-string">&quot;ogr&quot;</span>)</span></span>;
     <span class="hljs-keyword">if</span> (!layer.<span class="hljs-built_in">isValid</span>()) {
         std::cerr &lt;&lt; <span class="hljs-string">&quot;Layer failed to load\n&quot;</span>;
         <span class="hljs-keyword">return</span> <span class="hljs-number">1</span>;
@@ -128,17 +176,25 @@
         planar += feature.<span class="hljs-built_in">geometry</span>().<span class="hljs-built_in">area</span>();
         ellipsoidal += da.<span class="hljs-built_in">measureArea</span>(feature.<span class="hljs-built_in">geometry</span>());
     }
-    std::cout &lt;&lt; <span class="hljs-string">&quot;Planar sum: &quot;</span> &lt;&lt; planar &lt;&lt; <span class="hljs-string">&quot; (CRS units^2)\n&quot;</span>;
-    std::cout &lt;&lt; <span class="hljs-string">&quot;Ellipsoidal sum: &quot;</span> &lt;&lt; ellipsoidal &lt;&lt; <span class="hljs-string">&quot; m2\n&quot;</span>;
+    std::cout &lt;&lt; std::fixed &lt;&lt; std::<span class="hljs-built_in">setprecision</span>(<span class="hljs-number">6</span>)
+              &lt;&lt; <span class="hljs-string">&quot;Planar sum: &quot;</span> &lt;&lt; planar &lt;&lt; <span class="hljs-string">&quot; (CRS units^2)\n&quot;</span>;
+    std::cout &lt;&lt; std::<span class="hljs-built_in">setprecision</span>(<span class="hljs-number">1</span>)
+              &lt;&lt; <span class="hljs-string">&quot;Ellipsoidal sum: &quot;</span> &lt;&lt; ellipsoidal / <span class="hljs-number">1e6</span> &lt;&lt; <span class="hljs-string">&quot; km2\n&quot;</span>;
 
     QgsApplication::<span class="hljs-built_in">exitQgis</span>();
     <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
 }</code></pre></figure>
-<p>გამოსავალი ასე შეიძლება გამოიყურებოდეს (რიცხვები საილუსტრაციოა და შენს მონაცემებზეა დამოკიდებული):</p>
+<p>გამოსავალი იმერეთის ნიმუშზე (<code>data/imereti_sample.gpkg</code>):</p>
 <figure class="code out"><figcaption><span>შედეგი</span></figcaption><pre><code>Features: 12
-Planar sum: 0.0382741 (CRS units^2)
-Ellipsoidal sum: 453812345 m2</code></pre></figure>
-<p>თუ ფენა გეოგრაფიულ CRS-შია, პირველი რიცხვი პატარაა (კვადრატული გრადუსი), მეორე კი კვადრატული მეტრებია. სწორედ ამიტომ ორივეს ერთად ვბეჭდავთ.</p>
+Planar sum: 0.696446 (CRS units^2)
+Ellipsoidal sum: 6391.6 km2</code></pre></figure>
+<p>ფენა გეოგრაფიულ CRS-შია (EPSG:4326), ამიტომ პირველი რიცხვი <strong>კვადრატული გრადუსია</strong> (0.696446) და კვადრატულ მეტრებად არ ითვლება, მეორე კი ელიფსოიდზე გამოთვლილი ნამდვილი ფართობია: დაახლოებით 6392 კმ². სწორედ ამიტომ ორივეს ერთად ვბეჭდავთ. <code>da.areaUnits()</code> ამ შემთხვევაში კვადრატულ მეტრს აბრუნებს (<code>Qgis::AreaUnit::SquareMeters</code>), ამიტომ <code>1e6</code>-ზე გაყოფა კვადრატულ კილომეტრს გვაძლევს.</p>
+<div class="box note"><div class="box-title">როგორ არის შემოწმებული ეს რიცხვები</div><div class="box-body">
+<p>ეს რიცხვები გამოვთვალეთ PyQGIS-ით QGIS 4.2.2-ში იმავე გზით, რაც C++ კოდშია (<code>QgsDistanceArea</code>, WGS84, იგივე ფაილი). ჩვენს სატესტო კომპიუტერზე C++-ის დეველოპერული ფაილები (header-ები და <code>qgis_core</code>-ის იმპორტის ბიბლიოთეკა) არ იყო, ამიტომ თავად ეს C++ პროგრამა იქ არ აგვიწყვია. რიცხვები მაინც იმავე QGIS ბირთვითაა მიღებული. შენს კომპიუტერზე უნდა მიიღო იგივე სამი მნიშვნელობა: <code>12</code>, <code>0.696446</code>, <code>6391.6</code>.</p>
+</div></div>
+<div class="box warn"><div class="box-title">Windows-ზე</div><div class="box-body">
+<p>Windows-ის სტანდარტულ QGIS ინსტალერში (მაგ. QGIS 4.2.2) <code>qgis_core</code>-ისთვის header-ები და <code>.lib</code> ფაილები არ შედის: საქაღალდეში <code>apps/qgis</code> არ არის <code>include</code> და <code>lib</code>. C++ პროექტის ასაწყობად Windows-ზე გჭირდება OSGeo4W-ის დეველოპერული პაკეტები ან QGIS-ის აწყობა წყაროდან. უმარტივესი გზა Linux-ზეა (<code>libqgis-dev</code>), ამიტომ ეს თავი ასეთ გარემოზეა დაწერილი.</p>
+</div></div>
 <p>ხაზ-ხაზ:</p>
 <table>
 <thead>
@@ -201,7 +257,7 @@ Ellipsoidal sum: 453812345 m2</code></pre></figure>
   </section>
 
   <section class="slide" data-title="CMake: ერთი კონკრეტული გარემო">
-    <div class="eyebrow">12.4 · პრაქტიკა</div>
+    <div class="eyebrow">12.5 · პრაქტიკა</div>
     <h2>CMake: ერთი კონკრეტული გარემო</h2>
     <div class="content"><p>ქვემოთ მაგალითი <strong>Ubuntu/Debian-ისთვისაა</strong>, სადაც QGIS 3.x და Qt5 სისტემური პაკეტებით დგას. QGIS 4-სთვის გამოიყენება Qt6, ამიტომ <code>Qt5</code> უნდა შეიცვალოს <code>Qt6</code>-ით. სხვა სისტემებზე ბილიკები და პაკეტების სახელები განსხვავდება.</p>
 <p>დამოკიდებულებების დაყენება:</p>
@@ -273,7 +329,7 @@ cmake --build build
   </section>
 
   <section class="slide" data-title="საფეხური 2: C++ პლაგინი QGIS-ის წყაროში">
-    <div class="eyebrow">12.5 · პრაქტიკა</div>
+    <div class="eyebrow">12.6 · პრაქტიკა</div>
     <h2>საფეხური 2: C++ პლაგინი QGIS-ის წყაროში</h2>
     <div class="content"><p>C++ პლაგინი არის დინამიური ბიბლიოთეკა, რომელსაც QGIS გაშვებისას ტვირთავს. QGIS-ის რეპოზიტორიაში უკვე არსებობს რეალური C++ პლაგინები (<code>src/plugins/topology</code>, <code>geometry_checker</code>, <code>offline_editing</code>). საუკეთესო სასწავლო გზაა მათი სტრუქტურის გამეორება. ქვემოთ მინიმალური პლაგინია, აგებული <code>topology</code>-ს მიხედვით.</p>
 <p><strong>პლაგინის სავალდებულო ნაწილები</strong> (QGIS-ის <code>qgisplugin.h</code>-იდან):</p>
@@ -386,7 +442,7 @@ MyTool::<span class="hljs-built_in">MyTool</span>(QgisInterface *iface)
   </section>
 
   <section class="slide" data-title="საფეხური 3: QGIS-ის აწყობა წყაროდან (გაფართოებული)">
-    <div class="eyebrow">12.6 · პრაქტიკა</div>
+    <div class="eyebrow">12.7 · პრაქტიკა</div>
     <h2>საფეხური 3: QGIS-ის აწყობა წყაროდან (გაფართოებული)</h2>
     <div class="content"><p>ეს საფეხური არ არის აუცილებელი წიგნის ძირითადი შედეგისთვის. QGIS-ის აწყობა სერიოზული ამოცანაა: მოითხოვს დამოკიდებულებებს (Qt, GDAL, GEOS, PROJ და სხვა), მნიშვნელოვან დროსა და ადგილს დისკზე. დაიწყე მხოლოდ მაშინ, როცა პირველი ორი საფეხური უკვე მუშაობს.</p>
 <figure class="code bash"><figcaption><span>Shell</span></figcaption><pre><code class="hljs">git <span class="hljs-built_in">clone</span> https://github.com/qgis/QGIS.git
@@ -424,13 +480,14 @@ ninja</code></pre></figure>
   </section>
 
   <section class="slide" data-title="სავარჯიშო და შეჯამება">
-    <div class="eyebrow">12.7 · პრაქტიკა</div>
+    <div class="eyebrow">12.8 · პრაქტიკა</div>
     <h2>სავარჯიშო და შეჯამება</h2>
     <div class="content"><div class="box exercise"><div class="box-title">საბოლოო დავალება</div><div class="box-body">
 <ol>
-<li>გააკეთე საფეხური 1 შენი მონაცემით (მაგ. რაიონების პოლიგონები). <strong>მოსალოდნელი შედეგი:</strong> პროგრამა ბეჭდავს ობიექტების რაოდენობას და ორ ფართობს; ელიფსოიდური ფართობი კვადრატულ მეტრებშია და შესამჩნევად განსხვავდება „Planar sum“-ისგან, თუ ფენა გეოგრაფიულ CRS-შია.</li>
-<li>შეამოწმე შედეგი QGIS-ის გრაფიკულ ინტერფეისში (ატრიბუტთა ცხრილის გამოსახულება <code>$area</code>) და შეადარე.</li>
-<li>დაამატე <code>QgsFeatureRequest</code> ფილტრი და დათვალე მხოლოდ ობიექტები გარკვეული ატრიბუტით. <strong>შემოწმება:</strong> რაოდენობა უნდა დაემთხვეს QGIS-ში ამავე პირობით არჩეულ ობიექტებს.</li>
+<li>გააკეთე საფეხური 1 <code>data/imereti_sample.gpkg</code>-ზე. <strong>მოსალოდნელი შედეგი:</strong> <code>Features: 12</code>, <code>Planar sum: 0.696446</code>, <code>Ellipsoidal sum: 6391.6 km2</code>.</li>
+<li>გამოიტანე თითოეული მუნიციპალიტეტის ფართობი კმ²-ში. <strong>მოსალოდნელი შედეგი:</strong> ყველაზე დიდი ხარაგაულია (≈ 905 კმ²), ყველაზე პატარა ქუთაისი (≈ 59 კმ²).</li>
+<li>გახსენი იგივე ფაილი QGIS-ში და შეადარე შენი შედეგი ატრიბუტთა ცხრილის გამოსახულებას <code>$area</code> (ელიფსოიდზე) / <code>area($geometry)</code> (გეგმური).</li>
+<li>გახსენი ფენა <code>places</code> და <code>QgsFeatureRequest</code>-ის ფილტრით დათვალე მხოლოდ ქალაქები (<code>&quot;fclass&quot; = 'town'</code>). <strong>მოსალოდნელი შედეგი:</strong> 11 ქალაქი და 1 <code>city</code> (ქუთაისი); სულ 518 ობიექტი.</li>
 <li>წაიკითხე <code>src/plugins/topology/topol.cpp</code> და იპოვე იქ ყველა <code>QGISEXTERN</code> ფუნქცია. <strong>შემოწმება:</strong> ჩამოწერე რვავე სახელი.</li>
 <li>მოამზადე 5-ხაზიანი დოკუმენტი: რა ისწავლე, რა გაუგებარია, რა გინდა შემდეგ ეტაპზე.</li>
 </ol>
@@ -449,7 +506,7 @@ ninja</code></pre></figure>
   </section>
 
   <section class="slide" data-title="დასასრულის ნაცვლად">
-    <div class="eyebrow">12.8 · პრაქტიკა</div>
+    <div class="eyebrow">12.9 · პრაქტიკა</div>
     <h2>დასასრულის ნაცვლად</h2>
     <div class="content"><p>წიგნში გავლილი გზა C++-ის ძირითადი ცნებებიდან QGIS Core-ის API-მდე გაძლევს საფუძველს, რომ უფრო ღრმად გაიგო QGIS-ის პროგრამული გარემო. თუმცა პროგრამირების სწავლა მხოლოდ ცნებებისა და მაგალითების გაცნობით არ სრულდება: ცოდნა მაშინ მტკიცდება, როცა თავად იკვლევ დოკუმენტაციას, კითხულობ არსებულ კოდს, ცდი სხვადასხვა მიდგომას და საკუთარ ამოცანას პროგრამულ გადაწყვეტად აქცევ.</p>
 <h3>როგორ გააგრძელო დამოუკიდებლად</h3>

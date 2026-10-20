@@ -114,7 +114,7 @@ int main() {
     std::cout << "Total: " << total << "\n";
     std::cout << "Average: " << total / areas.size() << "\n";
 
-    long big = std::count_if(areas.begin(), areas.end(),
+    auto big = std::count_if(areas.begin(), areas.end(),
                              [](double a) { return a > 10.0; });
     std::cout << "Parcels > 10 ha: " << big << "\n";
     return 0;

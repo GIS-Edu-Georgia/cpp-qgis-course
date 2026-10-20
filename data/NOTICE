@@ -1,0 +1,23 @@
+Data in this folder
+===================
+
+File: imereti_sample.gpkg
+Layers: municipalities (12 polygons), places (518 points),
+        roads (1956 lines), rivers (380 lines)
+
+Source:  OpenStreetMap data, extract of the region "Imereti" (Georgia),
+         taken from the Geofabrik GmbH shapefile extract
+         georgia-261019-free.shp (data state 2026-10-19).
+Creator: (c) OpenStreetMap contributors
+License: Open Database License (ODbL) 1.0
+         https://opendatacommons.org/licenses/odbl/1-0/
+         https://www.openstreetmap.org/copyright
+
+Changes made: selected features inside the Imereti region polygon;
+removed unused attributes; roads limited to classes motorway, trunk,
+primary and secondary; places limited to city, town and village;
+waterways limited to rivers. Geometries are unchanged (EPSG:4326).
+
+This folder is a database derived from OpenStreetMap data and is
+therefore distributed under the ODbL, independent of the license of
+the book text and code in the rest of this repository.

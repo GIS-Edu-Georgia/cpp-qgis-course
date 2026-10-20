@@ -82,6 +82,8 @@
 </tr>
 </tbody>
 </table>
+<h3>მონაცემები და ლიცენზია</h3>
+<p>პრაქტიკული მაგალითები იყენებს <strong>OpenStreetMap</strong>-ის ღია მონაცემებს (იმერეთის ამონარიდი, ფაილი <code>data/imereti_sample.gpkg</code>, დაახლოებით 2 MB), ამიტომ არაფრის ძებნა და ჩამოტვირთვა არ დაგჭირდება. მონაცემები: © OpenStreetMap contributors, ლიცენზია ODbL 1.0 (<code>openstreetmap.org/copyright</code>); წყარო: Geofabrik GmbH. მონაცემთა სრული აღწერა და ლიცენზიის პირობები თავი 12-შია.</p>
 <p>თითოეული თავის ბოლოს არის სავარჯიშოები. თავები 02–09-ის მაგალითები დამოუკიდებლად, QGIS-ის გარეშე შეგიძლია შეასრულო და საუკეთესო სწავლა ისაა, რომ კოდს თავად აკრიფო და შეცვალო.</p>
 <div class="box note"><div class="box-title">რას არ გპირდება წიგნი</div><div class="box-body">
 <p>ეს არ არის QGIS-ის ყველა კომპონენტის ამომწურავი აღწერა და არც C++-ის სრული კურსი. ის გაძლევს საფუძველს და პირველ პრაქტიკულ პროექტს, საიდანაც დამოუკიდებლად გააგრძელებ.</p>
@@ -386,7 +388,11 @@ QgsFeature feature;
 <p><strong>Linux-ზე</strong> (Ubuntu/Debian) კომპილატორის დასაყენებლად:</p>
 <figure class="code bash"><figcaption><span>Shell</span></figcaption><pre><code class="hljs"><span class="hljs-built_in">sudo</span> apt install g++
 g++ --version</code></pre></figure>
-<p><strong>Windows-ზე</strong> უმარტივესია MSYS2 (msys2.org): დააყენე და მის ტერმინალში გაუშვი <code>pacman -S mingw-w64-ucrt-x86_64-gcc</code>. შემდეგ <code>C:\msys64\ucrt64\bin</code> დაამატე სისტემის <code>Path</code>-ში და ახალ ტერმინალში შეამოწმე <code>g++ --version</code>. თუ ვერსია დაიბეჭდა, გარემო მზადაა.</p>
+<p><strong>Windows-ზე Visual Studio-ით (MSVC).</strong> თუ გაქვს Visual Studio (Community) „Desktop development with C++“ კომპონენტით, ცალკე კომპილატორი არ გჭირდება. გახსენი „Developer PowerShell for VS“ (ან ჩვეულებრივ ტერმინალში გაუშვი <code>vcvars64.bat</code>) და აწყობე:</p>
+<figure class="code bash"><figcaption><span>Shell</span></figcaption><pre><code class="hljs">cl /nologo /std:c++17 /EHsc /utf-8 main.cpp
+.\main.exe</code></pre></figure>
+<p><code>/std:c++17</code> რთავს C++17-ს, <code>/EHsc</code> — გამონაკლისების სტანდარტულ დამუშავებას, <code>/utf-8</code> — იმას, რომ ქართული ტექსტი კოდში სწორად წაიკითხოს. VS Code-ში იგივე კომპილატორს „C/C++“ და „CMake Tools“ გაფართოებები იყენებენ. ამ წიგნის თავები 02–09-ის მაგალითები ამ გზითაც გამოვცადეთ და ყველა გამოსავალი ემთხვევა დაწერილს (გარდა მაჩვენებლის მისამართისა, რომელიც ყოველ გაშვებაზე იცვლება).</p>
+<p><strong>Windows-ზე MSYS2-ით</strong> (GCC კომპილატორი) უმარტივესია msys2.org: დააყენე და მის ტერმინალში გაუშვი <code>pacman -S mingw-w64-ucrt-x86_64-gcc</code>. შემდეგ <code>C:\msys64\ucrt64\bin</code> დაამატე სისტემის <code>Path</code>-ში და ახალ ტერმინალში შეამოწმე <code>g++ --version</code>. თუ ვერსია დაიბეჭდა, გარემო მზადაა.</p>
 <div class="box tip"><div class="box-title">თუ ვერ დააყენე</div><div class="box-body">
 <p>დასაწყისისთვის კოდის გასაშვებად შეგიძლია გამოიყენო ონლაინ კომპილატორი (მაგალითად, onlinegdb.com ან godbolt.org). თავები 02–10 არ საჭიროებს QGIS-ის დაყენებას.</p>
 </div></div>
