@@ -69,7 +69,7 @@ md.renderer.rules.fence = (tokens, idx) => {
   const name = { cpp: 'C++', python: 'Python', cmake: 'CMake', bash: 'Shell' }[lang] || lang;
   return `<figure class="code ${lang}"><figcaption><span>${name}</span>${label ? `<em>${esc(label)}</em>` : ''}</figcaption><pre><code class="hljs">${html}</code></pre></figure>\n`;
 };
-const BOXES = { analogy: 'ანალოგია', tip: 'დაიმახსოვრე', warn: 'ყურადღება', note: 'შენიშვნა', exercise: 'სავარჯიშო', summary: 'შეჯამება', compare: '' };
+const BOXES = { analogy: 'ანალოგია', tip: 'დაიმახსოვრე', warn: 'ყურადღება', note: 'შენიშვნა', exercise: 'სავარჯიშო', summary: 'შეჯამება', compare: '', speaker: 'ლექტორისთვის' };
 for (const [name, defTitle] of Object.entries(BOXES)) {
   md.use(container, name, {
     validate: p => p.trim().split(/\s+/)[0] === name,
@@ -138,27 +138,51 @@ function slidesHtml(ch, i) {
   return `<!doctype html>
 <html lang="ka"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>L${meta.n} · ${esc(meta.title)} — ${BOOK_TITLE}</title>
-<link rel="stylesheet" href="../assets/slides.css"></head>
+<link rel="stylesheet" href="../assets/slides.css"><script src="../assets/theme.js"></script></head>
 <body data-total="${total}">
 <div class="bar"><i></i></div>
 <main id="deck">${title}${body}${end}</main>
-<nav class="ctl"><button id="prev" aria-label="წინა">←</button><span id="count"></span><button id="next" aria-label="შემდეგი">→</button></nav>
 <script src="../assets/slides.js"></script>
 </body></html>`;
 }
 
+const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI'];
+const PARTS = [
+  { title: 'საფუძვლები', from: 1, to: 3 },
+  { title: 'მეხსიერება და ობიექტები', from: 4, to: 8 },
+  { title: 'ბიბლიოთეკები და პრაქტიკა', from: 9, to: 12 },
+];
+
 function indexHtml() {
-  const items = chapters.map(c => `<a class="card" href="lectures/L${c.meta.n}.html"><b>${c.meta.n}</b><span>${esc(c.meta.title)}<small>${esc(c.meta.topics || '')}</small></span></a>`).join('\n');
+  const card = c => {
+    const slidesCount = c.slides.length + 2;
+    const hasEx = c.slides.some(s => /::: exercise/.test(s.body));
+    return `<a class="card2" href="lectures/L${c.meta.n}.html"><span class="no">ლექცია ${c.meta.n}</span><span class="tt">${esc(c.meta.title)}</span><span class="tp">${esc(c.meta.topics || '')}</span><span class="tags"><span class="tag">${slidesCount} სლაიდი</span>${hasEx ? '<span class="tag">სავარჯიშო</span>' : ''}</span></a>`;
+  };
+  const parts = PARTS.map((p, i) => {
+    const cs = chapters.filter(c => +c.meta.n >= p.from && +c.meta.n <= p.to);
+    if (!cs.length) return '';
+    return `<section class="part"><h2>${ROMAN[i]} ნაწილი — ${p.title}</h2><div class="grid">${cs.map(card).join('\n')}</div></section>`;
+  }).join('\n');
+  const legend = [
+    ['← →', 'Space', 'ნავიგაცია'], ['Home', 'End', 'თავი / ბოლო'], ['O', '', 'სლაიდების სია'],
+    ['N', '', 'ლექტორის ჩანაწერები'], ['S', '', 'ლექტორის ხედი (მეორე ეკრანი)'], ['L', '', 'ლაზერი'],
+    ['D', '', 'ღია / მუქი თემა'], ['F', '', 'სრული ეკრანი'], ['P', '', 'ბეჭდვა / PDF'],
+  ].map(([a, b, t]) => `<div><kbd>${a}</kbd>${b ? ` <kbd>${b}</kbd>` : ''} — ${t}</div>`).join('');
   return `<!doctype html><html lang="ka"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>${BOOK_TITLE}</title><link rel="stylesheet" href="assets/slides.css"></head>
-<body class="index"><main><div class="eyebrow">კურსი</div><h1>${BOOK_TITLE}</h1><p class="en">${BOOK_SUBTITLE}</p><p class="topics">${AUTHOR} · ${PLACE_YEAR}</p>
-<div class="cards">${items}</div><p class="hint"><a href="book.pdf">PDF წიგნის გადმოწერა</a></p></main></body></html>`;
+<title>${BOOK_TITLE}</title><link rel="stylesheet" href="assets/slides.css"><script src="assets/theme.js"></script></head>
+<body class="index"><div class="top"><button class="tbtn" data-theme-toggle>◐ თემა</button></div>
+<main><div class="eyebrow">კურსი</div><h1>${BOOK_TITLE}</h1><p class="en">${BOOK_SUBTITLE}</p><p class="topics">${AUTHOR} · ${PLACE_YEAR}</p>
+${parts}
+<section class="part"><h2>კლავიატურა პრეზენტაციაში</h2><div class="legend">${legend}<div>მობილურზე — გადაფურცვლა</div></div></section>
+<p class="hint"><a href="book.pdf">PDF წიგნის გადმოწერა</a></p></main></body></html>`;
 }
 
 fs.mkdirSync(path.join(ROOT, 'docs/assets'), { recursive: true });
 fs.mkdirSync(path.join(ROOT, 'docs/lectures'), { recursive: true });
 fs.writeFileSync(path.join(ROOT, 'docs/assets/slides.css'), css('slides.css'));
 fs.copyFileSync(path.join(ROOT, 'src/slides.js'), path.join(ROOT, 'docs/assets/slides.js'));
+fs.copyFileSync(path.join(ROOT, 'src/theme.js'), path.join(ROOT, 'docs/assets/theme.js'));
 chapters.forEach((c, i) => fs.writeFileSync(path.join(ROOT, `docs/lectures/L${c.meta.n}.html`), slidesHtml(c, i)));
 fs.writeFileSync(path.join(ROOT, 'docs/index.html'), indexHtml());
 
