@@ -9,3 +9,7 @@
 ## მონაცემები
 
 `data/imereti_sample.gpkg` — OpenStreetMap-ის იმერეთის ამონარიდი (ODbL 1.0), იხ. `data/NOTICE`.
+
+## მაგალითების შემოწმება
+
+`python tools/verify_examples.py` აკომპილებს თავები 02–09-ის ყველა დამოუკიდებელ C++ მაგალითს (g++, clang++ ან cl) და ადარებს გამოსავალს წიგნში დაწერილს.
