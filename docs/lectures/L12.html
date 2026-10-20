@@ -13,7 +13,7 @@
     <div class="intro"><p>საბოლოო მიზანი: საკუთარი C++ კოდი QGIS-თან ერთად გაუშვა. გზა სამ საფეხურად ვაგებთ: ჯერ ვმუშაობთ QGIS-ის ბიბლიოთეკასთან დამოუკიდებელ აპლიკაციაში, შემდეგ ვაკეთებთ პლაგინის სტრუქტურას, ბოლოს (არასავალდებულოდ) ვაწყობთ QGIS-ს წყაროდან.</p>
 <p>ამ თავში შემოდის ახალი ტერმინები: <strong>პლაგინი</strong> არის დამატება, რომელსაც QGIS ჩატვირთვისას აკავშირებს თავის მენიუსა და ფუნქციებთან; C++ პლაგინი არის <strong>დინამიური ბიბლიოთეკა</strong> (<code>.dll</code> Windows-ზე, <code>.so</code> Linux-ზე) — ცალკე ფაილი, რომელიც უშუალოდ კი არ იხსნება, არამედ სხვა პროგრამა (QGIS) ტვირთავს. <strong>CMake</strong> კი არის „აწყობის დირიჟორი“: ტექსტური ფაილი (<code>CMakeLists.txt</code>), რომელიც ეუბნება, რომელი ფაილები და ბიბლიოთეკები დააკომპილოს და როგორ დააკავშიროს.</p>
 <div class="box warn"><div class="box-title">გაიგე, რა არის და რა არ არის შემოწმებული</div><div class="box-body">
-<p>ამ თავის კოდი შედგენილია QGIS-ის API-ის დოკუმენტაციისა და QGIS-ის რეალური წყაროს (<code>src/plugins/topology</code>) მიხედვით, მაგრამ ავტორს ის ჯერ არ აუწყვია და არ გაუშვია ყველა გარემოში. გამოიყენე ის როგორც გზამკვლევი, პირველად გაუშვი ერთ კონკრეტულ სისტემაზე და სისტემის ბილიკები და ვერსიები მოარგე შენს ინსტალაციას. API-ის ხელმოწერები შემოწმებულია <code>api.qgis.org</code>-ის 4.3.0-Master დოკუმენტაციასთან; QGIS 3.x-ში ზოგი overload შეიძლება განსხვავდებოდეს.</p>
+<p><strong>საფეხური 1</strong> (დამოუკიდებელი პროგრამა, CMake) რეალურად აწყობილი და გაშვებულია: Linux Mint 22.3 (Ubuntu 24.04), g++ 13.3, CMake 3.28, QGIS 3.44.15 (<code>libqgis-dev</code>), Qt5. <strong>საფეხური 2</strong> (პლაგინი) შედგენილია QGIS-ის რეალური წყაროს (<code>src/plugins/topology</code>) მიხედვით, მაგრამ ავტორს ის ჯერ არ აუწყვია და არ გაუშვია, ხოლო საფეხური 3 (QGIS-ის აწყობა) მხოლოდ მიმოხილვაა. გამოიყენე ისინი როგორც გზამკვლევი: სისტემის ბილიკები და ვერსიები მოარგე შენს ინსტალაციას. API-ის ხელმოწერები შემოწმებულია <code>api.qgis.org</code>-ის 4.3.0-Master დოკუმენტაციასთან; QGIS 3.x-ში ზოგი overload შეიძლება განსხვავდებოდეს.</p>
 </div></div>
 </div>
     <div class="hint">← → ისრებით გადაადგილება · F — სრული ეკრანი · P — ბეჭდვა</div>
@@ -149,11 +149,9 @@
 <span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;qgsproject.h&gt;</span></span>
 <span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;qgsvectorlayer.h&gt;</span></span>
 
-<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">(<span class="hljs-type">int</span> argc, <span class="hljs-type">char</span> *argv[])</span> </span>{
-    <span class="hljs-function">QgsApplication <span class="hljs-title">app</span><span class="hljs-params">(argc, argv, <span class="hljs-literal">false</span>)</span></span>;     <span class="hljs-comment">// false = GUI არ გვჭირდება</span>
-    QgsApplication::<span class="hljs-built_in">setPrefixPath</span>(<span class="hljs-string">&quot;/usr&quot;</span>, <span class="hljs-literal">true</span>); <span class="hljs-comment">// QGIS-ის ინსტალაციის საქაღალდე</span>
-    QgsApplication::<span class="hljs-built_in">initQgis</span>();
-
+<span class="hljs-comment">// მთელი სამუშაო ცალკე ფუნქციაშია, რომ ფენა და იტერატორი განადგურდეს</span>
+<span class="hljs-comment">// QgsApplication::exitQgis()-მდე (იხ. ახსნა ქვემოთ)</span>
+<span class="hljs-function"><span class="hljs-type">static</span> <span class="hljs-type">int</span> <span class="hljs-title">measureDistricts</span><span class="hljs-params">()</span> </span>{
     <span class="hljs-function">QgsVectorLayer <span class="hljs-title">layer</span><span class="hljs-params">(<span class="hljs-string">&quot;data/imereti_sample.gpkg|layername=municipalities&quot;</span>,
                          <span class="hljs-string">&quot;municipalities&quot;</span>, <span class="hljs-string">&quot;ogr&quot;</span>)</span></span>;
     <span class="hljs-keyword">if</span> (!layer.<span class="hljs-built_in">isValid</span>()) {
@@ -180,9 +178,18 @@
               &lt;&lt; <span class="hljs-string">&quot;Planar sum: &quot;</span> &lt;&lt; planar &lt;&lt; <span class="hljs-string">&quot; (CRS units^2)\n&quot;</span>;
     std::cout &lt;&lt; std::<span class="hljs-built_in">setprecision</span>(<span class="hljs-number">1</span>)
               &lt;&lt; <span class="hljs-string">&quot;Ellipsoidal sum: &quot;</span> &lt;&lt; ellipsoidal / <span class="hljs-number">1e6</span> &lt;&lt; <span class="hljs-string">&quot; km2\n&quot;</span>;
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">(<span class="hljs-type">int</span> argc, <span class="hljs-type">char</span> *argv[])</span> </span>{
+    <span class="hljs-function">QgsApplication <span class="hljs-title">app</span><span class="hljs-params">(argc, argv, <span class="hljs-literal">false</span>)</span></span>;     <span class="hljs-comment">// false = GUI არ გვჭირდება</span>
+    QgsApplication::<span class="hljs-built_in">setPrefixPath</span>(<span class="hljs-string">&quot;/usr&quot;</span>, <span class="hljs-literal">true</span>); <span class="hljs-comment">// QGIS-ის ინსტალაციის საქაღალდე</span>
+    QgsApplication::<span class="hljs-built_in">initQgis</span>();
+
+    <span class="hljs-type">const</span> <span class="hljs-type">int</span> rc = <span class="hljs-built_in">measureDistricts</span>();
 
     QgsApplication::<span class="hljs-built_in">exitQgis</span>();
-    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+    <span class="hljs-keyword">return</span> rc;
 }</code></pre></figure>
 <p>გამოსავალი იმერეთის ნიმუშზე (<code>data/imereti_sample.gpkg</code>):</p>
 <figure class="code out"><figcaption><span>შედეგი</span></figcaption><pre><code>Features: 12
@@ -190,7 +197,11 @@ Planar sum: 0.696446 (CRS units^2)
 Ellipsoidal sum: 6391.6 km2</code></pre></figure>
 <p>ფენა გეოგრაფიულ CRS-შია (EPSG:4326), ამიტომ პირველი რიცხვი <strong>კვადრატული გრადუსია</strong> (0.696446) და კვადრატულ მეტრებად არ ითვლება, მეორე კი ელიფსოიდზე გამოთვლილი ნამდვილი ფართობია: დაახლოებით 6392 კმ². სწორედ ამიტომ ორივეს ერთად ვბეჭდავთ. <code>da.areaUnits()</code> ამ შემთხვევაში კვადრატულ მეტრს აბრუნებს (<code>Qgis::AreaUnit::SquareMeters</code>), ამიტომ <code>1e6</code>-ზე გაყოფა კვადრატულ კილომეტრს გვაძლევს.</p>
 <div class="box note"><div class="box-title">როგორ არის შემოწმებული ეს რიცხვები</div><div class="box-body">
-<p>ეს რიცხვები გამოვთვალეთ PyQGIS-ით QGIS 4.2.2-ში იმავე გზით, რაც C++ კოდშია (<code>QgsDistanceArea</code>, WGS84, იგივე ფაილი). ჩვენს სატესტო კომპიუტერზე C++-ის დეველოპერული ფაილები (header-ები და <code>qgis_core</code>-ის იმპორტის ბიბლიოთეკა) არ იყო, ამიტომ თავად ეს C++ პროგრამა იქ არ აგვიწყვია. რიცხვები მაინც იმავე QGIS ბირთვითაა მიღებული. შენს კომპიუტერზე უნდა მიიღო იგივე სამი მნიშვნელობა: <code>12</code>, <code>0.696446</code>, <code>6391.6</code>.</p>
+<p>ეს პროგრამა აწყობილია და გაშვებულია Linux Mint 22.3-ზე (g++ 13.3, QGIS 3.44.15, Qt5) და ზუსტად ეს სამი სტრიქონი დაბეჭდა. იგივე რიცხვები მივიღეთ PyQGIS-ითაც QGIS 4.2.2-ში, ანუ შედეგი QGIS-ის ორ სხვადასხვა ვერსიაში ერთნაირია. შენს კომპიუტერზე უნდა მიიღო იგივე სამი მნიშვნელობა: <code>12</code>, <code>0.696446</code>, <code>6391.6</code>.</p>
+</div></div>
+<div class="box warn"><div class="box-title">ორი რეალური ხაფანგი, რომელიც ამ მაგალითზე აღმოვაჩინეთ</div><div class="box-body">
+<p><strong>1. განადგურების თანმიმდევრობა.</strong> თავიდან ფენა <code>main</code>-ში ეწერა და <code>exitQgis()</code> მის შემდეგ ისე გამოიძახებოდა, რომ ფენა მხოლოდ <code>main</code>-ის ბოლოს (<code>exitQgis()</code>-ის <strong>შემდეგ</strong>) განადგურდებოდა. მაშინ მას გასუფთავებული GDAL ბიბლიოთეკა დახვდებოდა და პროგრამა <code>Segmentation fault</code>-ით ჩამოვარდებოდა, ისე რომ ეკრანზე არაფერი დაიბეჭდებოდა (გამოსავალი ბუფერშივე რჩებოდა). გამოსავალი: მთელი სამუშაო ცალკე ფუნქციაშია (<code>measureDistricts</code>), რომ ფენა, იტერატორი და <code>QgsDistanceArea</code> დასრულდეს <code>exitQgis()</code>-მდე. ეს თავი 08-ის წესის კონკრეტული შემთხვევაა: ობიექტების სიცოცხლე და განადგურების თანმიმდევრობა.</p>
+<p><strong>2. ეკრანის გარეშე გაშვება.</strong> თუ პროგრამას გრაფიკული ეკრანის გარეშე (მაგ. SSH-ით ან სერვერზე) გაუშვებ, Qt შეიძლება დაგიბეჭდოს <code>could not connect to display</code>. გაუშვი ასე: <code>QT_QPA_PLATFORM=offscreen ./district_area</code>.</p>
 </div></div>
 <div class="box warn"><div class="box-title">Windows-ზე</div><div class="box-body">
 <p>Windows-ის სტანდარტულ QGIS ინსტალერში (მაგ. QGIS 4.2.2) <code>qgis_core</code>-ისთვის header-ები და <code>.lib</code> ფაილები არ შედის: საქაღალდეში <code>apps/qgis</code> არ არის <code>include</code> და <code>lib</code>. C++ პროექტის ასაწყობად Windows-ზე გჭირდება OSGeo4W-ის დეველოპერული პაკეტები ან QGIS-ის აწყობა წყაროდან. უმარტივესი გზა Linux-ზეა (<code>libqgis-dev</code>), ამიტომ ეს თავი ასეთ გარემოზეა დაწერილი.</p>
