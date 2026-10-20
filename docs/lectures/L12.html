@@ -259,7 +259,10 @@ Ellipsoidal sum: 6391.6 km2</code></pre></figure>
   <section class="slide" data-title="CMake: ერთი კონკრეტული გარემო">
     <div class="eyebrow">12.5 · პრაქტიკა</div>
     <h2>CMake: ერთი კონკრეტული გარემო</h2>
-    <div class="content"><p>ქვემოთ მაგალითი <strong>Ubuntu/Debian-ისთვისაა</strong>, სადაც QGIS 3.x და Qt5 სისტემური პაკეტებით დგას. QGIS 4-სთვის გამოიყენება Qt6, ამიტომ <code>Qt5</code> უნდა შეიცვალოს <code>Qt6</code>-ით. სხვა სისტემებზე ბილიკები და პაკეტების სახელები განსხვავდება.</p>
+    <div class="content"><p>ქვემოთ მაგალითი <strong>Ubuntu/Debian-ისთვისაა</strong> (Linux Mint-ზეც იგივე ბრძანებები მუშაობს), სადაც QGIS 3.x და Qt5 სისტემური პაკეტებით დგას.</p>
+<div class="box warn"><div class="box-title">Flatpak QGIS არ გამოდგება</div><div class="box-body">
+<p>თუ QGIS Flatpak-ით გაქვს დაყენებული, მისი header-ები და ბიბლიოთეკები C++ აწყობისთვის მიუწვდომელია: Flatpak პროგრამას იზოლირებულ გარემოში ინახავს. აწყობისთვის დააყენე სისტემური პაკეტები (<code>libqgis-dev</code>, ქვემოთ), რომლებიც Flatpak-ს არ ეწინააღმდეგება. ორივე ერთად შეიძლება იდგეს. შედეგის გრაფიკულად შესამოწმებლად Flatpak QGIS ისევ გამოგადგება.
+::: QGIS 4-სთვის გამოიყენება Qt6, ამიტომ <code>Qt5</code> უნდა შეიცვალოს <code>Qt6</code>-ით. სხვა სისტემებზე ბილიკები და პაკეტების სახელები განსხვავდება.</p>
 <p>დამოკიდებულებების დაყენება:</p>
 <figure class="code bash"><figcaption><span>Shell</span></figcaption><pre><code class="hljs"><span class="hljs-built_in">sudo</span> apt install build-essential cmake qgis libqgis-dev qtbase5-dev</code></pre></figure>
 <p><code>CMakeLists.txt</code>:</p>
@@ -325,6 +328,7 @@ cmake --build build
 </tr>
 </tbody>
 </table>
+</div></div>
 </div>
   </section>
 
