@@ -70,11 +70,9 @@ topics: დამოუკიდებელი C++ აპლიკაცია 
 #include <qgsproject.h>
 #include <qgsvectorlayer.h>
 
-int main(int argc, char *argv[]) {
-    QgsApplication app(argc, argv, false);     // false = GUI არ გვჭირდება
-    QgsApplication::setPrefixPath("/usr", true); // QGIS-ის ინსტალაციის საქაღალდე
-    QgsApplication::initQgis();
-
+// მთელი სამუშაო ცალკე ფუნქციაშია, რომ ფენა და იტერატორი განადგურდეს
+// QgsApplication::exitQgis()-მდე (იხ. ახსნა ქვემოთ)
+static int measureDistricts() {
     QgsVectorLayer layer("data/imereti_sample.gpkg|layername=municipalities",
                          "municipalities", "ogr");
     if (!layer.isValid()) {
@@ -101,9 +99,18 @@ int main(int argc, char *argv[]) {
               << "Planar sum: " << planar << " (CRS units^2)\n";
     std::cout << std::setprecision(1)
               << "Ellipsoidal sum: " << ellipsoidal / 1e6 << " km2\n";
+    return 0;
+}
+
+int main(int argc, char *argv[]) {
+    QgsApplication app(argc, argv, false);     // false = GUI არ გვჭირდება
+    QgsApplication::setPrefixPath("/usr", true); // QGIS-ის ინსტალაციის საქაღალდე
+    QgsApplication::initQgis();
+
+    const int rc = measureDistricts();
 
     QgsApplication::exitQgis();
-    return 0;
+    return rc;
 }
 ```
 
