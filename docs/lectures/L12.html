@@ -236,8 +236,12 @@ Ellipsoidal sum: 6391.6 km2</code></pre></figure>
 <td>QGIS-ის ინიციალიზაცია (static მეთოდია: კლასიდან გამოიძახება); ამზადებს მონაცემთა პროვაიდერებს, CRS ბაზას და სხვას</td>
 </tr>
 <tr>
-<td><code>QgsVectorLayer layer(&quot;districts.geojson&quot;, &quot;districts&quot;, &quot;ogr&quot;);</code></td>
-<td>ვქმნით ფენას: ფაილი, სახელი, მონაცემთა პროვაიდერი (<code>ogr</code> კითხულობს ბევრ ფორმატს)</td>
+<td><code>static int measureDistricts()</code></td>
+<td>მთელი სამუშაო ცალკე ფუნქციაშია, რომ ობიექტები <code>exitQgis()</code>-მდე განადგურდეს</td>
+</tr>
+<tr>
+<td><code>QgsVectorLayer layer(path, name, &quot;ogr&quot;);</code></td>
+<td>ვქმნით ფენას: ფაილი და ფენის სახელი (<code>data/imereti_sample.gpkg</code> + <code>layername=municipalities</code>), ფენის დასახელება, მონაცემთა პროვაიდერი (<code>ogr</code> კითხულობს ბევრ ფორმატს)</td>
 </tr>
 <tr>
 <td><code>if (!layer.isValid())</code></td>

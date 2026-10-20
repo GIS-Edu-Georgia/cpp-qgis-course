@@ -147,7 +147,8 @@ Windows-ის სტანდარტულ QGIS ინსტალერშ�
 | `QgsApplication app(argc, argv, false);` | QGIS-ის „გარემოს“ ობიექტი; `false` ნიშნავს, რომ გრაფიკული ინტერფეისი არ გვჭირდება (headless, ქვეთავი 1.4) |
 | `QgsApplication::setPrefixPath("/usr", true);` | ვეუბნებით, სად დგას QGIS (პლაგინები, რესურსები); Linux-ზე სისტემური ინსტალაციისას ჩვეულებრივ `/usr` |
 | `QgsApplication::initQgis();` | QGIS-ის ინიციალიზაცია (static მეთოდია: კლასიდან გამოიძახება); ამზადებს მონაცემთა პროვაიდერებს, CRS ბაზას და სხვას |
-| `QgsVectorLayer layer("districts.geojson", "districts", "ogr");` | ვქმნით ფენას: ფაილი, სახელი, მონაცემთა პროვაიდერი (`ogr` კითხულობს ბევრ ფორმატს) |
+| `static int measureDistricts()` | მთელი სამუშაო ცალკე ფუნქციაშია, რომ ობიექტები `exitQgis()`-მდე განადგურდეს |
+| `QgsVectorLayer layer(path, name, "ogr");` | ვქმნით ფენას: ფაილი და ფენის სახელი (`data/imereti_sample.gpkg` + `layername=municipalities`), ფენის დასახელება, მონაცემთა პროვაიდერი (`ogr` კითხულობს ბევრ ფორმატს) |
 | `if (!layer.isValid())` | თუ ფენა ვერ ჩაიტვირთა, ვბეჭდავთ შეცდომას `std::cerr`-ით და ვასრულებთ პროგრამას კოდით `1` |
 | `QgsDistanceArea da; da.setSourceCrs(...); da.setEllipsoid("WGS84");` | ზუსტი გაზომვის ობიექტი: ვუთითებთ ფენის CRS-ს და ელიფსოიდს |
 | `da.measureArea(geometry)` | გეომეტრიის ფართობი ელიფსოიდზე |
